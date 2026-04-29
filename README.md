@@ -12,4 +12,41 @@ This folder is an archive that collect the codes that I write and informations t
    - 파이썬의 기본 자료형 이해(Ex: 리스트, 딕셔너리) / (understanding python's basic data types (Ex: list, dictionary))
    - 사용자 입력 처리 및 예외 처리 방법 / processing user's input and ways to process exceptional user's input
 
-2. to be continued...
+2. to be continued..
+
+
+advanced version(powered by Gemini)
+# 🐍 Python Learning Lab
+
+파이썬을 공부하며 작성한 코드와 얻은 정보를 누적하는 폴더입니다.
+This folder is an archive of the code I've written and the information I've gathered while studying Python.
+
+---
+
+## 📂 주요 프로젝트 (Main Projects)
+
+### 1. 학생 관리 프로그램 (`student_management.py`)
+학생 정보를 효율적으로 관리하고 통계를 산출하는 프로그램입니다.
+A student supervising/managing program that provides features for information entry and statistics.
+
+#### ✨ 주요 기능 (Key Features)
+- **학생 추가 (Insert Student Info)**: 학생의 학번, 이름, 성적을 입력받아 저장합니다.
+- **성적 조회 (Search Grade)**: 특정 학번을 입력하여 해당 학생의 성적을 확인합니다.
+- **통계 출력 (Statistics)**: 전체 학생의 총점, 평균, 최고 득점자를 출력합니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Data Structures**: `List`, `Dictionary`
+- **Control Flow**: `while` & `for` loops, `if-elif-else`
+- **Advanced**: `try-except` (Exception Handling), `lambda` expressions
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **파이썬 기본 자료형 이해**: 리스트와 딕셔너리의 구조 및 활용법 학습.
+- **사용자 입력 및 예외 처리**: 숫자가 아닌 값 등 잘못된 사용자 입력에 대비한 프로그램의 견고성 확보.
+- **C vs Python**: 인덱스 기반 접근과 파이썬의 언패킹(Unpacking) 방식 차이 인지.
+
+---
+
+## 🚀 To be continued...
+학습 내용이 추가될 때마다 업데이트될 예정입니다.
+This repository will be updated as my learning progresses.
+
