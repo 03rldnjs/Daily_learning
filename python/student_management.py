@@ -32,8 +32,8 @@ while True: # 4. 종료를 입력할 때까지 무한 루프 (use infinite loop 
            # 딕셔너리를 선택한 이유는 key:value구조를 활용할 수 있기 때문 (the reason why I choose dictionary is I can use dictionary's key:item structure)
         print(stu_dic)
         stu_list.append(stu_dic)
-      sorted_list = sorted(stu_list, key=lambda x: x['id'])  # 성적이 높은 순으로 정렬한 리스트 (sort the list, high scorer will be at front)
-      print(sorted_list.sort()) 
+      sorted_list = sorted(stu_list, key=lambda x: x['id'])  # 학번 순으로 정렬한 리스트 (sort the list(id number))
+      print("학번순 정렬 결과:", sorted_list)
     else:
       print("잘못된 입력입니다. 자연수를 입력하세요.")
 
