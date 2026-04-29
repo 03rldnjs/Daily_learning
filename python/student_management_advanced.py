@@ -13,7 +13,7 @@ def grade_search(id_num, source_list):   # 학번을 통해 성적을 찾는 로
     print("해당 학번은 존재하지 않습니다.")
     
 def sum_avg(stu_grade_list):   # list를 입력받아 점수 합계와 평균, 최고점자를 찾는 로직을 함수로 분리 (extracted the total, avg, topscorer calculating logic into separate function)
-  total_grade = sum(s['grade'] for s in stu_grade_list)
+  total_grade = sum(s['grade'] for s in stu_grade_list)   # for문 제너레이터 표현식 활용 (for loop generator expression)
   avg_grade = total_grade / len(stu_grade_list)
   top_student = max(stu_grade_list, key=lambda x: x['grade'])
 
