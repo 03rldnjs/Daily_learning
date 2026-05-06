@@ -90,7 +90,7 @@ void permutation() {
 			break;
 	}
 	result = calc_fact(n) / calc_fact(n-r);  // 수정 사항 -  동일한 계산을 함수에서 반복하는 것이 아닌 팩토리얼 계산 함수 활용
-	// adjustment - not iterate same calculation in function, use factorial function 
+	// adjustment - not iterate same calculation in function, use factorial function / 중복 제거(DRY: Don't Repeat Yourself)
 	printf("결과: %lld\n\n", result);
 }
 
@@ -109,7 +109,7 @@ void combination() {
 			break;
 	}
 	result = calc_fact(n) / (calc_fact(r) * calc_fact(n-r));  // 수정 사항 -  동일한 계산을 함수에서 반복하는 것이 아닌 팩토리얼 계산 함수 활용
-	// adjustment - not iterate same calculation in function, use factorial function 
+	// adjustment - not iterate same calculation in function, use factorial function / 중복 제거(DRY: Don't Repeat Yourself)
 	printf("결과: %lld\n\n", result);
 }
 
