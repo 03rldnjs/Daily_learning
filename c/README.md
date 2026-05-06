@@ -14,7 +14,14 @@ This folder is an archive that collect the codes that I write and informations t
    - 모듈화를 위한 함수 분리 / Separation of functions for modularization
   
 2. [scientific_calculator_advanced.c](./scientific_calculator_advanced.c)
-   - 
+   - [scientific_calculator.c]의 발전, 완성 버전 (advanced version of [scientific_calculator.c])
+   - 기호 상수 활용, sin() 함수 라디안 변환 로직, 함수 재사용(순열, 조합에서의 팩토리얼 계산), 수학적 엄밀성 향상(log함수 0 입력 배제, sqrt 0 입력 포함 등) ( using symbolic constants, sin() function radian traslation logic, improved function reusablity(factorial calculation in permutation, combination), Handling mathmatical edge cases(rule out input 0 in log, include input 0 in sqrt etc.)
+  
+   주요 학습 내용(key learning contents)
+   - 출력, 계산 함수의 분리를 통한 함수 재사용성 향상 / enhanced function reusablity by seperate print function and calculate function + DRY(Don't repear yourself)
+   - 기호 상수 활용을 통한 유연성 향상 / enhanced flexablity by using symbolic constants
+   - 여러 입력 오류 방지 / prevent various input error program quit
+
 
 advanced version(powered by Gemini)
 # 💻 C Language Daily Learning Lab
@@ -45,6 +52,16 @@ A scientific calculator program using the `math.h` header file for various mathe
 - **코드 모듈화 (Modularization)**: 각 기능을 독립적인 함수로 분리하여 코드 가독성과 유지보수성 향상.
 
 ---
+
+### 2. [scientific_calculator_advanced.c](./scientific_calculator_advanced.c)
+- **논리적 정확도와 코드 재사용성을 극대화한 최종 완성본**
+- **Advanced Features**:
+  - **Function Reusability**: `calc_fact()` 함수를 별도로 정의하여 순열(nPr) 및 조합(nCr) 계산 시 코드 중복을 제거함.
+  - **Mathematical Accuracy**: 
+    - `sin()` 함수 호출 시 Degree 단위를 Radian 단위로 변환하는 기호 상수(`PI`) 로직 적용.
+    - 로그 및 제곱근 함수의 정의역(Domain)에 따른 정교한 입력값 검증 수행.
+    - 오버플로우 방지를 위한 입력 제어 수행(팩토리얼 long long형 오버플로우)
+  - **Modular Architecture**: 계산 로직(반환형 함수)과 출력 로직(void형 함수)을 분리하여 프로그램 구조를 최적화함.
 
 ## 🚀 To be continued...
 학습 내용이 추가될 때마다 업데이트될 예정입니다.
