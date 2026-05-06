@@ -20,16 +20,27 @@ int menu() {
 
 long long calc_fact(int n) {   // 팩토리얼 계산 전용 함수 생성(매개변수 포함, long long형 반환) create function only for calculate factorial(include parameter, return long long type)
 	long long result = 1;      // 팩토리얼의 계산 결과는 매우 클 수 있으므로 long long으로 선언하는 것이 안전함
-							   // declare by long long for result because result of factorial can be huge
+	// declare by long long for result because result of factorial can be huge
+	if (n > 20)
+		printf("결과값이 너무 커서 정확하지 않을 수 있습니다.\n");
 	for (int i = 1; i <= n; i++)
 		result *= i;
 	return result;             // 출력이 아닌 반환 return, not print
 }
 
 void factorial() {             // 팩토리얼 계산 결과를 출력하기 위한 함수 생성 create function to print the result of factorial calculation
-	int n;                     // 입력값은 int로 선언해도 문제 없음 declare in int is big enough for input number
-	printf("정수를 입력하세요: ");
-	scanf("%d", &n);
+	int n;      			   // 입력값은 int로 선언해도 문제 없음 declare in int is big enough for input number
+	while(1){
+		printf("정수를 입력하세요(0 ~ 20): ");   // 오버플로우를 방지하기 위해 입력할 수 있는 정수를 0부터 20 사이로 제한
+		// restrict input in range 0 to 20 to avoid overflow (cause 21! is bigger than long long type max value)
+		scanf("%d", &n);
+		if ( n < 0 ) 
+			printf("음수는 입력할 수 없습니다. 다시 입력하세요.\n");
+		else if ( n > 20 )
+			printf("21 이상의 정수는 오버플로우가 발생할 수 있습니다. 다시 입력하세요.\n");
+		else
+			break;
+	}
 	printf("결과: %lld\n\n", calc_fact(n));
 }
 
@@ -81,8 +92,10 @@ void permutation() {
 	while (1) {
 		printf("n과 r을 입력하시오: ");
 		scanf("%d %d", &n, &r);
-		if (n == 0 || r == 0)
-			printf("0을 입력하면 안됩니다. 자연수를 입력하세요.\n");
+		if (n <= 0 || r <= 0)
+			printf("0 이하의 수를 입력하면 안됩니다. 자연수를 입력하세요.\n");
+		else if (n > 20)
+			printf("21 이상의 수는 오버플로우가 발생할 수 있습니다. 20 이하의 수를 입력해주세요.\n");
 		else if (n < r)   // 순열 공식에 (n - r)!가 포함되므로 n이 반드시 r보다 커야함.
 			// permutation formular includes (n -r)!. so n should be bigger than r
 			printf("n이 r보다 작으면 안됩니다.다시 입력하세요.\n");
@@ -100,8 +113,10 @@ void combination() {
 	while (1) {
 		printf("n과 r을 입력하시오: ");
 		scanf("%d %d", &n, &r);
-		if (n == 0 || r == 0)
-			printf("0을 입력하면 안됩니다. 자연수를 입력하세요.\n");
+		if (n <= 0 || r <= 0)
+			printf("0 이하의 수를 입력하면 안됩니다. 자연수를 입력하세요.\n");
+		else if (n > 20)
+			printf("21 이상의 수는 오버플로우가 발생할 수 있습니다. 20 이하의 수를 입력해주세요.\n");
 		else if (n < r)  // 조합 공식에도 (n - r)!가 포함되므로 n이 반드시 r보다 커야함.
 			// combination formular includes (n - r)!. so n should be bigger than r
 			printf("n이 r보다 작으면 안됩니다.다시 입력하세요.\n");
