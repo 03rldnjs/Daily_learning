@@ -9,7 +9,7 @@ This folder is an archive that collect the codes that I write and informations t
    - 활용 기술(used skills) : list, dictionary, while & for loop
 
    주요 학습 내용(key learning contents)
-   - 파이썬의 기본 자료형 이해(Ex: 리스트, 딕셔너리) / (understanding python's basic data types (Ex: list, dictionary))
+   - 파이썬의 기본 자료형 이해(Ex: 리스트, 딕셔너리) / understanding python's basic data types (Ex: list, dictionary)
    - 사용자 입력 처리 및 예외 처리 방법 / processing user's input and ways to process exceptional user's input
 
 2. [student_management_advanced.py](./student_management_advanced.py)
