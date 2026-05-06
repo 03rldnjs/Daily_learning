@@ -23,7 +23,7 @@ This folder is an archive that collect the codes that I write and informations t
    - bool형 변수의 활용 / usage of bool type variables
 
 advanced version(powered by Gemini)
-# 🐍 Python Learning Lab
+# 🐍 Python Daliy Learning Lab
 
 파이썬을 공부하며 작성한 코드와 얻은 정보를 누적하는 폴더입니다.
 This folder is an archive of the code I've written and the information I've gathered while studying Python.
