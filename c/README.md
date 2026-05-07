@@ -23,7 +23,9 @@ This folder is an archive that collect the codes that I write and informations t
    - 여러 입력 오류 방지 / prevent various input error program quit
 
 
-advanced version(powered by Gemini)
+
+
+// advanced version(powered by Gemini)
 # 💻 C Language Daily Learning Lab
 
 C언어를 공부하며 작성한 코드와 얻은 정보를 누적하는 폴더입니다.
