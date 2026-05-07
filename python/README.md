@@ -22,7 +22,7 @@ This folder is an archive that collect the codes that I write and informations t
    - for문 제너레이터 표현식 (total_grade = sum(s['grade'] for s in stu_grade_list)) / for loop Generator Expression
    - bool형 변수의 활용 / usage of bool type variables
 
-advanced version(powered by Gemini)
+// advanced version(powered by Gemini)
 # 🐍 Python Daliy Learning Lab
 
 파이썬을 공부하며 작성한 코드와 얻은 정보를 누적하는 폴더입니다.
