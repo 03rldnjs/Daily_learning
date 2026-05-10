@@ -18,10 +18,20 @@ This folder is an archive that collect the codes that I write and informations t
    - 활용 기술(used skills) : list, dictionary, while & for loop, bool type, function, for loop generator expression
 
    주요 학습 내용(key learning contents)
-   - 함수 분리를 통한 역할 분담, 가독성 향상 / enhanced readability and readability by Modularizing code
+   - 함수 분리를 통한 역할 분담, 가독성 향상 /
    - for문 제너레이터 표현식 (total_grade = sum(s['grade'] for s in stu_grade_list)) / for loop Generator Expression
    - bool형 변수의 활용 / usage of bool type variables
-
+  
+3. [asset_manager.py](./asset_manager.py)
+   - 자산 관리 프로그램의 초안(draft of asset managing program)
+   - 수입/ 지출 내역 추가, 전체 내역 조회, 자산 현황 및 통계 조회 기능 제공(you can use this program for add income/expence details, view all details, view asset status and asset statistics
+   - 활용 기술(used skills) : dictionary, while infinite loop, function, try - except, if-elif-else
+  
+   주요 학습 내용(key learning contents)
+   - 1, 2에서의 주요 학습내용 복습
+  
+To be continued...
+  
 // advanced version(powered by Gemini)
 # 🐍 Python Daliy Learning Lab
 
@@ -63,6 +73,25 @@ A student supervising/managing program that provides features for information en
 - **Readable Comments**: 한/영 주석을 병기하여 코드의 의도를 명확히 설명함.
 
 ---
+
+### 3. 자산 관리 프로그램 (`asset_manager.py`)
+개인의 수입과 지출을 기록하고 자산 현황을 체계적으로 분석하는 프로그램입니다.  
+A personal asset management program designed to track income/expenses and analyze financial status.
+
+#### ✨ 주요 기능 (Key Features)
+- **내역 추가 (Add Transactions)**: 수입 및 지출 내역을 구분하여 금액과 상세 내용을 저장합니다.
+- **전체 조회 (View All Details)**: 현재까지 기록된 모든 입출력 히스토리를 리스트 형태로 확인합니다.
+- **자산 통계 (Asset Statistics)**: 현재 잔액, 총 수입/지출 합계 등 자산 현황에 대한 통계 데이터를 산출합니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Data Structures**: `Dictionary`를 활용한 체계적인 데이터 구조 설계
+- **Control Flow**: `while` 무한 루프와 `if-elif-else`를 통한 사용자 대화형 UI 구현
+- **Error Handling**: `try-except` 구문을 활용하여 문자열 입력 등 잘못된 입력값에 대한 예외 처리
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **종합 복습 (Comprehensive Review)**: 이전 프로젝트들(1, 2)에서 익힌 자료 구조와 제어문의 실전 응용 능력을 배양함.
+- **수학적 엄밀함 (Mathematical Rigor)**: 자산 계산 시 발생할 수 있는 논리적 오류를 방지하고, 정확한 통계 수치를 산출하기 위한 검증 로직 적용.
+- **기능 모듈화 (Modularization)**: 수입, 지출, 통계 등 각 기능을 독립된 함수로 분리하여 코드의 가독성과 유지보수성을 극대화함.
 
 ## 🚀 To be continued...
 학습 내용이 추가될 때마다 업데이트될 예정입니다.
