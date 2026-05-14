@@ -1,0 +1,167 @@
+import csv   # csv모듈을 사용하면 history 리스트 안의 객체들에서 필요한 값만 뽑아 엑셀파일로 만들 수 있음.
+import os    # os모듈을 사용하면 파일 존재 여부를 확인할 수 있음
+
+asset_goal = 0
+asset = 0
+
+history = []   # 초안 방법(딕셔너리)으로 항목 추가 시 key(날짜)가 같은 경우 덮어쓰기 현상 발생.
+#따라서 리스트 안의 딕셔너리 형식으로 추가(by append)하는 것이 안전함. 
+
+# 파일 불러오기 함수
+import os  # 파일 존재 여부를 확인하기 위해 필요해!
+
+def load_from_csv():
+    global asset
+    # 파일이 없는데 읽으려고 하면 에러가 나니까 먼저 확인!
+    if not os.path.exists('my_assets.csv'):
+        print("기존 데이터 파일이 없습니다. 새로 시작합니다.")
+        return
+
+    with open('my_assets.csv', 'r', encoding='utf-8-sig') as f:
+        reader = csv.reader(f)
+        next(reader)  # 첫 줄(헤더)은 데이터가 아니니 건너뛰기
+        
+        for line in reader:
+            # line은 ['2026-05-14', '알바비', '500000', '수입'] 이런 형태야
+            date, item, amount, category = line[0], line[1], int(line[2]), line[3]
+            
+            # 1. 객체 생성
+            record = in_and_out(date, item, amount)
+            record.category = category
+            
+            # 2. 리스트에 추가
+            history.append(record)
+            
+            # 3. 자산 계산 (수입이면 더하고, 지출이면 빼기)
+            if category == "수입":
+                asset += amount
+            else:
+                asset -= amount
+    print(f"기존 데이터를 불러왔습니다. (현재 자산: {asset}원)")
+# 메뉴 출력 함수
+def print_menu():
+  print('1. 수입 내역 추가(날짜, 항목, 금액)')
+  print('2. 지출 내역 추가(날짜, 항목, 금액)')
+  print('3. 전체 내역 조회')
+  print('4. 현재 자산 현황 및 통계 보기')
+  print('5. 데이터 저장 및 종료')
+
+# 수입 및 지출 내역 연산 class
+class in_and_out:         # 수입 내역과 지출 내역을 입력받을 때, 입력 항목이 중복되므로 class와 __init__함수를 활용하여 한 번에 처리
+  def __init__(self, date, item, amount):
+    self.date = date
+    self.item = item
+    self.amount = amount
+
+# 수입 내역 연산 함수
+  def income_note(self):  # 클래스 내부의 변수들에게는 반드시 앞에 self.를 써주어야 함
+    global asset
+    asset += self.amount
+    self.category = "수입"   # 클래스 내부에서 자유롭게 사용되는 category 항목 추가
+    history.append(self)
+    print(f'현재 자산: {asset}, 내역 추가 완료')
+    return asset
+
+# 지출 내역 연산 함수
+  def outcome_note(self):
+    global asset
+    asset -= self.amount
+    self.category = "지출"
+    history.append(self)
+    print(f'현재 자산: {asset}, 내역 추가 완료')
+    return asset
+
+# 전체 거래 내역 출력 함수
+def print_income_outcome():
+  print("=== 전체 거래 내역 ===")
+  for record in history:
+    print(f"[{record.date}] {record.category} / {record.item}, {record.amount}")
+# 덮어쓰기 문제 예방을 위한 리스트 안의 딕셔너리 형식 활용
+
+# 자산 현황 및 통계 출력 함수
+def print_stats():
+  print(f'현재 자산: {asset}원')
+  print(f'목표 자산: {asset_goal}원')
+  if asset >= asset_goal:
+    print('목표 자산에 도달했습니다.')
+  else:
+    print(f'목표 자산까지 남은 금액: {asset_goal - asset}원')
+
+# 수입 및 지출 관련 입력 전담 함수
+def input_items():
+  while True:
+    try:
+      date = input('날짜를 입력하세요(YYYY-MM-DD): ')
+      item = input('항목을 입력하세요(ex. 월급, 월세 등): ')
+      amount = int(input('금액을 입력하세요: '))
+      return date, item, amount
+    except ValueError:
+      print("잘못된 입력입니다. 다시 입력하세요.")
+
+# 파일 입력(프로그램 지속성 향상) 
+def save_to_csv():
+    # 파일 열기 (newline=''은 줄바꿈 중복 방지, utf-8-sig는 엑셀 한글 깨짐 방지)
+    with open('my_assets.csv', 'w', newline='', encoding='utf-8-sig') as f:    # 'a'를 쓰면 데이터가 무한 증식하는 문제가 발생함.
+        writer = csv.writer(f)
+        # 1. 헤더(첫 줄 제목) 쓰기
+        writer.writerow(['날짜', '항목', '금액', '구분'])
+        
+        # 2. 리스트를 돌면서 데이터 한 줄씩 쓰기
+        for record in history:
+            writer.writerow([record.date, record.item, record.amount, record.category])
+    print("데이터가 'my_assets.csv' 파일로 안전하게 저장되었습니다.")
+
+load_from_csv()
+
+if asset == 0:
+  while True:
+    try:
+      first_asset = int(input('초기 자본을 입력하세요: '))
+      asset = first_asset
+      break
+    except ValueError:
+      print('잘못된 입력입니다. 다시 입력하세요.')
+else:
+  print(f'이전 기록을 바탕으로 자산을 설정했습니다. 현재 자산: {asset}원}')
+
+while True:
+  try:
+    asset_goal = int(input('목표 자산을 입력하세요: '))
+    break
+  except ValueError:
+    print('잘못된 입력입니다. 다시 입력하세요.')
+
+while True:
+  print_menu()
+  try:
+    menu = int(input('원하시는 서비스의 번호를 입력하세요: '))
+    if menu == 1:
+      date, item, amount = input_items()
+      in_out = in_and_out(date, item, amount)
+      asset = in_out.income_note()
+    elif menu == 2:
+      date, item, amount = input_items()
+      in_out = in_and_out(date, item, amount)
+      asset = in_out.outcome_note()
+    elif menu == 3:
+      print_income_outcome()
+    elif menu == 4:
+      print_stats()
+    elif menu == 5:
+      save_to_csv()
+      print('데이터 저장 후 프로그램을 종료합니다.')
+      break
+    else:
+      print('잘못된 입력입니다. 다시 입력하세요')
+      continue
+
+  except ValueError:
+    print('잘못된 입력입니다. 다시 입력하세요.')
+    continue
+
+
+# 변경 사항:
+# 1. 단순 함수에서 class와 __init__ 활용 전환
+# 2. 딕셔너리 사용시 덮어쓰기 문제 발생 -> 리스트 안의 딕셔너리 형식을 활용하여 해당 문제 사전 예방
+# 3. 프로그램의 지속성을 위한 파일 입출력 기능 추가
+# 4. 초기 자본 재입력 방지를 위한 조건문 추가
