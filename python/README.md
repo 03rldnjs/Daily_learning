@@ -18,7 +18,7 @@ This folder is an archive that collect the codes that I write and informations t
    - 활용 기술(used skills) : list, dictionary, while & for loop, bool type, function, for loop generator expression
 
    주요 학습 내용(key learning contents)
-   - 함수 분리를 통한 역할 분담, 가독성 향상 /
+   - 함수 분리를 통한 역할 분담, 가독성 향상 / distributing the role and improving readablity by modulizing the code
    - for문 제너레이터 표현식 (total_grade = sum(s['grade'] for s in stu_grade_list)) / for loop Generator Expression
    - bool형 변수의 활용 / usage of bool type variables
   
@@ -29,6 +29,16 @@ This folder is an archive that collect the codes that I write and informations t
   
    주요 학습 내용(key learning contents)
    - 1, 2에서의 주요 학습내용 복습
+  
+4. [asset_manager_advanced.py](./asset_manager_advanced.py)
+   - [asset_manager.py]의 발전, 완성 버전 (advanced version of [asset_manager.py])
+   - 파일 입출력 기능, class와 __init__함수 활용, key 중복으로 인한 덮어쓰기 문제 방지를 위한 리스트 내의 딕셔너리 활용, 초기 자본 재입력 방지를 위한 조건문 추가 등 기능 및 안정성 향상( improve functinality and stability by add file i/o function, using class and __init_ function, Dictionary within a list to prevent overwrite problem, add conditional statement to prevent reinput of first asset)
+   - 활용 기술(used skills) : class and __init__function, dictionary within a list, file i/o funtion, csv module
+  
+   주요 학습 내용(key learning contents)
+   - csv 모듈을 활용한 파일 입출력 기능 / file i/o funcion by csv module
+   - 리스트 내부의 딕셔너리 / dictionary within a list
+   - class와 __init__함수 / class and __init__function
   
 To be continued...
   
@@ -92,6 +102,28 @@ A personal asset management program designed to track income/expenses and analyz
 - **종합 복습 (Comprehensive Review)**: 이전 프로젝트들(1, 2)에서 익힌 자료 구조와 제어문의 실전 응용 능력을 배양함.
 - **수학적 엄밀함 (Mathematical Rigor)**: 자산 계산 시 발생할 수 있는 논리적 오류를 방지하고, 정확한 통계 수치를 산출하기 위한 검증 로직 적용.
 - **기능 모듈화 (Modularization)**: 수입, 지출, 통계 등 각 기능을 독립된 함수로 분리하여 코드의 가독성과 유지보수성을 극대화함.
+
+### 4. 자산 관리 프로그램 완성판 (`asset_manager_advanced.py`)
+클래스와 파일 입출력을 도입하여 데이터 영속성과 프로그램 안정성을 극대화한 최종 버전입니다.  
+An advanced version of the asset manager, enhancing functionality and stability through OOP and File I/O.
+
+#### ✨ 주요 기능 (Key Features)
+- **파일 영구 저장 (File I/O)**: `csv` 모듈을 활용하여 프로그램 종료 후에도 자산 내역이 유지되도록 구현했습니다.
+- **객체 지향 프로그래밍 (OOP)**: `class`와 `__init__` 함수를 사용하여 자산 관리 시스템을 구조화했습니다.
+- **데이터 무결성 확보**: 리스트 내 딕셔너리 구조를 채택하여 Key 중복으로 인한 데이터 유실(Overwrite) 문제를 완벽히 해결했습니다.
+- **초기 자본 보호**: 조건문을 추가하여 프로그램 재실행 시 초기 자본이 중복 입력되는 오류를 방지했습니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Object-Oriented**: `class`, `__init__`, Methods
+- **Data Structures**: `List` of `Dictionaries` (Advanced Data Handling)
+- **File Management**: `csv` module, File Open/Write/Read
+- **Logic**: Conditional statements for state management
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **객체 지향의 이해**: 클래스를 통한 데이터와 기능의 결합, 인스턴스화 과정 습득.
+- **영속적 데이터 관리**: 메모리 내 휘발성 데이터를 물리 파일(`csv`)로 저장하고 불러오는 전체 프로세스 이해.
+- **복합 자료구조 활용**: 리스트와 딕셔너리를 중첩하여 대량의 데이터를 효율적으로 관리하는 설계 능력 배양.
+- **예외 상황 대응**: 초기화 로직 및 데이터 중복 등 실제 사용 시 발생할 수 있는 논리적 엣지 케이스(Edge Case) 처리.
 
 ## 🚀 To be continued...
 학습 내용이 추가될 때마다 업데이트될 예정입니다.
