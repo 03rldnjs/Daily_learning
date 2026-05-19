@@ -1,5 +1,5 @@
 1. 리스트 컴프리헨션(List comprehesion)
-   - style : [x for x in data]
+   - style : [x for y in data]
    - 대괄호 [] 사용 (use [])
    - 결과를 한꺼번에 다 만들어서 메모리에 올림 (create all results instantly)
    - 메모리 차지(memory) : 데이터의 양만큼 메모리를 차지함 (occupy memory by the amount of memory)
@@ -7,7 +7,7 @@
    - 재사용성(reusablilty) : 여러 번 다시 사용 가능 (high reusablilty)
 
 2. 제너레이터 표현식(Generator expression)
-   - style : (x for x in data)
+   - style : (x for y in data)
    - 괄호 () 사용 (use ())
    - 결과를 미리 만들지 않고 필요할 때마다 전달 (create results only if it needs)
    - 메모리 차지(memory) : 필요할 때만 결과가 나오므로 적은 메모리 차지 (occupy only small amount of memory)
