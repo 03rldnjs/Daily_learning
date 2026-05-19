@@ -1,4 +1,5 @@
-from tkinter import *
+from tkinter import *  
+#from import를 사용하면 라이브러리 내부의 함수를 사용할 때 클래스를 앞에 붙이지 않아도 된다 / you don't have to add the name of class when you use from import
 
 window = Tk()  # tkinter에 들어있는 클래스를 window라는 이름의 객체로 생성시킴 / create instance of 'class Tk()' which is included in tkinter library
 
@@ -9,9 +10,9 @@ def search_list():
     rest_name = e1.get()  
     if rest_name in restaurants:
         l3.config(text = f'식당 이름: {rest_name}, 대표 메뉴: {restaurants[rest_name]}')
-        e1.delete(0, END)
+        e1.delete(0, END)  # 버튼을 누른 다음 entry 내부 청소 / clear the entry after the button was pressed
     else:
-        l3.config(text = '검색하신 식당은 리스트에 존재하지 않습니다.')
+        l3.config(text = '검색하신 식당은 리스트에 존재하지 않습니다.')  
 
 # 식당 추가 함수 / method that can add new restaurant
 def add_list():
@@ -23,8 +24,8 @@ def add_list():
     menu_name = e3.get()
     restaurants[rest_name] = menu_name
     l3.config(text = f'추가가 완료되었습니다.\n추가 내역: {rest_name} : {menu_name}')
-    e2.delete(0, END)
-    e3.delete(0, END)
+    e2.delete(0, END)   # 번튼을 누른 다음 entry 내부 청소 / clear the entry after the button was pressed
+    e3.delete(0, END)  
 
 # 식당 리스트 출력 함수 / method that can print list of restaurants
 def view_list():
@@ -42,6 +43,7 @@ def view_list():
 
 window.title("맛집 리스트") 
 
+# GUI 화면 레이아웃 조정부 / GUI window layout control part
 l_first = Label(window, text = '식당 검색')
 l_first.grid(row = 0, column = 0)
 
