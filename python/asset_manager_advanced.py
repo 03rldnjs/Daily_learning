@@ -4,11 +4,11 @@ import os    # os모듈을 사용하면 파일 존재 여부를 확인할 수 �
 asset_goal = 0
 asset = 0
 
-history = []   # 초안 방법(딕셔너리)으로 항목 추가 시 key(날짜)가 같은 경우 덮어쓰기 현상 발생.
-#따라서 리스트 안의 딕셔너리 형식으로 추가(by append)하는 것이 안전함. 
+history = []   # 초안 방법(딕셔너리)으로 항목 추가 시 key(날짜)가 같은 경우 덮어쓰기 현상 발생
+#따라서 리스트 안의 딕셔너리 형식으로 추가(by append)하는 것이 안전
 
 # 파일 불러오기 함수
-import os  # 파일 존재 여부를 확인하기 위해 필요해!
+import os  # 파일 존재 여부를 확인하기 위해 필요
 
 def load_from_csv():
     global asset
@@ -22,7 +22,7 @@ def load_from_csv():
         next(reader)  # 첫 줄(헤더)은 데이터가 아니니 건너뛰기
         
         for line in reader:
-            # line은 ['2026-05-14', '알바비', '500000', '수입'] 이런 형태야
+            # line은 ['2026-05-14', '알바비', '500000', '수입'] 이런 형태
             date, item, amount, category = line[0], line[1], int(line[2]), line[3]
             
             # 1. 객체 생성
