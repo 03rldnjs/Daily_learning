@@ -23,12 +23,12 @@ This folder is an archive that collect the codes that I write and informations t
    - 여러 입력 오류 방지 / prevent various input error program quit
 
 3. [seat_reserv_plus.c](./seat_reserv_plus.c)
-   - 배열을 활용한 미니 좌석 예약 시스템 (mini seat reservation system using arrangement)
+   - 배열을 활용한 미니 좌석 예약 시스템 (mini seat reservation system using array)
    - 기본적인 좌석 예약 시스템에 여러 입력 오류 방지 로직 추가 (add several input error prevention logic in the basic seat reservation system)
    - 예약되지 않은 좌석은 0, 예약된 좌석은 1로 처리, 모든 좌석이 예약된 경우 프로그램 종료
 
    주요 학습 내용(key learning contents)
-   - c언어에서의 배열 활용 / using c language arrangement for the first time
+   - c언어에서의 배열 활용 / using c language array for the first time
    - 나타날 수 있는 입력 오류(ex. 범위 밖 숫자 입력, 문자 입력, 예약된 좌석 입력 등) 방지 로직 형성 / create preventing input error logic(ex. input the number that is out of the range, input character, input the seat that is already reserved)
    - 모든 좌석이 예약된 경우 프로그램을 종료시키는 로직 형성 / create the logic that can exit the program when all the seats are reserved
   
