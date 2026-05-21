@@ -181,7 +181,7 @@ int permu_input() {
 // 순열 계산 함수(팩토리얼 계산 함수 활용)
 long long permutation(int num) {
 	int n, r;
-	if (num / 100 <= 20 && num % 100 >= 10) {
+	if (num >= 1000) {
 		n = num / 100;
 		r = num % 100;
 	}
@@ -226,7 +226,7 @@ int combi_input() {
 // 조합 계산 함수(팩토리얼 계산 함수 활용)
 long long combination(int num) {
 	int n, r;
-	if (num / 100 <= 20 && num % 100 >= 10) {
+	if (num >= 1000) {
 		n = num / 100;
 		r = num % 100;
 	}
@@ -242,50 +242,26 @@ long long combination(int num) {
 
 // 메인 함수 (switch문 활용)
 int main() {
-	int fact_num;
-	double sine_num;
-	double log_num;
-	double root_num;
-	int permu_num;
-	int combi_num;
-	long long result_1;
-	double result_2;
-	double result_3;
-	double result_4;
-	long long result_5;
-	long long result_6;
 	while (1) {
 		print_menu();
 		switch (menu_input()) {
 		case 1:
-			fact_num = fact_input();
-			result_1 = calc_fact(fact_num);
-			printf("결과: %lld\n\n", result_1);
+			printf("결과: %lld\n\n",calc_fact(fact_input()));
 			break;
 		case 2:
-			sine_num = sine_input();
-			result_2 = sine(sine_num);
-			printf("결과: %lf\n\n", result_2);
+			printf("결과: %lf\n\n",sine(sine_input()));
 			break;
 		case 3:
-			log_num = log_input();
-			result_3 = logBase10(log_num);
-			printf("결과: %lf\n\n", result_3);
+			printf("결과: %lf\n\n", logBase10(log_input()));
 			break;
 		case 4:
-			root_num = root_input();
-			result_4 = root(root_num);
-			printf("결과: %lf\n\n", result_4);
+			printf("결과: %lf\n\n", root(root_input()));
 			break;
 		case 5:
-			permu_num = permu_input();
-			result_5 = permutation(permu_num);
-			printf("결과: %lld\n\n", result_5);
+			printf("결과: %lld\n\n", permutation(permu_input()));
 			break;
 		case 6:
-			combi_num = combi_input();
-			result_6 = combination(combi_num);
-			printf("결과: %lld\n\n", result_6);
+			printf("결과: %lld\n\n", combination(combi_input()));
 			break;
 		case 7:
 			printf("프로그램을 종료합니다.\n");
