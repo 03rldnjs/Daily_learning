@@ -80,7 +80,7 @@ A scientific calculator program using the `math.h` header file for various mathe
 
 ---
 
-### 2. 공학용 계산기 발전 버전 (`scientific_calculator.c`)
+### 2. 공학용 계산기 발전 버전 (`scientific_calculator_advanced.c`)
 - **논리적 정확도와 코드 재사용성을 극대화한 최종 완성본**
 - **Advanced Features**:
   - **Function Reusability**: `calc_fact()` 함수를 별도로 정의하여 순열(nPr) 및 조합(nCr) 계산 시 코드 중복을 제거함.
@@ -92,7 +92,7 @@ A scientific calculator program using the `math.h` header file for various mathe
 
 ---
 
-### 3. 공학용 계산기 고도화 버전 (`scientific_calculator_advanced.c`)
+### 3. 공학용 계산기 고도화 버전 (`scientific_calculator_prime.c`)
 단일 책임 원칙(SRP)을 기반으로 입출력 로직과 연산 엔진을 완벽히 분리하고, 버퍼 비우기를 통해 문자 입력 예외까지 통제한 공학용 계산기입니다.  
 An advanced scientific calculator that completely decouples I/O from core logic using SRP, featuring robust input buffer management.
 
