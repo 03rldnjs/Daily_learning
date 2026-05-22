@@ -1,4 +1,4 @@
-# 💻 기원의 프로그래밍 학습 연구소 (Daily Learning Lab)
+# 💻 Daily Learning Lab (C/Python)
 
 C언어와 Python을 깊이 있게 공부하며 구현한 핵심 프로젝트와 예외 처리, 소프트웨어 아키텍처에 대한 고민을 누적하는 공간입니다.  
 This repository is an archive of my journey in mastering C and Python, focusing on robust error-handling, modularization, and software engineering principles.
