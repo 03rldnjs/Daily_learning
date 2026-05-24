@@ -13,7 +13,7 @@ This repository is an archive of my journey in mastering C and Python, focusing 
 | :--- | :--- | :--- |
 | [**🔵 C**](./) | `C`, `math.h`, Buffer I/O | 공학용 계산기(Prime), 미니 좌석 예약 시스템 / 버퍼 제어 및 예외 처리 |
 | [**🐍 python**](./) | `Python`, OOP, File I/O | 학생 관리 시스템, 영속적 자산 관리 프로그램 / 객체 지향 및 자료구조 |
-| [**🎨 python_GUI**](./) | `Python`, GUI Library | *(To be updated)* 파이썬 기반 그래픽 사용자 인터페이스 연구 공간 |
+| [**🎨 python_GUI**](./) | `Python`, GUI Library | 파이썬 기반 그래픽 사용자 인터페이스 연구 공간 |
 
 ---
 
