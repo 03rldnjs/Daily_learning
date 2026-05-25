@@ -47,6 +47,15 @@ This folder is an archive that collect the codes that I write and informations t
    - c언어에서의 배열 활용 / using c language array for the first time
    - 나타날 수 있는 입력 오류(ex. 범위 밖 숫자 입력, 문자 입력, 예약된 좌석 입력 등) 방지 로직 형성 / create preventing input error logic(ex. input the number that is out of the range, input character, input the seat that is already reserved)
    - 모든 좌석이 예약된 경우 프로그램을 종료시키는 로직 형성 / create the logic that can exit the program when all the seats are reserved
+
+---
+
+5. [pointer_prac.c](./pointer_prac.c)
+   - 포인터의 원리를 이해하기 위한 코드 / code for understand principle of pointer
+
+   주요 학습 내용(key learning contents)
+   - 포인터가 선언된 자료형에 따라 어떤 차이를 보이는지 확인 / check the difference of result when declared types are different
+   - 포인터를 활용할 때 *과 &의 역할 이해 / understand the role of * and & when using pointer
   
 To be continued...
 
@@ -134,6 +143,26 @@ A mini seat reservation system using arrays, featuring robust error-prevention l
 - **배열 구조의 이해**: C언어에서 연속된 메모리 공간(배열)을 선언하고 인덱스를 제어하는 방법 숙지.
 - **방어적 코드 설계 (Defensive Coding)**: 잘못된 입력(범위 초과, 문자 입력 등)이 시스템에 미치는 영향을 파악하고, 이를 필터링하는 방어 로직 형성.
 - **자동 종료 메커니즘 (Exit Logic)**: 배열의 모든 요소를 순회하여 특정 조건(만석)을 만족할 때 안전하게 탈출하는 제어 흐름 구현.
+
+---
+
+### 5. 포인터 기초 및 원리 실습 (`pointer_prac.c`)
+C언어의 핵심인 포인터의 메모리 참조 메커니즘을 이해하고, 자료형에 따른 주소 연산의 차이를 분석한 실습 코드입니다.  
+A foundational practice code exploring C pointer mechanisms, address operations by data types, and reference operators.
+
+#### ✨ 주요 기능 (Key Features)
+- **주소 및 참조 연산 실습**: 주소 연산자(`&`)와 역참조 연산자(`*`)를 활용하여 변수의 메모리 주소에 직접 접근하고 값을 제어합니다.
+- **자료형별 포인터 특성 비교**: `int*`, `char*`, `double*` 등 선언된 자료형에 따라 포인터가 메모리를 해석하고 이동하는 크기의 차이를 직접 확인합니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Memory Management**: 메모리 주소(Address)와 값(Value)의 개념 분리 및 매핑
+- **Operators**: 주소 추출 연산자(`&`) 및 간접 참조 연산자(`*`)의 상호작용 이해
+- **Pointer Arithmetic**: 자료형 크기(Type Size)에 따른 포인터 주소 연산 원리 파악
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **참조와 역참조의 이해**: 변수의 메모리 공간 주소를 가리키는 포인터의 개념을 정립하고, `*` 연산자를 통해 실제 데이터에 접근하는 메커니즘을 체득함.
+- **자료형(Data Type)과 포인터의 관계**: 포인터 변수 자체의 크기는 동일하더라도, 가리키는 대상의 자료형에 따라 주소 증가 단위 및 메모리 참조 범위가 달라짐을 인지함.
+- **포인터 기반 리팩토링의 발판**: 이전에 복합 반환값 전송을 위해 자릿수를 인코딩했던 편법 로직을 주소 참조 방식(Call by Reference)으로 개선할 수 있는 이론적 기반을 마련함.
 
 ---
 
