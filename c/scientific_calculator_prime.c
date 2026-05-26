@@ -27,6 +27,10 @@ int menu_input() {
 
 		return -1;
 	}
+	if (n > 7 || n < 1) {
+		return -1;  // 범위 내에 존재하지 않는 정수가 들어와도 -1을 반환 return -1 when entered number is not in the menu range
+	}
+	// 따라서 잘못된 입력은 모두 -1이 반환되도록 설계됨 / so every exceptional input will return -1
 	return n;
 }
 
