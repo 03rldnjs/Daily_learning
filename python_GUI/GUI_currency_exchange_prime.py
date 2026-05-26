@@ -3,6 +3,8 @@ from tkinter import messagebox  # tkinter내에 있는 messagebox를 import함 /
 # from tkinter import *이 아닌 import tkinter as tk로 작성하였으므로 tkinter에 들어있는 함수를 사용하려면 앞에 tk.을 붙여주어야 함.
 # should add tk. because i use 'import tkinter as tk' instead of 'from tkinter import *'
 
+EXCHANGE_RATE = 1514.9  # 환율의 변동성을 고려하여 기호 상수로 선언 / declare symbolic constant to reflect the volatility of the exchange rate
+
 window = tk.Tk()  # Tk() 클래스를 이 코드 내에서 window라는 객체로 생성 / create 'window' instance of Tk() class(which is included in tkinter library)
 window.title(" 환율 계산기 ")
 window.geometry("500x400") 
@@ -24,12 +26,14 @@ def exchange():
     
         current_choice = convert_type.get()  
         if current_choice == "to_usd": 
-            exed_money = money / 1514.9
-            l2.config(text = f'결과: ${exed_money:,.2f}, 입력하신 금액: {money:,} (환율: 1514.9원/$)')
+            # 환율의 변동성을 고려하여 기호 상수 활용 / use symbolic constant to reflect the volatility of the exchange rate well
+            exed_money = money / EXCHANGE_RATE  
+            l2.config(text = f'결과: ${exed_money:,.2f}, 입력하신 금액: {money:,} (환율: {EXCHANGE_RATE}원/$)')
 
         elif current_choice == "to_krw":
-            exed_money = money * 1514.9
-            l2.config(text = f'결과: {exed_money:,.2f}원, 입력하신 금액: {money:,} (환율: 1514.9원/$)')
+            # 환율의 변동성을 고려하여 기호 상수 활용 / use symbolic constant to reflect the volatility of the exchange rate well
+            exed_money = money * EXCHANGE_RATE
+            l2.config(text = f'결과: {exed_money:,.2f}원, 입력하신 금액: {money:,} (환율: {EXCHANGE_RATE}원/$)')
         # DRY 원칙을 위해 if문과 elif문에 넣지 않고 모든 과정이 끝난 후 알림과 칸 비우기 실행
         # operate message and delete function after every process is done for DRY principle
         messagebox.showinfo("환전 완료", "성공적으로 환전되었습니다.")
@@ -82,7 +86,7 @@ window.mainloop()
 
 # which point does 'import tkinter as tk' is better than 'from tkinter import *'?
 # 1. import* is the action of pouring hundreds of variables, functions, and classes in tkinter into your code rooms (global space) without a name tag
-#    if you create a function or variables that has same name with the function of variables included in Tkinter library, the existing element will overwrited and the unknown error or bug will occur
+#    if you create a function or variables that has same name with the function of variables included in Tkinter library, the existing element will be overwritten and the unknown error or bug will occur
 # 2. Can not know which widget came from where
 #    When you start mixing multiple libraries such as time and csv, as well as tkinter, it becomes difficult to determine at a glance whether a function or class that appears out of the blue in the middle of the code is from tkinter or something else   
 
