@@ -10,7 +10,7 @@ This folder is an archive that collect the codes that I write and informations t
   
    주요 학습 내용(key learning contents)
    - C언어의 math.h 헤더파일 활용 / using math.h header file
-   - 사용자 입력 예외 처리 방법 / processing user's exceptional input using while(1) infinite loop
+   - 사용자 입력 예외 처리 방법 / process user's exceptional input using while(1) infinite loop
    - 모듈화를 위한 함수 분리 / Separation of functions for modularization
 
 ---
@@ -20,7 +20,7 @@ This folder is an archive that collect the codes that I write and informations t
    - 기호 상수 활용, sin() 함수 라디안 변환 로직, 함수 재사용(순열, 조합에서의 팩토리얼 계산), 수학적 엄밀성 향상(log함수 0 입력 배제, sqrt 0 입력 포함 등) ( using symbolic constants, sin() function radian traslation logic, improved function reusablity(factorial calculation in permutation, combination), Handling mathmatical edge cases(rule out input 0 in log, include input 0 in sqrt etc.)
   
    주요 학습 내용(key learning contents)
-   - 출력, 계산 함수의 분리를 통한 함수 재사용성 향상 / enhanced function reusablity by seperate print function and calculate function + DRY(Don't repear yourself)
+   - 출력, 계산 함수의 분리를 통한 함수 재사용성 향상 / enhanced function reusablity by seperate print function and calculate function + DRY(Don't repeat yourself)
    - 기호 상수 활용을 통한 유연성 향상 / enhanced flexablity by using symbolic constants
    - 여러 입력 오류 방지 / prevent various input error program quit
 
