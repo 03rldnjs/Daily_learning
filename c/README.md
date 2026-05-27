@@ -56,7 +56,20 @@ This folder is an archive that collect the codes that I write and informations t
    주요 학습 내용(key learning contents)
    - 포인터가 선언된 자료형에 따라 어떤 차이를 보이는지 확인 / check the difference of result when declared types are different
    - 포인터를 활용할 때 *과 &의 역할 이해 / understand the role of * and & when using pointer
+
+---
+
+6. [scientific_calculator_pointer](./scientific_calculator_pointer)
+   - [scientific_calculator_prime]의 단점이었던 순열, 조합함수에서의 편법 사용을 포인터를 통해 보완 / make up the shortcoming of [scientific_calculator_prime](use expedient in permutation and combination function)
+   - 포인터를 실제 프로그램에 적용 경험
   
+   주요 학습 내용(key learning contents)
+   - c언어의 특징 중 하나인 함수가 하나의 값만 반환할 수 있다는 점을 포인터를 활용하여 해결 / solve the problem of C language's 1 function 1 return with pointer
+   - 포인터의 작동 매커니즘 이해 / understand the mechanism of pointer
+   - 포인터를 활용하는데 필요한 기호의 역할 이해, 포인터 선언 방식과 스타일 습득 / understand the role of * and & when using pointer, acquire the way and style when declare the pointer variables.
+
+---
+
 To be continued...
 
 // advanced version(powered by Gemini)
@@ -163,6 +176,27 @@ A foundational practice code exploring C pointer mechanisms, address operations 
 - **참조와 역참조의 이해**: 변수의 메모리 공간 주소를 가리키는 포인터의 개념을 정립하고, `*` 연산자를 통해 실제 데이터에 접근하는 메커니즘을 체득함.
 - **자료형(Data Type)과 포인터의 관계**: 포인터 변수 자체의 크기는 동일하더라도, 가리키는 대상의 자료형에 따라 주소 증가 단위 및 메모리 참조 범위가 달라짐을 인지함.
 - **포인터 기반 리팩토링의 발판**: 이전에 복합 반환값 전송을 위해 자릿수를 인코딩했던 편법 로직을 주소 참조 방식(Call by Reference)으로 개선할 수 있는 이론적 기반을 마련함.
+
+---
+
+### 6. 포인터 기반 공학용 계산기 (`scientific_calculator_pointer.c`)
+포인터 메커니즘을 실제 프로그램에 적용하여, 기존 버전의 한계였던 다중 반환값 전송 문제를 주소 참조 방식으로 완벽히 보완한 고도화 버전입니다.  
+An upgraded scientific calculator that replaces previous encoding expedients with pointer-based Call-by-Reference to handle multiple inputs effectively.
+
+#### ✨ 주요 기능 (Key Features)
+- **주소 참조 기반 입력 시스템 (Call by Reference)**: 순열과 조합 함수에서 $n$과 $r$ 두 개의 입력값을 포인터 매개변수를 통해 안전하고 직관적으로 메인 로직에 전달합니다.
+- **구조적 결함 보완**: 임시 자릿수 인코딩 방식을 제거하고 C언어 표준 패러다임에 맞는 포인터 제어를 도입하여 잠재적 엣지 케이스(Overflow 및 데이터 유실)를 원천 차단했습니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Memory Address Mapping**: 포인터 변수 선언 및 메모리 주소 상호작용 활용
+- **Parameter Passing**: 주소 전달 방식을 통한 다중 데이터 참조 및 수정
+- **Code Refactoring**: 기존 편법 로직을 표준 객체 지향 및 구조적 코드로 개선
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **C언어 반환 제약 극복**: "함수는 오직 하나의 값만 반환할 수 있다"는 C언어의 구조적 특징을 포인터 주소 참조 방식을 통해 우아하게 해결함.
+- **포인터 작동 메커니즘의 실전 적용**: 이론으로만 배웠던 주소 연산자(`&`)와 역참조 연산자(`*`)를 실제 복잡한 프로그램 로직에 적용하며 구체적인 구동 원리를 체득함.
+- **안정적인 코딩 스타일 정립**: 포인터 변수의 선언 방식과 참조 스타일을 올바르게 습득하여, 메모리에 안전하게 접근하고 가독성을 높이는 방어적 코딩 습관을 형성함.
+- **지속 가능한 소프트웨어 개발**: 기술적 부채(Technical Debt)였던 과거의 임시 코드를 새로운 기술을 통해 스스로 리팩토링함으로써 소프트웨어의 점진적 발전 과정을 경험함.
 
 ---
 
