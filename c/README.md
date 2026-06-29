@@ -67,6 +67,16 @@ This folder is an archive that collect the codes that I write and informations t
    - c언어의 특징 중 하나인 함수가 하나의 값만 반환할 수 있다는 점을 포인터를 활용하여 해결 / solve the problem of C language's 1 function 1 return with pointer
    - 포인터의 작동 매커니즘 이해 / understand the mechanism of pointer
    - 포인터를 활용하는데 필요한 기호의 역할 이해, 포인터 선언 방식과 스타일 습득 / understand the role of * and & when using pointer, acquire the way and style when declare the pointer variables.
+  
+7. [CT_lv1_videoplayer.c](./CT_lv1_videoplayer.c)
+   - 코딩테스트 레벨 1 문제 풀이(PCCP 기출문제) / solve the coding test lvl.1 question(PCCP previous question)
+   - 비디오 플레이어 기능 구현(10초 단위 이동(prev, next), 오프닝 건너뛰기, 예외 처리(ex. 10초 이동 후 시점이 오프닝 구간인 경우)) / realize the fuction of video player(moving 10sec, skip the opening, processing the exceptions)
+   - 문자열 입력을 변환하여 계산 -> 다시 문자열로 변형하여 출력 / string input -> process and caculate, translate -> print the string
+
+   주요 학습 내용(key learning contents)
+   - 포인터 배열 활용, 문자열 읽기/쓰기, 시간 처리, 코드 모듈화, 다양한 예외 처리
+   - 코드 함수 분리(모듈화), 함수 원형 정의, 비디오 플레이어에 발생할 수 있는 다양한 예외 고려 및 처리, 문자열 처리(string.h 활용)
+   - 코딩 테스트 기출문제 경험을 통한 실력 파악 및 객관화
 
 ---
 
@@ -197,6 +207,27 @@ An upgraded scientific calculator that replaces previous encoding expedients wit
 - **포인터 작동 메커니즘의 실전 적용**: 이론으로만 배웠던 주소 연산자(`&`)와 역참조 연산자(`*`)를 실제 복잡한 프로그램 로직에 적용하며 구체적인 구동 원리를 체득함.
 - **안정적인 코딩 스타일 정립**: 포인터 변수의 선언 방식과 참조 스타일을 올바르게 습득하여, 메모리에 안전하게 접근하고 가독성을 높이는 방어적 코딩 습관을 형성함.
 - **지속 가능한 소프트웨어 개발**: 기술적 부채(Technical Debt)였던 과거의 임시 코드를 새로운 기술을 통해 스스로 리팩토링함으로써 소프트웨어의 점진적 발전 과정을 경험함.
+
+### 7. PCCP 기출문제: 동영상 재생기 (`CT_lv1_videoplayer.c`)
+문자열 형식의 시간 데이터를 파싱 및 연산하고, 오프닝 건너뛰기 등 복잡한 조건문과 예외 처리를 구현한 코딩테스트 레벨 1 풀이 소스코드입니다.  
+A solution for the PCCP Level 1 coding test question, featuring string-to-time conversion, video control logic, and meticulous exception handling.
+
+#### ✨ 주요 기능 (Key Features)
+- **시간 데이터 포맷 변환**: `mm:ss` 형태의 문자열 입력을 초(Second) 단위 정수로 변환하여 계산한 뒤, 출력 시 다시 문자열 포맷으로 재변환합니다.
+- **비디오 컨트롤 로직**: 10초 앞/뒤 이동(`prev`, `next`) 및 가용 범위를 벗어날 시의 타임라인 제한 기능을 제공합니다.
+- **오프닝 자동 건너뛰기**: 이동 후의 시점이나 초기 시점이 오프닝 구간(`op_start` ~ `op_end`) 내에 위치할 경우, 오프닝이 끝나는 시점으로 자동 점프하는 예외 처리를 수행합니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **String Manipulation**: `string.h` 라이브러리를 활용한 문자열 읽기/쓰기 및 파싱
+- **Pointer Array**: 문자열 명령어 배열 처리를 위한 포인터 배열 활용
+- **Code Architecture**: 함수 원형(Prototype) 정의 및 기능별 함수 분리(모듈화)
+- **Time Arithmetic**: 분/초 단위를 단일 기준(초)으로 통합하여 연산하는 로직 설계
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **문자열 처리 능력 향상**: C언어에서 가장 까다로운 영역 중 하나인 문자열 데이터를 정수형 데이터로 변환하고, 포인터 배열을 제어하는 실전 감각을 익힘.
+- **철저한 예외 상황 시뮬레이션**: 10초 이동 후의 시점이 오프닝 구간에 걸치는 경우, 동영상 시작/종료 지점을 이탈하는 경우 등 발생 가능한 모든 엣지 케이스(Edge Case)를 고려한 방어적 흐름 설계.
+- **구조적 모듈화 프로그래밍**: 코딩테스트 환경에서도 스파게티 코드를 지양하고, 함수 원형 선언과 기능별 분리를 통해 가독성과 구조적 완성도를 높임.
+- **객관적 실력 점검 및 피드백**: 실제 공인 코딩테스트(PCCP) 기출문제를 제한된 조건 속에서 해결해 보며, 현재 나의 구현 능력을 객관적으로 파악하고 향후 학습 방향성을 설정함.
 
 ---
 
