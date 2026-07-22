@@ -190,4 +190,4 @@ AWS Lambda 요금 측정 요소 2가지:
 호출 횟수 (Total Requests)
 실행 시간 + 메모리 크기 (Duration & Memory)
 
-
+-> lambda의 핵심 철학 = 실제 사용한 만큼만 낸다(pay-as-you-go)
