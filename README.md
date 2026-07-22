@@ -61,5 +61,32 @@ C언어의 표준 입출력 스트림 메커니즘을 이해하고, 방어적 �
 ## 🚀 Future Roadmap: Python GUI Lab
 * 현재 축적된 C언어의 엄밀한 계산 엔진 로직과 파이썬의 객체 지향 아키텍처를 바탕으로, **사용자 친화적인 그래픽 인터페이스(GUI)** 환경을 구축하는 연구를 진행할 예정입니다. (Tkinter, PyQt 등 활용 예정)
 
+  ### AWS Cloud Practitioner (CLF-C02) 핵심 개념 정리 (`AWS_CLF-C02_Notes.md`)
+AWS 자격증 취득 및 클라우드 인프라 이해를 위해 시험 출제 포인트, 핵심 서비스 비교, 함정 선지 분석을 정리한 학습 기록입니다.  
+Core cloud architecture concepts, AWS service comparisons, and exam-focused trouble-shooting notes for AWS CLF-C02.
+
+#### ✨ 주요 학습 서비스 및 개념 (Key Concepts & Services)
+- **High Availability & Fault Tolerance**: Multi-AZ 배포를 통한 단일 장애 지점(SPOF) 제거 및 가용성 향상 메커니즘
+- **Database Architecture**: RDBMS(Aurora, RDS)의 ACID 트랜잭션 vs NoSQL(DynamoDB)의 유연한 스키마 및 수평적 확장성 비교
+- **Global Content Delivery**: CloudFront(CDN)의 3대 요소(Origin, Edge Location, Distribution) 및 S3 정적 웹 호스팅 가속 기법
+- **Cloud Migration Strategies**: AWS MGN(서버 전체 Lift-and-Shift) vs AWS DMS(DB 데이터 이전)의 적재적소 활용법
+- **Serverless Event-Driven Architecture**: AWS Lambda의 실행 시간(Duration) 및 요청 수(Requests) 기반 Pay-as-you-go 요금 측정 체계
+
+#### 🛠 핵심 가이드 & 매칭 팁 (Quick Reference Tips)
+- **Multi-AZ vs Multi-Region/CloudFront**:
+  - `Multi-AZ`: 고가용성(High Availability) 및 SPOF 방지 🎯
+  - `Multi-Region / CloudFront`: 글로벌 지연 시간(Latency) 감소 🎯
+- **Database Selection Standard**:
+  - `관계형 (RDS, Aurora)`: 트랜잭션 정확도 및 복잡한 관계가 핵심인 시스템 (금융, 주문/결제)
+  - `비관계형 (DynamoDB)`: 초고속 읽기/쓰기 및 대규모 트래픽 확장이 핵심인 시스템 (게이밍, IoT, SNS)
+- **Migration Services**:
+  - `AWS MGN`: 온프레미스 서버(OS + 파일시스템 + 앱) 통째로 EC2 복제 🚚
+  - `AWS DMS`: 데이터베이스 내 데이터(Data)만 AWS DB 서비스로 동기화/이전 📊
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **클라우드 아키텍처 패턴 이해**: 온프레미스 인프라와 AWS 클라우드 환경의 구조적 차이를 파악하고 고가용성 아키텍처 설계 원리를 체득함.
+- **오답 노트 기반의 문제 해결력 배양**: 오답 및 함정 선지(SQS vs SNS, DAX vs CloudFront 등) 분석을 통해 각 서비스의 고유 유스케이스(Use-Case)를 엄격하게 구분함.
+- **서버리스(Serverless) 및 S3 정적 호스팅의 이점 파악**: 기존 EC2 유지 비용 대비 S3 정적 호스팅 및 Lambda의 경제성(비용 절감)과 무한 자동 스케일링 특성을 구체적으로 이해함.
+
 ```markdown
 To be continued... 학습 진행도에 따라 본 로드맵은 실시간으로 업데이트됩니다.
