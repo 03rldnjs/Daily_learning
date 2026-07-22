@@ -1,7 +1,7 @@
-# 💻 Daily Learning Lab (C/Python)
+# 💻 Daily Learning Lab (C/Python/AWS Certificate)
 
-C언어와 Python을 깊이 있게 공부하며 구현한 핵심 프로젝트와 예외 처리, 소프트웨어 아키텍처에 대한 고민을 누적하는 공간입니다.  
-This repository is an archive of my journey in mastering C and Python, focusing on robust error-handling, modularization, and software engineering principles.
+C언어와 Python, AWS 자격증시험을 깊이 있게 공부하며 구현한 핵심 프로젝트와 예외 처리, 소프트웨어 아키텍처에 대한 고민을 누적하는 공간입니다. 
+This repository is an archive of my journey in mastering C and Python, AWS certificate test focusing on robust error-handling, modularization, and software engineering principles.
 
 ---
 
