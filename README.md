@@ -58,9 +58,6 @@ C언어의 표준 입출력 스트림 메커니즘을 이해하고, 방어적 �
 
 ---
 
-## 🚀 Future Roadmap: Python GUI Lab
-* 현재 축적된 C언어의 엄밀한 계산 엔진 로직과 파이썬의 객체 지향 아키텍처를 바탕으로, **사용자 친화적인 그래픽 인터페이스(GUI)** 환경을 구축하는 연구를 진행할 예정입니다. (Tkinter, PyQt 등 활용 예정)
-
   ### AWS Cloud Practitioner (CLF-C02) 핵심 개념 정리 (`AWS_CLF-C02_Notes.md`)
 AWS 자격증 취득 및 클라우드 인프라 이해를 위해 시험 출제 포인트, 핵심 서비스 비교, 함정 선지 분석을 정리한 학습 기록입니다.  
 Core cloud architecture concepts, AWS service comparisons, and exam-focused trouble-shooting notes for AWS CLF-C02.
