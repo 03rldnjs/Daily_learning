@@ -662,8 +662,8 @@ matching tip
 
 정답
 - Business
-AWS Support 플랜 중 3번째 단계로, Business 단계부터 기술 지원을 제공함
-Basic이 가장 기초적인 단계이지만 전화 통화를 통한 기술 지원을 제공하지 않음
+AWS Support 플랜 중 3번째 단계로, Business 단계부터 전화/채팅을 통한 기술 지원을 제공함
+Basic/Developer 단계에서는 전화 통화를 통한 기술 지원을 제공하지 않음.
 
 + AWS Support 플랜
 1. Basic Support (기본)
