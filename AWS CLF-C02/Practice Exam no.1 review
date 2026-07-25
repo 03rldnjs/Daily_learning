@@ -1,0 +1,155 @@
+1번. 
+- 문제 상황 분석
+한 회사의 여러 부서가 각각 독립된 AWS 계정 보유
+어떤 부서는 예약 인스턴스를 남겨서 놀리고 있고 어떤 부서는 모자람
+-> 따라서 가장 비용 효율적인 방법으로 남는 예약 인스턴스 할인 혜택을 회사 전체 계정끼리 공유하기를 원함
+
+- 정답 및 해결책
+AWS Organizations 사용
+여러 계정을 하나로 묶어 관리하고, 통합 결제 기능을 통해 한 계정에서 놀고 있는 예약 인스턴스 할이니 혜택을
+다른 계정이 끌어다 쓸 수도 있도록 공유함.
+
+## AWS Organizations's Consolidated Billing (통합 결제)
+
+* **AWS Organizations:** 여러 개의 AWS 계정을 중앙에서 한 번에 관리하고 통합 결제를 적용할 수 있는 서비스.
+* **Reserved Instance (RI) 할인 공유:** 
+  * AWS Organizations로 계정들을 묶으면, A 계정에서 남는 RI 할인 혜택이 B 계정의 EC2 사용량에 **자동으로 공유되어 적용**됨 (비용 최적화).
+* **주요 1초 키워드:** `Manage multiple AWS accounts`, `Consolidated Billing`, `Share Reserved Instance discounts`
+
+오답 선지 분석
+- AWS Systems Manager(SSM)
+계정 관리용이 아니라 EC2 인스턴스/서버 설정, 패치, 자동화를 제어하는 패치/운영 관리 도구
+- AWS Trusted Advisor
+계정을 그룹화하는 게 아니라 내 계정의 보안, 비용 최적화, 성능, 내결함성을 실시간으로 진단하고 검사해주는
+컨설턴트
+- AWS Cost Explorer
+계정을 관리하는 게 아니라 과거 비용 내역을 시각화(그래프)해서 분석하고 향후 비용을 예측하는 도구
+
+2번.
+- 문제 분석 포인트
+회사가 자신의 암호화 키를 직접 생성하고, 사용 권한과 제어권을 완벽히 가지고 싶어 함.
+
+- 정답
+AWS CMK(Key Management Service)
+* **Customer Managed Key (CMK):** (유료)
+  * 고객이 직접 생성(Create), 관리(Manage), 삭제(Delete)할 수 있는 암호화 키.
+  * **핵심 키워드:** `Control over creating and using keys`, `Custom key policy`, `Rotation control`
+* **AWS Managed Key:**(무료)
+  * AWS 서비스(S3, EBS 등)가 사용자를 위해 생성해 주는 기본 키 (예: `aws/s3`).
+  * 고객이 직접 삭제하거나 키 정책을 자유롭게 수정할 수는 없음.
+* **AWS Secrets Manager vs KMS:**
+  * **KMS:** 데이터를 암호화하는 **암호화 키(Encryption Keys)** 자체를 관리.
+  * **Secrets Manager:** DB 비밀번호, API Token 같은 **비밀 정보(Credentials/Secrets)**를 관리.
+
+- 함정 선지
+AWS Secrets Manager
+AWS Secrets Manager는 민감한 보안 정보를 안전하게 저장하고 로테이션시키는 보관함.
+문제에서 요구한 건 데이터를 암호화할 때 쓰는 암호화키 자체의 생성 및 제어권이니 비밀번호 관리함이 아니므로
+정답이 될 수 없음
+
+- matching tip
+"고객이 직접 키를 만들고(Create) 제어(Control)하고 싶다" ➡️ Customer Managed Key (CMK)
+
+"비밀번호(Password)나 API Key를 주기적으로 자동 교체(Rotate)하고 싶다" ➡️ AWS Secrets Manager
+
+3번.
+- 문제 상황
+자주 접근하지 않지만 필요 시 빠른 접근 필요.
+S3 스토리지 클래스 중 선택
+
+- 정답
+Amazon S3 Standard-Infrequent Access(S3 Standard-IA)
+빈번하지 않은 접근인 경우에는 IA가 붙은 서비스나 Glacier가 적합하지만 문제에서 필요 시 빠른 접근을 
+원하므 Glacier는 불가능함.
+S3 Standard-IA는 Standard와 마찬가지로 밀리초(ms) 단위의 즉시 접근을 제공함.
+➔ 반면 Glacier Flexible Retrieval은 데이터 복원(Retrieval)에 분~시간 단위의 
+대기 시간이 발생하므로 rapid access 조건을 만족하지 못함.
+자주 안 쓰지만(IA) 필요할 땐 즉시 빠르게(Standard 수준의 속도) 불러와야 하므로 
+S3 Standard-IA가 가장 비용 효율적임
+
+스토리지 클래스,지문 속 핵심 키워드 (Trigger Words),특징
+S3 Standard = Frequently accessed, Milliseconds access -> 자주 접근하는 데이터 (기본값)
+S3 Standard-IA = Infrequently accessed + Rapid / Instant access -> 자주 안 쓰지만 즉시 빠른 접근 필요 (밀리초)
+S3 One Zone-IA = Infrequently accessed + Non-critical / Recreatable data -> 단일 AZ 저장으로 더 저렴하지만 재해 복구 불가
+S3 Intelligent-Tiering = Unknown or changing access patterns -> 접근 패턴을 모르거나 변동이 심할 때 (자동 이동)
+S3 Glacier = Archive, Long-term storage, Minutes to hours retrieval ->장기 보존/아카이빙 전용 (복원에 시간 소요)
+
+4번.
+- 문제 상황
+OS 취약성과 보안 평가가 자동적이고 지속적으로 이루어지길 원함
+EC2 인스턴스에 대한 서비스 모색 중
+
+- 정답 
+Amazon Inspector
+Amazon Inspectorsms EC2/ECR 등의 OS 및 소프트웨어 취약점을 자동 및 지속적으로 평가하는 서비스
+
+- 선지 분석
+
+### 1. Amazon Inspector (자동 취약점 평가)
+* **역할:** EC2 인스턴스, ECR 컨테이너 이미지, Lambda 함수의 
+**OS 및 소프트웨어 취약점(Vulnerabilities)을 자동 및 지속적으로 스캔하고 평가(Assessments)**함.
+* **1초 정답 키워드:** `OS vulnerabilities`, `Automate assessments`, `EC2 instance security scan`, `Software vulnerabilities`
+
+### 2. Amazon GuardDuty (지능형 위협 탐지)
+* **역할:** VPC Flow Logs, CloudTrail Logs, DNS Logs 등을 머신러닝으로 분석하여 
+**악의적인 행위나 무단 침입을 탐지(Threat Detection)**함.
+* **1초 정답 키워드:** `Threat detection`, `Malicious activity`, `Unauthorized behavior`, `Intrusion detection`
+
+### 3. Amazon Macie (S3 민감 정보 감지)
+* **역할:** S3 버킷 내의 **민감한 개인정보(PII, 주민번호, 카드번호 등)를 
+머신러닝으로 감지 및 보호**.
+* **1초 정답 키워드:** `S3`, `Sensitive data`, `PII (Personally Identifiable Information)`
+
+### 4. AWS Shield (DDoS 방어)
+* **역할:** 웹 애플리케이션 및 인프라를 **DDoS(분산 서비스 거부) 공격으로부터 보호**. 
+(Standard: 기본 제공 / Advanced: 유료 프리미엄 보호)
+* **1초 정답 키워드:** `DDoS protection`
+
++ GuardDuty는 계정 수준의 보안 서비스이고 Inspector는 리소스/인스턴스 수준의 스캔 서비스임
++ inspector는 취약점을 정기 검진하는 보안 점검관이고 Amazon GuardDuty는 24시간 감시하다가 악성
+트래픽이나 무단 접속이 들어오면 경보를 울리는 경비원
+
+-> GuardDuty
+계정 버튼 하나만 켜면 해당 계정 내의 모든 VPC, EC2, S3, IAM 활동을 계정 전체 단위로 감시
+-> Inspector
+특정 EC2 인스턴스, ECR 컨테이너 이미지, Lambda 함수 등을 지정하여 내부를 깊숙이 들여다보는 스캔을 수행
+
+5번.
+
+- 문제 분석 포인트
+고객의 문의와 피드백에 더 신속하게 반응/대응하기를 원함
+조직적 변화(체질 개선) 원함
+about AWS CAF(Cloud Adoptoin Framework)
+
+- 정답 
+제품 및 가치 스트림 중심으로 팀 조직
+= 기존의 딱딱한 부서 이기주의(개발 따로, 운영 따로)를 깨고, 특정 제품 중심으로 다재다능한 십자형 팀을
+구성해야 고객 피드백에 즉각 반응할 수 있음
+agile 방식을 활용하여 빠르게 반복 및 진화
+= 고객 피드백을 반영하려면 Agile(민첩한, 기민한) 기법을 통해 짧은 주기(Quick iteration)로 기능을 
+개선하고 바르게 배포해야 함.
+
+- 오답 선지 분석
+관료주의적 설계 원칙
+-> 딱봐도 개소리
+레거시/기존 인프라 활용
+-> 구식 레거시 인프라를 유지하는 것은 클라우드 도입 목적에 부합하지 못함
+기존 제품에서 새로운 insight를 뽑아냄
+-> 겉보기에는 맞아보일 수 있지만 기존과 같은 일반 분석 작업일 뿐, 고객 피드백에 신속하게 반응하도록 조직을
+혁신하는 행위와는 관련성잉 떨어짐
+
+## AWS CAF (Cloud Adoption Framework) - People/Culture 관점
+
+* **목표:** 클라우드 도입 시 기술뿐만 아니라 **조직의 문화, 구조, 일하는 방식**을 신속하고 효율적으로 전환하는 것.
+* **고객 반응성(Responsiveness) 향상 방안:**
+  1. **Product-centric teams:** 제품 및 가치 흐름(Value stream) 중심으로 팀을 재구성 (DevOps / Cross-functional team).
+  2. **Agile methodology:** 애자일(Agile) 개발 및 빠른 반복(Rapid iterations)을 활용하여 빠르게 변경사항을 적용.
+
+
+6번.
+- 문제 분석 포인트
+회사에서 비용을 절약하고 워크로드 성능을 향상시키는 최적의 AWS 자원 배치를 원하고 있음
+
+- 정답 
+AWS Compute Optimizer
+
