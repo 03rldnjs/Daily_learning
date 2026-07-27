@@ -25,6 +25,8 @@ AWS Organizations 사용
 - AWS Cost Explorer
 계정을 관리하는 게 아니라 과거 비용 내역을 시각화(그래프)해서 분석하고 향후 비용을 예측하는 도구
 
+---
+
 2번.
 - 문제 분석 포인트
 회사가 자신의 암호화 키를 직접 생성하고, 사용 권한과 제어권을 완벽히 가지고 싶어 함.
@@ -52,6 +54,8 @@ AWS Secrets Manager는 민감한 보안 정보를 안전하게 저장하고 로�
 
 "비밀번호(Password)나 API Key를 주기적으로 자동 교체(Rotate)하고 싶다" ➡️ AWS Secrets Manager
 
+---
+
 3번.
 - 문제 상황
 자주 접근하지 않지만 필요 시 빠른 접근 필요.
@@ -73,6 +77,8 @@ S3 Standard-IA = Infrequently accessed + Rapid / Instant access -> 자주 안 �
 S3 One Zone-IA = Infrequently accessed + Non-critical / Recreatable data -> 단일 AZ 저장으로 더 저렴하지만 재해 복구 불가
 S3 Intelligent-Tiering = Unknown or changing access patterns -> 접근 패턴을 모르거나 변동이 심할 때 (자동 이동)
 S3 Glacier = Archive, Long-term storage, Minutes to hours retrieval ->장기 보존/아카이빙 전용 (복원에 시간 소요)
+
+---
 
 4번.
 - 문제 상황
@@ -113,6 +119,8 @@ Amazon Inspectorsms EC2/ECR 등의 OS 및 소프트웨어 취약점을 자동 �
 계정 버튼 하나만 켜면 해당 계정 내의 모든 VPC, EC2, S3, IAM 활동을 계정 전체 단위로 감시
 -> Inspector
 특정 EC2 인스턴스, ECR 컨테이너 이미지, Lambda 함수 등을 지정하여 내부를 깊숙이 들여다보는 스캔을 수행
+
+---
 
 5번.
 
@@ -194,6 +202,8 @@ agile 방식을 활용하여 빠르게 반복 및 진화
 5. Security : 데이터 암호화, 권한(IAM), 취약점 및 위협 관리
 6. Operations : 24/7 운영 모니터링, 패치 관리, 성능 및 장애 대응
 
+---
+
 6번.
 - 문제 분석 포인트
 사용 중인 인스턴스의 크기/타입이 적절한지 평가
@@ -233,8 +243,245 @@ key word -> operational management, automate tasks, patch management, centralize
 * AWS Budgets:
   * 임계값을 설정하여 비용이나 사용량이 초과될 것 같을 때 **알림(Alert)을 발송**하는 예산 관리 도구.
 
+---
+
 7번. 
 - 문제 발문 포인트
-성능 이슈(문제) 디버깅, 마이크로서비스/서버리스 환경 
+애플리케이션 성능 이슈(문제) 디버깅, 마이크로서비스/서버리스 환경 
 
 - 정답
+AWS X-Ray
+역할: 마이크로서비스나 서버리스 애플리케이션의 요청 흐름을 초적하고 병목 지점을 디버깅하여 성능 문제를
+해결하는 도구
+X-Ray처럼 복잡한 서비스 내부 요청 흐름을 시각화해 줌
+key word -> Debug, trace requests, microservices, serverless, performance bottlenecks
+
+- 오답 선지 분석
+Amazon Pinpoint(고객 참여 및 마케팅)
+역할: 고객에게 이메일, SMS, 푸시 알림 등을 보내는 고객 아웃리치 및 마케팅 메시지 서비스
+-> 마케팅/알림 서비스이므로 애플리케이션 성능 디버깅과 전혀 관련이 없음
+key word -> marketing communications, targeted push notifications, customer engagement
+
+AWS CloudFormation(인프라 코드화 / IaC)
+역할: 템플릿(JSON/YAML)을 작성하여 AWS 리소스를 코드 기반으로 자동 생성/배포하는 서비스
+-> 리소스 배포/생성 도구일 뿐, 디버깅이나 성능 분석 도구가 아님
+key word -> infrastructure as Code(IaC), templates, automated provisioning
+
+AWS Trusted Advisor(실시간 모니터링 및 권장 사항)
+역할: 계정의 비용, 성능, 보안, 내결함성, 서비스 한도를 모니터링하여 가이드랑니을 제공하는 종합 컨설턴트
+-> 마이크로서비스 코드나 서버리스 내부의 요청 단위 디버깅/추적 기능은 없음
+key word -> best practices checks, cost/security recommendations
+
+## AWS X-Ray vs CloudFormation vs Pinpoint
+
+* AWS X-Ray: 
+  * 마이크로서비스 및 서버리스 앱에서 요청을 추적(Distributed Tracing)하고 성능 병목 현상을 디버깅(Debug)하는 서비스.
+  * 핵심 키워드: `Debug performance issues`, `Microservices`, `Distributed Tracing`
+* AWS CloudFormation: 
+  * 템플릿(코드)을 이용해 AWS 인프라 전체를 자동 프로비저닝(IaC)하는 서비스.
+* Amazon Pinpoint:
+  * 푸시 알림, SMS, 이메일을 보낸 후 사용자 반응을 분석하는 마케팅/메시징 서비스.
+
+---
+
+8번.
+- 문제 발문 포인트
+Amazon S3 storage class
+데이터 검색/복원(retrieve)에 가장 많은 시간이 소요되는 서비스
+first byte latency
+
+- 정답
+Amazon S3 Glacier Deep Archive
+AWS S3 스토리지 중에서 비용이 가장 저렴하지만 검색에 걸리는 시간이 가장 오래 걸림
+데이터 검색 시간 - standard = 약 12시간, bulk = 약 48시간
+따라서 자주 사용하지 않지만 장기적인 보관이 필요한 경우 사용됨
+(ex. 금융/의료 규정 준수를 위한 7~10년 이상 장기 보관용 법적 기록, 백업 데이터)
+
+- 오답 선지 분석
+Amazon S3 Glacier Flexible Retrieval
+과거에는 그냥 S3 Glacier라고 불렸던 서비스. 데이터 검색/복원 옵션이 유연하게 제공됨
+데이터 검색 시간(1분 ~ 12시간)
+expedited = 1 ~ 5분, standard = 3 ~ 5시간, bulk = 5 ~ 12시간
+Deep Archive보다 비용은 살짝 높지만 긴급 복원이 가능하다는 점에서 복원 속도가 훨씬 빠름
+
+Amazon S3 Standard
+가장 기본이 되는 범용 객체 스토리지
+데이터 검색 시간: 밀리초 단위(실시간 즉시 접근)
+자주 사용하는 파일, 웹사이트 이미지 등을 저장할 때 쓰며 비용은 Glacier계열보다 비쌈
+
+Amazon S3 Intelligent-Tiering
+데이터의 Access Pattern을 감지해서 자주 쓰면 Frequent Access계층, 안쓰면 Infrequent/Archive 계층으로
+자동으로 이동시켜주는 스마트 스토리지 서비스
+데이터 검색 시간
+기본 계층 = 밀리초 단위
+
++ Amazon S3 Glacier Instant Retrieval도 있는데 이는 Glacier계열이지만 밀리초 단위의 검색 지연 시간을 지원함
+
+## Amazon S3 주요 스토리지 클래스 핵심 정리
+
+* S3 Standard: 자주 접근하는 데이터, 밀리초(ms) 단위 즉시 접근.
+* S3 Intelligent-Tiering: 접근 패턴 자동 분석 및 최적 계층 자동 이동 (비용 자동 절감).
+* S3 Glacier Instant Retrieval: 아카이브 중 가장 빠름 (밀리초 단위 접근).
+* S3 Glacier Flexible Retrieval: 1분~12시간 내 복원 가능 (백업/재해 복구용).
+* S3 Glacier Deep Archive: 
+  * AWS에서 가장 저렴한 스토리지.
+  * 복원 시간 12~48시간으로 가장 오래 걸림 (First byte latency가 가장 큼).
+
+---
+
+9번.
+- 문제 발문 포인트
+프로그래밍 언어 전용 API(programming language-specific APIs)를 통해 AWS를 제어
+즉, Python이나 C 같은 프로그래밍 언어 코드 내부에서 라이브러리/패키지 형태로 불러와 AWS 서비스를 
+제어하게 해주는 도구를 찾는 문제
+
+- 정답
+AWS Software Developer Kit(SDK) (소스 코드 내부)
+개발자가 자신이 사용하는 프로그래밍 언어로 작성된 코드 안에서 AWS API를 직접호출할 수 있도록 라이브러리와
+도구를 제공하는 키트
+key word -> programming language-specific APIs, code inside applications, programmatic access in code
+
+- 오답 선지 분석
+Integrated Developement Environments (IDE)
+Visual Studio Code, PyCharm, Eclipse 같은 코드를 작성하고 편집하는 소프트웨어
+IDE는 코드를 짜는 편집기일 뿐 그 자체가 AWS 서비스/도구인 것이 아님
+
+AWS Command Line Interface(CLI) (터미널/프롬프트)
+터미널에 텍스트 명령어를 입력하여 AWS 서비스를 제어하는 도구
+프로그래밍 언어 코드(API)가 아니라 터미널 커맨드 라인 명령어를 사용함
+key word -> command shell, terminal, scripts, command
+
+AWS Management Console(웹 브라우저 로그인)
+웹 브라우저로 로그인해서 마우스 클릭과 웹 화면으로 AWS 서비스를 조작하는 그래픽 인터페이스
+코드나 API 접근이 아닌 웹 GUI 기반 클릭 접근 방식임
+key word -> graphical user interface(GUI), web brower
+
+## AWS 접근 방식 (Console vs CLI vs SDK)
+
+* AWS Management Console: 웹 브라우저 기반 GUI로 접근 (마우스 클릭 조작).
+* AWS CLI: 터미널(CLI) 환경에서 명령어를 입력하거나 쉘 스크립트로 자동화할 때 사용.
+* AWS SDK (Software Development Kit): 
+  * 프로그래밍 언어 전용 API(Python의 boto3 등)를 제공하여 애플리케이션 코드 내부에서 AWS 서비스를 제어함.
+  * 핵심 키워드: `Programming language-specific APIs`
+
+간단 요약 
+웹 화면 클릭 ➡️ Console
+검은 창(터미널) 명령어 ➡️ CLI
+Python이나 C 코드 안에서 API 함수 호출 ➡️ SDK
+
+---
+
+10번.
+- 문제 포인트
+AWS 클라우드의 6대 장점
+
+- 정답
+자본 지출을 가변 비용으로 전환/교환한다
+=> 초기 목돈 지출 대신 쓰며 내는 가변 비용을 채택한다는 의미
+즉, 데이터 센터 설치가 필요없으므로 초기 목돈 지출을 피할 수 있고 AWS 클라우드의 지불 체계를 통해
+사용한 만큼만 합리적으로 비용을 지불할 수 있다는 의미
+필요한 인프라 용량 추측의 필요성을 제거함
+
+## AWS Cloud 컴퓨팅의 6대 장점 (6 Advantages of Cloud Computing)
+
+1. Trade capital expense for variable expense (자본 지출을 가변 비용으로 전환)
+2. Benefit from massive economies of scale (거대한 규모의 경제로 인한 비용 절감)
+3. Stop guessing capacity (용량 추측 불필요)
+4. Increase speed and agility (속도 및 민첩성 향상)
+5. Stop spending money running and maintaining data centers (데이터센터 운영/유지에 돈을 쓰지 않음)
+6. Go global in minutes (몇 분 만에 글로벌 배포)
+
+- 함정 선지 분석
+Increase speed and agility by keeping servers and other required resources ready before time
+in your data centers
+초반에 속도와 민첩성을 향상시킨다는 부분이 있어 헷갈릴 수 있지만 후반부의 in your data centers가 붙음
+데이터 센터에 미리 서버를 구매해 준비한다는 점은 on-premises의 단점이지 AWS cloud의 장점이 아님
+
+---
+
+11번.
+- 문제 포인트
+AWS VPC(Virtual Private Cloud)
+Amazon VPC는 AWS 클라우드 내에 구축하는 나만의 가상 네트워크 공간
+클라우드라는 거대한 아파트 단지 안에 우리 집만의 울타리와 방을 치고, 방화벽을 두어
+허락된 사람만 들어오게 만드는 독립된 네트워크 영역
+- 주요 구성 요소
+subnet: VPC 내부를 목적에 맞게 쪼갠 구역
+security group(보안 그룹): EC2 인스턴스 바로 앞을 지키는 가상 방화벽(인스턴스 단위)
+network ACL(NACL): 서브넷 입구를 지키는 가상 방화벽(서브넷 단위)
+NAT gateway: private subnet에 있는 서버들이 인터넷에 직접 노출되지 않으면서 외부 패치/업데이트를 
+다운로드할 수 있게 연결해주는 통로
+
+- 선지 분석
+보안 그룹은 allow and deny rules를 모두 가질 수 있다. (X)
+-> 보안 그룹은 Allow 규칙만 설정할 수 있음. 거부/차단(Deny) 규칙은 만들 수 없음.
+기본적으로 모든 입력을 막아두고, 허용할 트래픽만 등록하는 방식
+
+보안 그룹은 allow rules만 설정할 수 있다. (O)
+1번 선지 설명과 정확히 겹침
+
+NAT gateway(Network Address Translation gateway)가 AWS에 의해 관리된다. (O)
+NAT gateway는 AWS가 완전히 관리해주는 서브넷 서비스임. 대역폭 확장, 고가용성, 패치 등을 AWS가 알아서
+전부 다 관리해주므로 사용자가 OS나 서버를 관리할 필요 없음
+
+network ACL은 허용 규칙만 가질 수 있다. (X)
+network ACL은 보안 그룹과 달리 허용(allow) 규칙과 거부/차단(Deny) 규칙을 모두 지원함.
+
+NAT instance는 AWS에 의해 관리된다. (X)
+NAT instance는 사용자가 일반 EC2 인스턴스에 NAT 소프트웨어를 올려 직접 만든 서버임. 따라서 OS 패치, 
+보안, 스케일링 등 모든 관리를 고객이 직접 수행해야 함.
+
+## AWS VPC 핵심 보안 및 NAT 서비스 비교
+
+### 1. Security Group vs Network ACL
+* Security Group: EC2 단위 방화벽, Allow 규칙만 설정 가능, Stateful.
+* Network ACL: 서브넷 단위 방화벽, Allow 및 Deny(차단) 규칙 모두 설정 가능, Stateless.
+
+### 2. NAT Gateway vs NAT Instance
+* NAT Gateway: AWS가 관리하는 완전 관리형 서비스 (Managed by AWS).
+* NAT Instance: 고객이 직접 EC2로 구축하고 관리해야 하는 형태 (Self-managed).
+
+"Security Group" ➔ Allow rules only (Deny 불가)
+"Deny rule이 필요하다" ➔ Network ACL
+"AWS가 알아서 관리하는 NAT" ➔ NAT Gateway
+
+---
+
+12번. 
+- 문제 발문 포인트
+수백 개의 EC2 인스턴스가 동시에 접근 -> 여러 대의 EC2 인스턴스가 하나의 저장소를 공유해서
+동시에 읽고 써야함(수평 확장이 가능한 공유 파일 시스템)
+기존 파일에 데이터 추가/수정 -> 객체 방식이 아니라 tradtional한 파일 시스템 방식이어야 
+파일 수정/추가가 원활함
+
+- 정답
+AWS EFS(Elastic File System)
+Linux EC2 인스턴스를 위한 전통적인 공유 파일 시스템(NFS)
+수백 ~ 수천 개의 EC2인스턴스가 동시에 마운트해서 하나의 파일 시스템을 공유할 수 있고, 
+표준 파일 시스템을 지원하므로 파일에 데이터를 직접 추가하는 배치 작업에 완벽하게 부합함.
+key word -> Hundreds of EC2 instances simultaneously, Shared file system, Linux-based, POSIX
+
+- 오답 선지 분석
+AWS EBS(Elastic Block Store)
+EC2 전용 가상 하드디스크(블록 스토리지) 
+(+ 하드디스크로 비유한 이유는 객체 스토리지와 달리 하드디스크나 SSD처럼 전통적인 파일 저장 방식을 채택하기 때문임)
+기본적으로 EBS 볼륨은 단 1대의 EC2 인스턴스에만 연결됨. Multi-Attach 기능이 존재하긴 하지만 극소수
+인스턴스 제한이며, 수백 대의 EC2가 동시에 마운트하는 용도로는 절대 사용할 수 없음)
+key word -> single EC2 instance, Block storage, Boot volume
+
+Amazon S3
+파일/데이터를 객체 단위로 저장하는 웹 기반 스토리지
+파일/데이터를 객체 단위로 저장하므로 데이터 추가/수정이 불가하고 전체 객체를 다시 덮어써야함.
+key word -> object stroage, web-based, unlimited scale, static website hosting
+
+Instance Store
+EC2가 올라가 있는 실제 물리 서버에 직접 붙어있는 임시 블록 스토리지
+단일 EC2 전용 스토리지이며 인스턴스를 중지하거나 종료하면 데이터가 삭제되는 휘발성 스토리지.
+여러 EC2가 공유할 수 없음
+key word -> Ephemeral(휘발성), Temporary storage, High IOPS, Physically attached
+
+
+
+
+
+
