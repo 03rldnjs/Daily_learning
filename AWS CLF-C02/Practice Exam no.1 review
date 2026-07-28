@@ -511,10 +511,245 @@ on-ramp를 중요하게 생각할 필요는 없음
 ---
 
 14번.
-AWS Well-Architected Framework
+- 문제 발문 포인트
+AWS Well-Architected Framework의 신뢰성 기둥에 부합하지 않는 진술 찾기
 
+- 정답
+내결함성은 scale up을 통해 달성된다.
+- scale up vs scale out
+scale up => 하나의 인스턴스 자체의 성능을 향상시킴(수직 향상)
+단일 인스턴스가 단일 장애점(SPOF)이 되므로 내결함성(Fault Tolerance)을 제공하지 못함. 
+scale out => 여러 인스턴스로 부하를 분산(수평 향상)하므로 일부 인스턴스에 장애가 발생해도 서비스가 계속 유지됨.
+따라서 내결함성(Fault Tolerance)이 확보됨.
+내결함성이란 결함이 발생해도 시스템을 유지할 수 있는 능력을 의미하므로 여러 인스턴스에 데이터를 분산시켜
+하나의 인스턴스에 문제가 생겨도 시스템이 계속 유지되도록하는 scale out이 내결함성과 직결됨
+단일 인스턴스의 성능을 올리는 scale up은 성능 자체는 향상될 수 있지만 해당 인스턴스에 문제가 발생하면
+시스템을 끊김없이 운영할 수 없음.
 
+## Reliability Pillar (신뢰성 기둥) 디자인 원칙
 
+1. Automatically recover from failure: 
+   - 장애가 나면 머신러닝(ML)/Auto Scaling/Health Check로 자동 복구해라.
+2. Scale horizontally to increase aggregate workload availability (Scale Out):
+   - 거대한 서버 1대(Scale Up)보다 작은 서버 여러 대(Scale Out)로 분산하여 단일 장애점(SPOF)을 제거해라.
+3. Stop guessing capacity:
+   - 용량을 미리 추측하지 말고 수요에 맞춰 자동 스케일링(Auto Scaling)해라.
+
++ AWS Well-ARchitected Framework의 6가지 핵심 기둥
+
+# AWS Well-Architected Framework 6대 기둥 요약
+
+1. Operational Excellence (운영 우수성): 코드 기반 운영 자동화 및 지속적 프로세스 개선
+2. Security (보안): 데이터 암호화, IAM 최소 권한 원칙, 심층 방어
+3. Reliability (신뢰성): 장애 자동 복구, 수평 확장(Scale Out), 고가용성(HA)
+4. Performance Efficiency (성능 효율성): 최적의 컴퓨팅/DB 선택, 글로벌 지연 시간 감소
+5. Cost Optimization (비용 최적화): 종량제 지불, 불필요한 자원 제거, 비용 효율적 인스턴스 선택
+6. Sustainability (지속 가능성): 에너지 소비 및 탄소 발자국 최소화
+
+- matching tip
+Scale Out / 백업 / Auto Scaling ➔ Reliability (신뢰성)
+
+IAM / 암호화 / CloudTrail ➔ Security (보안)
+
+IaC / CI-CD / 운영 모니터링 ➔ Operational Excellence (운영 우수성)
+
++ AWS CloudTrail vs AWS CloudWatch
+AWS CloudTrail
+계정 활동 감사 / API(누가, 언제, 무엇을, 어디서) 요청 기록
+보안 감사 및 규정 준수 계정 내에서 보안 침해나 비인가 접근이 발생했을 때 원인 추적 및 포렌식 분석이 가능함
+무단 변경 모니터링 및 알림 연동
+key word -> API activity, Audit, Who did what
+
+AWS CloudWatch
+시스템 성능 및 상태 모니터링
+서버의 계기판 / 상태 측정기의 역할을 함
+key word -> Metrics, Logs, CPU utilization, Alarm
+
+누가 리소스를 변경했는지 감사(Audit)하고 싶다 ➔ CloudTrail
+CPU 사용량, 메모리, 로그 모니터링 및 알람이 필요하다 ➔ CloudWatch
+
+---
+
+15번.
+- 문제 발문 분석
+온-프레미스 서버에 있는 MySQL database(관계형 데이터베이스)를 AWS서버로 옮기려고 함
+(reduce the operational burden of database maintenance and management)
+데이터베이스 유지와 운영 부담을 줄이기를 원하며 완전 관리형 AWS 데이터베이스 서비스로 이동하기를 원함
+(move to fully managed AWS database offering)
+
+- 정답
+Replatform
+기존에 사용하던 MySQL 애플리케이션의 쿼리나 소스 코드는 전혀 수정하지 않으면서 데이터베이스가 동작하는
+플랫폼을 AWS 관리형 서비스로 옮기는 전략
+기존의 쿼리와 소스코드를 수정하지 않고, 패치/백업/스케일링 등의 운영은 AWS가 대신 해주므로 운영 부담이
+크게 줄어들 수 있음
++ replatform의 모범 사례
+-> 자가 관리 DB(Self-managed DB on EC2/On-premise)를 AWS 관리형 DB(Amazon RDS/관계형 데이터베이스)로 
+전환한 경우
+
+- 오답 선지 분석
+Rehost
+-> 온프레미스 DB 서버를 EC2인스턴스에 그대로 복사(lift & shift)
+운영을 직접 관리하므로 운영 부담이 절감되지 않음
+key word -> lift and shift, EC2, No code changes
+
+Replatform
+-> 온프레미스 MySQL을 Amazon RDS for MySQL
+AWS가 서버 전반을 관리하므로 운영 부담이 크게 절감됨
+key word -> fully managed service, reduce operational burden, RDS
+
+Refactor
+-> 관계형 DB를 NoSQL또는 Serverless Aurora로 구조 재설계
+운영 부담 절감 O
+key word -> re-architect, Cloud-native, change DB architecture
+
+Repurchase
+-> 기존 DB를 삭제하고 SaaS형태의 타사 DB 솔루션을 새로 구매
+운영 부담 절감 O
+key word -> drop and replace, SaaS, new license
+
+---
+
+16번. 
+- 문제 발문 포인트
+온프레미스 인프라 전체를 AWS로 이전
+(migrate data and applications from on-premises to AWS Cloud)
+-> 단순히 서비스나 인스턴스 생성 방법에 대한 질문이 아니라, 전문 컨설컨트나 파트너 조직이 직접 개입해서
+설계/구축/배포를 도와주어야 하는 전문 서비스 영역을 찾아야 함.
+
+- 정답 
+1. 인프라 마이그레이션을 위한 개별 솔루션을 위해 AWS Partner Network를 활용한다
+AWS Partner Network는 AWS 클라우드로 전환하려는 고객에게 솔루션을 설계, 구축, 마이그레이션해주는 
+검증된 외부 파트너사 네트워크. 인프라 마이그레이션을 위한 맞춤 솔루션을 제안받아 구축할 수 있음
+key word -> custom solution, consulting partners, system integrators
+2. 인프라 마이그레이션을 가속화하기 위해 AWS Professional Service를 이용한다
+AWS Professional Services는 외부 파트너가 아니라 AWS 본사의 전담 컨설팅 전문가팀임. 
+고객이 비즈니스 목표를 달성하고 클라우드 마이그레이션을 안전하고 신속하게 진행할 수 있도록 직접 컨설팅과
+기술 가이드를 제공함.
+key word -> AWS internal experts/consultants, Accelerate cloud adoption
+
+- 오답 선지 분석
+1. 앞으로의 도움을 위해 AWS Support ticket을 얻는다
+AWS Support Ticket은 이미 운영 중인 리소스에 결함이 발생했거나, 설정 방법 질문, 서비스 한도 증설 요청 등
+단발성 기술 트러블슈팅 및 가이드용. 마이그레이션과 관련이 없음
+2. AWS Developer Forums의 중재자에게 상담받는다
+AWS 개발자 포럼은 커뮤니티 기반 질문 게시판임. 기업의 대규모 마이그레이션이라는 중대한 비즈니스 과제를 
+게시판 중재장에게 물어보는 것은 이치에 맞지 않음
+3. 인프라 마이그레이션을 자동화하기 위해 AWS Trusted Advisor을 사용한다
+AWS Trusted Advisor는 계정의 비용 절감, 보안, 성능, 내결함성, 서비스 한도를 체크 및 모니터링하여 
+가이드라인을 주는 도구일 뿐, 마이그레이션과 관련이 없고 마이그레이션 자동화는 더욱 말이 안됨.
+
+## AWS 마이그레이션 전문 지원 조직 (ProServe vs APN vs Support)
+
+* AWS Professional Services (ProServe):
+  * AWS 본사 전문 컨설턴트 팀이 직접 고객의 클라우드 마이그레이션 및 아키텍처 설계를 돕는 서비스.
+* AWS Partner Network (APN):
+  * AWS 승인을 받은 외부 파트너 기업 네트워크를 활용해 맞춤형 마이그레이션 솔루션을 구축.
+* AWS Support (티켓 문의):
+  * 단발성 장애 처리, 기술 질문, 결제 문의용이며 마이그레이션 프로젝트 전체를 대행/수행해주지 않음.
+
+- 한 줄 요약
+AWS 본사 전문가 팀 ➔ AWS Professional Services
+AWS 검증 외부 협력업체 ➔ AWS Partner Network (APN)
+
+---
+
+17번. 
+- 문제 발문 포인트
+기업 = 스타트업, EC2 인스턴스를 장기적으로 사용하되, 가능한 최저가로 사용하기를 원함.
+단, 인스턴스가 끊김과 방해 없이 유지되어야 함.
+
+- 정답
+EC2 Reserved instance(RI)
+예약 인스턴스는 고객이 1~3년 동안의 장기적인 인스턴스 사용을 예약함으로써 on-demand에 비해 매우 저렴하게 
+서비스를 제공받을 수 있으며 고객에게 서버가 예약되어있으므로 끊김과 방해 없이 서버가 유지될 수 있음
+
+- 오답 선지 분석
+EC2 On-Demand instance
+온디맨스 인스턴스는 끊김과 방해 없이 서버가 유지되지만 예약 없이 서버를 사용한 만큼 정가를 지불하므로 
+장기 사용을 통한 비용 절감 혜택을 받을 수 없음
+따라서 발문에 나와있는 최저가 조건에 부합하지 않음
+
+EC2 Spot instance
+스팟 인스턴스는 AWS 서버에서 사용되지 않고 있는 잉여 공간을 최대 90%의 할인혜택을 받으며 사용할 수 있음.
+따라서 비용 측면에서는 최저가가 맞지만 AWS에서 해당 공간을 필요로 하는 경우 2분 전 경고 후 인스턴스가 종료됨.
+따라서 발문에 나와있는 끊김과 방해 없음 조건에 부합하지 않음
+
+EC2 Dedicated Host
+전용 호스트는 고객 전용 물리 서버 자체를 독점적으로 사용하므로 끊김과 방해가 전혀 없지만 독점 사용이므로
+큰 비용을 감당해야 함. 따라서 발문에 나와있는 최저가 조건에 부합하지 않음.
+
++ Dedicated Instance vs Dedicated host
+Dedicated Instance: 계정 전용 독립 물리 하드웨어를 사용하지만, 인스턴스 재부팅 시 물리 서버가 바뀔 수 있음
+Dedicated Host: 고객 전용 물리 서버 전체를 통째로 할당받아 서버의 CPU/코어 정보까지 완벽 제어 가능 (가장 비쌈).
+
+## EC2 구매 옵션 4대장 한눈에 보기
+
+1. On-Demand: 약정 없음, 초/분 단위 결제, 정가 지불 (단기/예측 불가능한 워크로드).
+2. Reserved Instances (RI): 1년 또는 3년 약정, 최대 72% 할인, 중단 없음 (`Long-term + Lowest cost + No interruption`).
+3. Spot Instances: 잉여 자원 활용, 최대 90% 최저가, AWS에 의해 언제든 중단 가능 (`Interruptible`, `2-minute warning`).
+4. Dedicated Hosts: 물리적 서버 통째로 대여, 가장 비쌈, 기존 소프트웨어 라이선스(BYOL) 및 엄격한 규정 준수용.
+
+18번. 
+- 문제 발문 포인트
+AWS Web Application Firewall(WAF)
+웹 애플리케이션 방화벽
+웹 프로토콜인 HTTP/HTTPS 트래픽을 검사하여 SQL 인젝션, 크로스 사이트 스크립팅 같은 악의적인 웹 공격을 차단함
+
+- 정답
+Layer 7(애플리케이션 계층)
+HTTP/HTTPS는 OSI 7계층 중 가장 위에 있는 layer 7 프로토콜임.
+WAF는 웹 요청 패킷 내부의 URL, HTTP Header, Query String, Cookie 등을 정밀 검사하기 
+때문에 Layer 7 방화벽에 해당함.
+key word -> AWS WAF, HTTP/HTTPS, SQL Injection, XSS, Layer 7
+
+- 오답 선지 분석
+## AWS WAF vs Security Group vs Shield (OSI 계층별 구분)
+
+* AWS WAF (Layer 7):
+  * HTTP/HTTPS 웹 트래픽 전용 방화벽.
+  * SQL Injection, XSS 공격 차단.
+* Security Group / Network ACL (Layer 3 & 4):
+  * IP 주소 및 포트(Port) 번호 기반의 네트워크 통신 제어.
+* AWS Shield (Layer 3 & 4):
+  * 대규모 DDoS(분산 서비스 거부) 공격 방어.
+
+- 한 줄 요약
+HTTP/HTTPS, SQLi, XSS ➔ Layer 7 ➔ AWS WAF
+IP, Port, TCP/UDP ➔ Layer 4 ➔ Security Group
+DDoS 방어 ➔ Layer 3/4 ➔ AWS Shield
+
+---
+
+19번. 
+- 문제 발문 포인트
+health-care startup, 익명화된 환자 건강 기록을 Amazon S3에 보관 중
+이 민감한 데이터/정보 누출을 예방/방지(prevent)하기를 원함
+
+- 정답
+Amazon Macie
+Amazon Macie는 S3를 위한 데이터 보안 서비스로 머신러닝과 패턴 분석을 통해 민감한 정보를 찾고 보호하는 역할을 함
+key word ->PII (Personally Identifiable Information, 개인식별정보), 
+Discover sensitive data in S3
+
+- 오답 선지 분석
+AWS Glue
+데이터를 모으고 변환해서 이동시켜주는 ETL 서비스
+영단어(glue) 그대로 서로 다른 데이터들을 착 붙여서 연결해준다고 생각하면 됨.
++ ETL 서비스?
+extract(추출) - S3, RDS 등 여러 곳에서 데이터 가져오기
+transform(변환) - 분석하기 좋은 형태로 데이터 가공하기
+load(적재) - 데이터 웨어하우스나 S3에 다시 저장하기
+해당 서비스는 보안/개인정보와 전혀 관련이 없음
+
+AWS Secrets Manager
+DB 비밀번호, API 키 등 민감한 보안 정보를 안전하게 저장하고 회전(Rotate)시키는 보관함.
+민감한 개인정보를 보호하지는 않고 암호를 안전하게 저장하고 회전하는 서비스
+Automatic Rotatoin이 핵심. DB 비밀번호나 API 토큰을 일정 주기마다 자동으로 바꿔주는 안전한 비밀번호 금고
+
+AWS Polly
+Polly는 앵무새처럼 텍스트를 오디오로 변환하여 출력해주는 서비스
+이 문제의 발문과는 전혀 관련이 없음
 
 
 
