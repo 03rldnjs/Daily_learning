@@ -900,11 +900,11 @@ AWS의 공동 책임 모델에 따를 때, AWS의 책임인 것 찾기
 간단히 말해 클라우드 자체의 보안은 AWS가 담당하고, 클라우드 내부의 보안은 고객이 담당한다고 생각하면 됨
 
 - 오답 선지 분석
-guest OS 패치 -> 고객 책임
+// guest OS 패치 -> 고객 책임
 (+ 물리 하드웨어 바로 위에 깔리는 Host OS 및 하이퍼바이저 패치는 AWS의 책임임. 즉, Host OS와 Guest OS를 잘 구분해야 함)
-고객 어플리케이션 배열/배치 -> 고객 책임
+// 고객 어플리케이션 배열/배치 -> 고객 책임
 EC2 위에 설치된 Python 코드, Node.js서버, 웹 애플리케이션의 설정 및 버그 관리는 전적으로 고객의 책임임
-서비스/커뮤니케이션 보안, zone security -> 고객 책임
+// 서비스/커뮤니케이션 보안, zone security -> 고객 책임
 고객이 구축한 VPC 내부의 서브넷 통신 제어, 보안 그룹 및 Network ACL 설정, 데이터 암호화 설정 등 네트워크 
 통신 보안을 구성하는 것은 클라우드 내부의 영역이므로 고객의 책임
 
@@ -993,5 +993,427 @@ AWS: 인프라 장비 및 하드웨어 설정 관리
 AWS: AWS 직원 대상 보안 교육
 고객: 자사 임직원/개발자 대상 보안 및 클라우드 교육
 
+---
 
+26번.
+- 문제 발문 분석
+고객이 데이터를 Amazon S3로 보내기 전에 암호화해야한다고 규정/요청
+즉, 데이터가 S3에 도착하기 이전(내부 환경/클라이언트 단계)에서 이미 암호화가 완료되어 있어야 함
+-> 서버 측 암호화(Server-Side Encryption)이 아니라 보내는 쪽에서 암호화하는
+클라이언트 측 암호화(Client-Side Encryption)을 요구하는 것
+
+- 정답
+AWS encryption SDK를 이용하여 클라이언트 측 암호화를 가능하게 한다
+데이터가 S3로 전송되기 전에 고객의 애플리케이션(클라이언트) 환경에서 AWS Encryption SDK 등을 사용해
+미리 암호화 한 뒤 암호화된 파일 자체를 S3에 업로드하는 방식
+
+- 오답 선지 분석
+// Amazon S3에서 기본적으로 암호화가 제공되므로 추가적인 작업이 필요하지 않다.
+S3에서 암호화를 default로 제공하는 것은 맞는 말임. 그러나 문제 발문에서 S3로 이동하기 이전에 암호화한다고
+고객이 규정했다고 했으므로 문제의 조건에 부합하지 못함.
+// 서버 측 암호화를 S3 Managed Keys(SSE-S3)로 수행한다.
+서버 측 암호화는 전송 후 암호화에 해당하므로 조건에 부합하지 않음
+// 서버 측 암호화를 AWS Key Management Service(KMS) 키로 수행한다.
+서버 측 암호화는 전송 후 암호화에 해당하므로 조건에 부합하지 않음
+
+# Amazon S3 암호화 유형 구분
+
+1. Client-Side Encryption (클라이언트 측 암호화):
+* 키워드: `Before sending`, `Before uploading`, `AWS Encryption SDK`
+   * 데이터가 S3로 전송되기 **전**에 사용자/애플리케이션 측에서 암호화 수행.
+2. Server-Side Encryption (서버 측 암호화 - SSE):
+   * 키워드: `SSE-S3`, `SSE-KMS`, `SSE-C`, `At rest`
+   * 데이터가 S3에 전송되어 저장될 때(At rest) S3 서버가 암호화 수행.
+
++ AWS encryption SDK란?
+Encryption SDK는 AWS에서 제공하는 software development kit에서 암호화에 특화된 도구를 말함
+내 어플리케이션 코드 안에서 데이터를 전송 전에 안전하게 암호화할 수 있도록 도와주는 AWS 개발용 도구임
+
+SDK = 소프트웨어 개발 도구 상자
+일반 AWS SDK: AWS 서비스들을 코드로 제어하기 위한 종합 연장 상자
+AWS Encryption SDK: 그중에서도 '데이터 암호화' 전용으로 만들어진 정밀 암호화 도구 상자
+
+---
+
+27번.
+- 문제 발문 포인트
+On-demand instance 가격에 비해 spot instance의 가능한 최대 할인율은?
+
+- 정답
+90%
+
+- EC2 인스턴스 서비스별 할인율 요약
+Spot Instance: 최대 90%
+Reserved Instance(예약 인스턴스) / Savings Plans: 최대 72%
+Dedicated Hosts: 최고가, 옵션에 따라 달라짐
++ Reserved Instance -> 인스턴스 타입, 리전 등을 지정하여 약정. 용량 예약 옵션 제공
++ Savings Plans -> 1년 동안 시간당 $10치 쓰겠다 처럼 금액 단위로 약정하는 방식. 뛰어난 유연성 제공
+
+# EC2 요금제 할인율 및 특징 비교
+* Spot Instances (최대 90% 할인):
+  * 경매/남는 자원 개념. 2분 전 알림 후 종료 가능. Batch 작업 및 장애 내성 있는 애플리케이션용.
+* Reserved Instances / Savings Plans (최대 72% 할인):
+  * 1년 또는 3년 장기 약정. 예측 가능하고 지속적인 워크로드(Always-on)용.
+* On-Demand (0% 할인):
+  * 약정 없음. 단기/테스트 및 예측 불가능한 워크로드용.
+
+---
+
+28번. 
+- 문제 발문 포인트
+VPC 게이트웨이 엔드포인트를 지원하는 AWS 서비스
+
+- 정답
+Amazon Dynamo DB, Amazon S3
+VPC Gateway Endpoint를 지원하는 서비스는 걍 딱 2개 = S3(객체 스토리지), DynamoDB(비관계형 데이터베이스)
+
++ VPC Endpoint와 게이트웨이 엔드포인트(Gateway Endpoint)란?
+VPC Endpoint
+-> 인터넷을 거치지 않고 AWS 내부 전용 네트워크망으로 프라이빗하게 통신하고 싶을 때 사용하는 서비스
+
+1. Gateway Endpoint(게이트웨이 엔드포인트)
+라우팅 테이블에 라우트(Route)를 추가해서 통신하는 방식, 무료로 제공됨
+지원 서비스 -> Amazon S3, Amazon DynamoDB
+
+2. Interface Endpoint(인터페이스 엔드포인트 - PrivateLink)
+서브넷 안에 가상 ENI(네트워크 카드)를 꼽아서 프라이빗 IP로 통신하는 방식, 유료
+지원 서비스 -> SQS, SNS, EC2, CloudWatch 등 대부분의 다른 AWS 서비스들(최근 S3도 지원 시작)
+
+- matching tip
+Gateway Endpoint -> 걍 무조건 Amazon S3 & Amazon DynamoDB / 무료
+Interface Endpoint -> 대부분의 AWS 서비스 / 유료
+
+---
+
+29번.
+- 문제 발문 포인트
+사용자의 특정 유즈케이스에 맞춘 맥락적 지침을 지원하는 AWS Support plan
+
+- 정답
+AWS Business Support
+
+- 문제 특징 분석
+물론 비즈니스 플랜에서 지원하는 서비스는 비즈니스의 상위 플랜인 엔터프라이즈 시리즈에서 당연히 지원함.
+그런데 이 문제같은 형태에서는 해당 수식어가 처음으로 시작되거나 대표 수식어로 정의된 최저 등급 플랜을 
+정답으로 채점하게 설계되어 있음.
+즉, 특정 유즈케이스에 맞춘 맥락적 아키택처 지침을 제공하기 시작하는 기본 플랜을 묻는 문제
+
+- key word matching tip
+Basic: Documentation, Whitepapers, Forums (문서/백서 중심)
+Developer: General guidance (일반적인 아키텍처 가이드, 영업시간 내 이메일)
+Business: Contextual to your specific use-cases (유즈케이스별 맞춤 가이드, 24/7 전화/채팅)
+Enterprise: Designated TAM (전담 TAM), Proactive / Consultative reviews, 15분 이내 응답
+
+---
+
+30번.
+- 문제 발문 포인트
+유니콘 스타트업이 스피치 기반 인터페이스 어플리케이션 설계 중
+사용자의 speech input을 수용할 수 있어야하고, 결과를 speech로 전달할 수 있어야 함.
+
+- 정답
+// 분석을 위해 Amazon Transcribe를 사용하여 speech를 text로 변환한 후 Amazon Polly를 이용해 결과를 speech로 전달함
+Amazon Transcribe -> 서비스의 이름 그대로 오디오를 텍스트로 변환해주는 AWS 서비스
+Amazon Polly -> Polly는 앵무새의 국룰 이름. 앵무새를 떠올리면 텍스트를 오디오로 읽어주는 서비스인 Amazon Polly를 
+쉽게 암기할 수 있음
+이 스타트업이 스피치 기반 인터페이스를 원하고 입력과 출력을 모두 speech로 하기를 원함. 그러나 오디오 자체를 
+컴퓨터가 처리할 수는 없으므로 텍스트로 변환하는 작업이 필요함. 이 선지는 해당 과정을 정확히 설명하므로 
+정답임
+Amazon Transcribe: 음성을 텍스트로 변환 (STT: Speech-to-Text). 지문의 accept speech-based input 요구사항을 해결.
+Amazon Polly: 텍스트를 자연스러운 음성으로 변환 (TTS: Text-to-Speech). 지문의 convey results via speech 요구사항을 해결.
+
+- 오답 선지 분석
+// Amazon Polly로 스피치를 텍스트로 변환하고 Amazon Translate로 결과를 speech로 전달한다.
+-> 각 서비스의 작동 방식이 정확히 반대로 바뀌었음
+
+# AWS 대표 AI/ML 서비스 (음성 및 언어)
+1. Amazon Transcribe:
+   * 역할: 음성(Speech/Audio) ➔ 텍스트(Text) 변환 (STT)
+   * 키워드: `Speech to text`, `Audio transcription`, `Subtitles`
+2. Amazon Polly:
+   * 역할: 텍스트(Text) ➔ 자연스러운 음성(Speech) 변환 (TTS)
+   * 키워드: `Text to speech`, `Read text aloud`, `Lifelike voices`
+3. Amazon Translate:
+   * 역할: 텍스트 언어 번역 (Translation)
+   * 키워드: `Language translation`, `Multi-lingual`
+
+4. Amazon Rekognition: (참고용 - 이미지/비디오 분석)
+   * 역할: 이미지 및 비디오 객체/얼굴/문자 인식
+   * 키워드: `Image and video analysis`, `Face detection`
+
+---
+
+31번.
+- 문제 포인트
+AWS 데이터베이스 서비스인 것 찾기
+
+- 정답
+ AWS Redshift
+카테고리: Database & Analytics(데이터베이스 및 데이터 분석)
+AWS의 대표적인 클라우드 데이터 웨어하우스(창고) 서비스임
+온라인 분석 처리 용도로 설계되어, 대용량 데이터를 고성능으로 분석하고 조회하는 분석용 페타바이트급 
+관계형 데이터베이스에 해당함
+
+- 오답 선지 분석
+AWS Storage Gateway
+카테고리: 스토리지
+온프레미스 환경과 AWS 클라우드 스토리지를 연결해주는 하이브리드 스토리지 서비스
+데이터베이스가 아니라 온프레미스 장비에서 S3나 EBS 같은 AWS 스토리지 자원에 접근하게 해주는 연결 다리 역할 수행
+
+AWS Glue
+카테고리: Analytics / Data integration (분석 및 데이터 통합)
+서버리스 ETL(Extract, Transform, Load) 서비스
+여러 출처에서 데이터를 추출하고 변환하여 원하는 곳으로 로드해주는 데이터 파이프라인/준비 도구일 뿐 데이터베이스가 아님
+
+AWS Database Migration Service(AWS DMS)
+기존 데이터베이스를 AWS의 다른 데이터베이스로 안전하고 신속하게 마이그레이션해주는 서비스
+이름에 Database가 들어가서 헷갈리기 쉽지만 데이터베이스인 것이 아니라 데이터베이스를 마이그레이션해주는 역할을 하는 서비스
+
+AWS 주요 데이터베이스 서비스 6대장
+- 관계형 데이터베이스
+1. AWS RDS
+key word -> SQL, MySQL, PostgreSQL, Oracle, MS SQL 지원
+2. Amazon Aurora
+key word -> RDS의 프리미엄 버전, 고성능, MySQL/PostgreSQL
+
+- 비관계형 데이터베이스
+1. Amazon DynamoDB
+key word -> key-value 구조, 초저지연, 완전 관리형
+
+- 기타
+1. Amazon Redshift
+데이터 분석용 웨어하우스(굳이 구분지으면 관계형 데이터베이스)
+key word -> 대용량 데이터 분석, OLAP, 페타바이트 규모
+
+2. Amazon ElastiCache
+인메모리 DB
+key word -> Redis/Memcached 기반, 빠른 캐싱 서비스
+
+3. Amazon Neptune
+그래프 DB
+key word -> 소셜 네트워크, 사기 탐지 등 복잡한 관계망 데이터
+
+---
+
+32번. 
+- 문제 주제
+AWS Route 53
+AWS의 DNS(Domain Name System) 서비스
+사용자가 웹 브라우저 주소창에 도메인 네임을 입력했을 때 이를 컴퓨터가 이해할 수 있는 IP주소의 형태로 변환하여
+해당 서버로 사용자를 보내주는 역할
++ 왜 이름이 Route 53일까?
+DNS 서비스가 사용하는 표준 전송 포트 번호가 53번 포트이기 때문
+
+- 문제 발문 포인트
+여러 리소스로 트래픽을 라우팅하면서, 각 리소스로 얼마나 많은 트래픽을 보낼지 비율/양을 결정할 때 사용하는 정책은?
+
+- 정답
+가중치 기반 라우팅(Weighed routing)
+각 서버마다 비율을 지정하여 트래픽을 분산 전송하는 정책
+문제 발문에서 제시한 조건인 각 리소스로 얼마나 많은 트래픽을 보낼지 비율/양을 결정하는 경우에 적합한 정책임
+
+- 오답 선지 분석
+// 지연 시간 기반 라우팅(latency-based routing)
+사용자와 지연 시간이 가장 짧은 AWS 리전으로 트래픽을 보냄
+-> 트래픽의 비율/양을 조절하는 것이 문제가 원하는 답인데, 지연 시간 기반 라우팅은 가장 빠른 리전으로 연결해주는 
+정책이므로 오답임
+// 장애 조치 라우팅
+주 서버와 예비 서버를 두고, 주 서버가 정상일 때는 주 서버로만 보내다가 주 서버가 터지면 예비 서버로 자동 전환하는 정책
+-> 트래픽 비율 분산이 아니라 장애 대비와 재해 복구가 목적인 서비스이므로 오답임
+// 단순 라우팅
+하나의 도메인에 단일 리소스를 매핑하는 가장 기본적이고 단순한 라우팅 방식
+-> 트래픽 비율 제어 등의 복잡한 규칙 설정이 불가능하므로 오답임
+
+# 🌐 AWS Route 53 라우팅 정책 (Routing Policies) 6대장
+
+Amazon Route 53에서 도메인 이름을 IP 주소로 변환할 때, 트래픽을 어떤 기준과 규칙으로 보낼지 결정하는 **6가지 주요 라우팅 정책** 정리 Sheet.
+
+### 1. Simple Routing (단순 라우팅)
+* 개념: 하나의 도메인 이름에 단일 리소스(또는 무작위로 여러 IP)를 매핑하는 가장 기본적이고 단순한 방식.
+* 특징: 트래픽 분산 비율이나 지리적 위치 등의 특별한 조건 없이 단순 연결만 수행.
+* 시험 키워드: `Single resource`, `Basic DNS routing`, `No special logic`
+### 2. Weighted Routing (가중치 기반 라우팅)
+* 개념: 지정한 가중치(비율)에 따라 여러 리소스(서버)로 트래픽을 나눠서 전송하는 방식.
+* 유즈케이스: 신규 버전 앱을 출시할 때 10%의 사용자에게만 먼저 배포해 보는 A/B 테스트나 카나리(Canary) 배포.
+* 시험 키워드: `How much traffic`, `Percentage / Ratio`, `A/B testing`, `Canary release`
+### 3. Latency-based Routing (지연 시간 기반 라우팅)
+* 개념: 네트워크 지연 시간(Latency)이 가장 적은, 즉 사용자 입장에서 응답 속도가 가장 빠른 AWS 리전으로 트래픽을 라우팅.
+* 유즈케이스: 전 세계 사용자를 대상으로 가장 빠른 웹페이지 로딩 속도를 제공해야 할 때.
+* 시험 키워드: `Lowest latency`, `Fastest response time`, `Performance optimization`
+### 4. Failover Routing (장애 조치 라우팅)
+* 개념:주(Primary) 리소스와 예비(Secondary/Standby) 리소스를 설정해 두고, 주 리소스 헬스 체크(Health Check) 실패 시 예비 리소스로 자동 전환.
+* 유즈케이스: 서비스 중단을 방지하기 위한 재해 복구(Disaster Recovery, DR) 구성.
+* 시험 키워드: `Primary & Secondary`, `Active-Passive`, `Disaster Recovery (DR)`, `Health checks`
+### 5. Geolocation Routing (지리적 위치 기반 라우팅)
+* 개념: 접속한 사용자의 지리적 위치(국가 또는 대륙)를 파악하여 해당 지역에 맞는 리소스로 라우팅.
+* 유즈케이스: 접속 국가에 따라 한국어/영어/일어 웹사이트로 자동 연결하거나, 특정 국가 규제/콘텐츠 현지화 적용.
+* 시험 키워드: `User's location`, `Country / Continent`, `Local language / Content`
+### 6. 🗺️ Geoproximity Routing (지리적 근접성 라우팅)
+* 개념: 사용자의 위치와 AWS 리소스의 위치를 모두 고려하여, 가장 근접한 리소스 구역으로 트래픽을 보냄. (편향값`Bias` 조절 가능)
+* 특징: 특정 리전이 담당할 지리적 영역의 경계선(영역 크기)을 늘리거나 줄일 수 있음.
+* 시험 키워드: `Geographic location of resources`, `Bias value`, `Shift traffic between regions`
+### 💡 1초 요약 구분표 (시험용 암기 Sheet)
+
+| 라우팅 정책 | 핵심 목적 | 시험 문제 암기 키워드 |
+| :--- | :--- | :--- |
+| Simple | 기본 연결 | `Single resource` / `No special logic` |
+| Weighted | 비율 기반 분산 (A/B 테스트) | `How much traffic` / `Percentage` |
+| Latency-based | 최고 속도 제공 | `Lowest latency` / `Fastest response` |
+| Failover | 장애 대비 (Active-Passive) | `Primary & Secondary` / `Disaster recovery` |
+| Geolocation | 사용자 접속 국가 기반 | `User's location (Country/Continent)` |
+| Geoproximity | 리소스-사용자 간 근접 구역 | `Location of resources` / `Bias` |
+
+---
+
+33번. 
+- 문제 포인트
+클라우드 컴퓨팅의 장점
+
+- 정답
+// 몇 분만에 글로벌로 배포 가능, 클릭 몇 번으로 다수의 리전에 애플리캐이션 배포 가능
+// 고정 자본 비용을 가변 비용으로 전환
+(+ 물리적 인프라 설치에 필요할 막대한 자본을 클라우드 컴퓨팅으로의 전환을 통해 다양한 용도로 사용 가능) 
+// 규모의 경제를 통한 이익
+
+- 오답 선지 분석
+// 가변비용을 고정 자본 비용으로 전환
+정답의 정확히 반대 선지
+// 데이터 센터 설치 및 유지에 비용 소비
+클라우드 컴퓨팅을 쓰는데 왜 데이터 센터를 설치하냐
+// 인프라 용량 수요에 맞게 몇 달 정도를 계획에 배치
+클라우드 컴퓨팅을 쓰는데 왜 인프라를 신경쓰냐
+
++ AWS 클라우드 컴퓨팅의 6대 장점
+
+- Trade capital expense for variable expense (고정 자본 비용 ➔ 가변 비용)
+데이터 센터와 서버에 대한 막대한 사전 투자 비용을 지불하는 대신 사용한 만큼만 지불하는 가변 비용 형태로 전환
+- Massive economies of scale (거대한 규모의 경제)
+수백만 고객의 사용량이 합쳐져 AWS의 구매력이 극대화됨. 따라서 AWS는 더 합리적인 가격에 서비스를 제공할 수 있게 됨.
+- Stop guessing capacity (용량 예측 필요 없음)
+서버 인프라 용량 수요를 사전에 예측할 필요 없이 필요에 따라 자동으로 확장/축소 가능
+- Increase speed and agility (속도 및 민첩성 증가)
+클라우드 컴퓨팅을 통해 개발팀의 민첩성과 혁신 속도 향상 가능
+- Stop running data centers (데이터 센터 직접 운영 중단)
+인프라 유지/관리 같은 무거운 작업은 AWS에 맡기고 비즈니스와 개발에만 집중 가능
+- Go global in minutes (몇 분 만에 글로벌 배포)
+전 세계 리전에 애플리케이션을 클릭 몇 번으로 쉽게 배포하여 지연 시간을 줄리고 최소한의 비용만으로 글로벌 고객 대상 서비스 제공
+
+---
+
+34번.
+- 문제 포인트
+서버리스 AWS 서비스
+
+- 정답 
+AWS Lambda
+
++ 서버리스란?
+서버가 실제로 존재하지 않는 것이 아니라, 서버의 관리 및 운영을 AWS가 전부 알아서 처리해주므로 개발자는
+인프라를 신경쓰지 않고 코드/데이터에만 집중할 수 있는 구조.
+
++ AWS의 주요 서버리스 서비스 목록
+① 컴퓨팅 / 컨테이너
+AWS Lambda: 이벤트 기반의 서버리스 컴퓨팅 서비스 (코드만 올리면 알아서 실행).
+AWS Fargate: EC2 서버를 직접 관리하지 않고 컨테이너(Docker)만 띄워서 실행하는 서버리스 컨테이너 엔진.
+
+② 데이터베이스 / 스토리지
+Amazon DynamoDB: 서버를 프로비저닝할 필요 없이 자동으로 용량이 조절되는 대표적인 서버리스 NoSQL 데이터베이스.
+Amazon S3: 용량 제한이나 서버 관리 없이 파일을 무한히 저장하고 가져오는 서버리스 객체 스토리지.
+
+③ 게이트웨이 / 통합
+Amazon API Gateway: 개발자가 서버를 구축하지 않고도 REST API 또는 WebSocket API를 쉽게 생성, 유지 관리, 모니터링할 수 있게 해주는 서버리스 API 관리 서비스.
+AWS Step Functions: 여러 람다(Lambda) 함수나 AWS 서비스들을 연결해서 복잡한 워크플로를 만드는 서버리스 오케스트레이션 도구.
+
+# ☁️ AWS 서버리스 (Serverless) 핵심 개념 및 대표 서비스
+
+### 1. 서버리스(Serverless)의 4대 특징
+* 서버 관리 불필요: OS 설치, 패치, 프로비저닝 등 인프라 관리 작업 없음.
+* 유연한 자동 확장 (Auto-scaling): 트래픽 양에 따라 자동으로 수평 확장.
+* 지불 방식 (Pay-for-value): 방치 시 비용 $0, 실제 실행/요청이 발생한 수와 시간만 과금.
+* 고가용성 내장: 가용 영역(AZ) 간 복제가 기본 내장됨.
+
+### 2. 카테고리별 주요 서버리스 서비스
+* Compute: `AWS Lambda`, `AWS Fargate` (서버리스 컨테이너)
+* Database & Storage: `Amazon DynamoDB`, `Amazon S3`, `Amazon Aurora Serverless`
+**API & Integration: `Amazon API Gateway`, `AWS Step Functions`, `Amazon EventBridge`
+
+---
+
+35번. 
+- 문제 발문 포인트
+사이버 포렌식 팀이 AWS IP에 대한 악성 공격을 감지
+공격의 주체가 AWS 정책을 위반/금지된 행위를 하고 있음
+해당 이슈를 다루기 위한 옳은 해결법
+
+- 정답
+AWS Abuse Team에 연락한다.
+AWS IP를 사용하는 누군가가 스팸 메일 발송, Port Scanning, DDos 공격, 악성 코드 유포 등 AWS 서비스 오남용 행위를
+할 때 이를 제보받아 조사하고 정지시키는 전담 보안/경찰 조직임.
+
+- 오답 선지 분석
+// 아마존 창립자인 제프 베조스씨에게 사건의 자세한 사항을 담은 이메일을 보낸다 
+개그용 선지
+// AWS Support에 연락한다
+외부의 악성 공격 제보나 Abuse 건은 Support 전담 영역이 아님
+AWS Support는 AWS의 정식 고객이 기술적 문제를 해결받기 위한 기술 지원 창구임
+// AWS Developer Forum moderators
+AWS Developer Forum moderators는 개발자 포럼임. 악성 공격과 전혀 관련이 없음
+
+---
+
+36번. 
+- 문제 발문 포인트
+이커머스 회사가 RDS 데이터베이스를 하나의 AZ에 배치
+엔지니어링 팀은 AZ 사용 불능 상태에 대비하여 문제가 발생했을 때 별도의 수동 작업 개입 없이 끊김없이 작동하기를 원함
+
+- 정답
+자동 장애복구를 위해 데이터를 RDS Multi-AZ 배치하여 대기시킴
+RDS Multi-AZ는 단일 장애 지점 문제를 해결하기 위해 장애를 대비하여 여분의 AZ가 대기하도록 하는 서비스임
+이 AZ는 일상에서는 전혀 작동하지 않은 상태이고, 문제가 발생한 경우에만 작동함.
++ RDS Multi-AZ의 3대 특성
+동기식 복제 (Synchronous Replication): 주 DB(Primary)에 데이터가 쓰일 때 대기 DB(Standby)에도 동시에 저장됨.
+자동 장애 조치 (Automatic Failover): 주 DB가 있는 AZ가 다운되면, AWS가 알아서 대기 DB를 주 DB로 승격시킴.
+동일한 엔드포인트 (Same Endpoint): 주 DB가 바뀌어도 DB 접속 주소(Endpoint URL)가 그대로 유지되기 때문에 애플리케이션 코드를 수정하거나 수동 개입할 필요가 전혀 없음
+
+- 오답 선지 분석
+// AWS Elastic Beanstalk
+개발자가 코드만 올리면 용량 프로비저닝, 로드 밸런싱, Auto Scaling, 애플리케이션 상태 모니터링까지 웹 앱 배포 환경을
+자동으로 구축해주는 PaaS 서비스
+애플리케이션 개발/배포 관리 도구일 뿐, DB 자체의 AZ 장애 대응 기능을 제공하는 서비스가 아님
+
+// AWS CloudFormation
+코드로 AWS 리소스들을 정의하고 생성하는 IaC(코드로 보는 인프라) 서비스
+복잡한 VPC, EC2, S3, RDS 구성을 템플릿 코드 한 줄 실행으로 몇 분 만에 똑같이 찍어낼 수 있음
+
+// RDS read replica mode 
+Read Replica는 DB의 읽기 성능 확장을 위해 비동기로 복제본을 만드는 기능
+읽기 전용 복제본은 자동 장애 조치를 지원하지 않음.(수동 승격이 필요함)
+Multi-AZ가 고가용성이 목적이라면 Read Replica는 읽기 트래픽 분산이 목적임
+
+# 🗄️ Amazon RDS 복제 및 배포 관리 서비스 정리
+
+### 1. RDS Multi-AZ vs Read Replica
+* Multi-AZ Deployment:
+  * 목적: 고가용성(HA) 및 재해 복구(DR).
+  * 특징: 동기식 복제, Standby DB 존재, **자동 장애 조치(Automatic Failover)** 지원.
+  * 키워드: `High availability`, `Automatic failover`, `Same endpoint`, `AZ outage`
+* Read Replica (읽기 전용 복제본):
+  * 목적: 읽기 성능 확장 (Read scaling).
+  * 특징: 비동기식 복제, 읽기 전용 쿼리 처리 가능, 수동 승격 필요.
+  * 키워드: `Read performance`, `Read-heavy workload`, `Scalability`
+
+### 2. AWS 배포 / 관리 서비스
+* AWS Elastic Beanstalk:
+  * 코드만 업로드하면 인프라 구성부터 배포까지 알아서 해주는 서버리스형 PaaS.
+  * 키워드: `Easy deployment`, `PaaS`, `Upload code`
++ Beanstalk란 잭과 콩나무에 나오는 그 콩나무를 뜻함.
+동화 속에서 콩을 심기만 했더니 아무런 노력 없이 콩나무가 알아서 하늘까지 자라났던 것에 비유하여 이름이 지어짐
+AWS Elastic Beanstalk도 코드만 업로드하면 서버, 데이터베이스, 로드밸런서 등 거대한 인프라를 알아서 구축해줌
+PaaS이므로 개발자는 코드에만 집중하면 됨.
+
+* AWS CloudFormation:
+  * 코드로 인프라를 정의하고 생성/관리하는 IaC 서비스 (JSON/YAML).
+  * 키워드: `Infrastructure as Code (IaC)`, `Templates`, `Automation`
+
+---
 
