@@ -1951,13 +1951,328 @@ AWS Root 계정의 Access Key는 생성하지 않거나, 존재한다면 즉시 
 ---
 
 54번.
+- 문제 포인트
+Amazon Aurora의 기본 운영체제에 패치를 적용하는 entity
+
+- 정답
+The AWS Product Team automatically
+AWS Aurora는 AWS에서 제공하는 완전 관리형 관계형 데이터베이스 서비스임
+따라서 고객이 하위 인프라(서버 OS, 패치, 서버 하드웨어 관리 등)에 신경 쓸 필요가 없음
+따라서 Aurora를 구동하는 기본 운영체제의 보안 패치나 시스템 업데이트는 AWS 제품 팀이 알아서 자동으로 수행함
+
+- 오답 선지 분석
+// The AWS customer by using AWS Systems Manager
+고객이 직접 EC2 인스턴스를 띄워서 만든 DB라면 Systems Manager로 OS 패치를 하겠지만, Aurora는 
+완전 관리형 서비스이므로 고객이 OS에 접근할 수 있는 권한이 없음
+
+// The AWS Support after receiving a request from the customer
+AWS Support 팀은 고객이 요청할 때 기술 지원이나 트러블슈팅을 도와주는 팀이지, 정기적인 OS 패치를 대신해주는 주체가 아님
+
+// The AWS Customer by SSHingi on the instances
+Aurora나 RDS의 DB 인스턴스는 고객이 SSH에 절대 접근할 수 없음. OS 계층이 완전히 감춰져 있기 때문
+
++ EC2 vs Amazon RDS & Amazon Aurora
+- EC2
+서비스 유형 : IaaS(Infra as a Service)
+OS 패치 주체 : 고객
+OS 접근(SSH) : 가능
+DB 엔진 패치 : 고객
+
+- RDS & Amazon Aurora
+서비스 유형 : PaaS(Platform as a Service)
+OS 패치 주체 : AWS
+OS 접근(SSH) : 불가능
+DB 엔진 패치 : AWS
+
++ IaaS / 관리형(Managed) / 완전 관리형(Fully-Managed)
+IaaS : EC2, EBS, VPC
+관리형 서비스 : RDS, Aurora, ElastiCache 등
+완전 관리형 서비스 : S3, DynamoDB, Lambda, Fargate
+(Aurora는 완전 관리형 서비스의 특징과 관리형 서비스의 특징을 모두 지니고 있음.
+대표적인 이유는 인스턴스의 스펙을 사용자가 지정한다는 점임.)
+
+---
+
+55번. 
+- 문제 발문 포인트
+AWS Cloud의 스토리지 서비스
+
+- 정답
+Amazon Elastic File System(Amazon EFS)
+Amazon Simple Storage Service(Amazon S3)
+AWS의 대표적인 스토리지 서비스 3가지 -> S3(객체 스토리지), EFS(파일 스토리지), EBS(블록 스토리지)
+
+- 오답 선지 분석
+// Amazon EC2 
+EC2는 가상 서버 프로비저닝과 보안과 유연한 크기 조절이 가능한 compute 성능을 제공받을 수 있는 AWS 서비스임
+스토리지 서비스가 아님
+// Amazon Simple Notification Service (SNS)
+이름 그대로 알림 전송에 특화된 메시징 서비스, 스토리지와 전혀 관련이 없음
+// Amazon Simple Queue Service (SQS)
+SQS 역시 메시징과 관련된 서비스는 맞지만 알림을 발송하는 용도가 아니라 대기열 서비스임. 
+즉, 메시지를 보내는 것이 아니라 메시지를 담아두고 끌어오는 역할
+스토리지와 전혀 관련이 없음
+
++ SNS vs SQS
+- SNS
+방식: Publish / Subscribe(게시/구독) 모델
+매커니즘: Push 방식(이벤트가 발생하면 구독자들에게 즉시 밀어넣어 줌)
+동작: 하나의 메시지를 여러 수진자에게 동시에 일괄 전송할 때 사용
+비유: 방송국이 뉴스 특보를 송출하면, TV를 켜둔 시청자들이 동시에 받아보는 것
+
+- SQS
+방식: Message Queuing(메시지 큐/ Decoupling)
+메커니즘: Pull / Polling 방식(메시지가 큐에 담겨 있으면, 수신자가 직접 와서 긁어감/가져옴)
+동작: 애플리케이션 간의 디커플링(결합도 낮추기)을 위해 사용. 트래픽이 몰려도 서버가 터지지 않도록 메시지를 임시 보관해주는 완충지대 역할
+비유: 은행의 대기번호표 뽑기 시스템. 손짐이 대기열에 쌓여 있으면 창구 직원(소비자/EC2)이 처리할 수 있는 속도에 맞춰 한 명씩 불러서 처리함.
+
+---
+
+56번.
+- 문제 발문 포인트
+플래그십 어플리케이션에 대한 회복력을 향상시키기 위해 전통적 DB에서 AWS NoSQL(비관계형 데이터베이스)로의 이동 희망
+active-active configuration, cross-region support가 핵심
+
+- 정답
+Amazon DynamoDB with global tables
+DynamoDB는 AWS의 대표적 비관계형 데이터베이스 서비스이며 글로벌 테이블을 함께 활용하므로 active-active configuration, cross-region support 조건도 충족함
+DynamoDB Global Tables는 선택한 여러 AWS 리전에 DynamoDB 테이블을 생성하고, 데이터가 변경되면 다중 리전간에 양방향으로 자동 복제함.
+즉, 동부 리전에서도 읽기/쓰기가 가능하고 서부 리전에서도 동시에 읽기/쓰기가 가능하며, 어느 한 리전이 장애가 나도 서비스가 끊기지 않는 최고 수준의 복원력을 제공
+
+- 오답 선지 분석
+// Amazon Aurora with multi-master clusters
+Aurora는 관계형 데이터베이스임
+// Amazon Relational Database Service for MySQL
+이름에서 알 수 있듯 Amazon RDS는 관계형 데이터베이스임
+// Amazon DynamoDB with DynamoDB Acclerator
+DynamoDB는 비관계형 데이터베이스이지만 Acclerator로는 active-active configuration, cross-region support조건을 만족시킬 수 없음
+DynamoDB Acclerator는 DynamoDB를 위한 In-Memory Cache(인메모리 캐시) 서비스임
+읽기 성능을 밀리초에서 마이크로초 단위로 획기적으로 줄여주는 캐싱 전용 레이어임. 다중 리전 복제나 Active-Active구성을 처리하는 기능이 아님
+
+---
+
+57번.
+- 문제 발문 포인트
+의료 연구 스타트업
+HIPPA 가이드라인과 거버넌스 관련 문서의 가이드라인 준수 여부를 검토할 수 있는 AWS 서비스
+
+- 정답
+AWS Artifact
+AWS의 공식 보안 성적표와 법적 계약서를 다운로드 받는 무료 공인 문서 보관소
+특정 산업군(특히 의료나 공공기관)에서는 데이터를 클라우드에 저장하려면 법적으로 특별한 계약을 맺어야하는데, 
+AWS Artifact 계약을 활용하면 종이계약서 대신 AWS Artifact 화면에서 클릭 몇 번으로 동의하고 계약을 체결할 수 있음.
+
+- 오답 선지 분석
+// AWS Trusted Advisor
+Trusted Advisor는 규정 준수나 계약서에 관련된 서비스가 아니라 자동화 스캔을 통해 계정 모니터링/비용 절감/보안 권장사항을 조언하고 자동으로 점검해주는 서비스
+// AWS Systems Manager
+AWS Systems Manager는 AWS의 인프라 상태난 서버의 상태를 한 곳에서 조회하고 시각화해주는 서비스. 즉 인프라 관리 서비스임
+// AWS Secrets Manager
+AWS Secrets Manager는 암호를 관리하고 주기적으로 로테이션해주는 서비스
+
++ AWS Arifacts vs AWS Config
+AWS Artifact:
+AWS 자체가 규정을 잘 지키고 있다는 문서/증빙 자료 다운로드 및 계약 체결 센터
+키워드: Download compliance reports, HIPAA/SOC/PCI-DSS documents, Agreements
+
+AWS Config:
+우리 회사(고객)의 AWS 리소스 설정 변경 이력을 기록하고 규정 위반 여부를 지속적으로 평가/감시하는 서비스
+키워드: Resource configuration history, Audit compliance of AWS resources, Compliance rules
+
+58번.
+- 문제 발문 포인트
+EC2 요금 = $1000 / S3 요금 = $500
++ 보유 중인 크레딧 
+credit 1: $100/ 2022년 7월 만료/ EC2 & S3 사용 가능
+credit 2: $50/ 2022년 12월 만료/ EC2 전용
+
+AWS 크레딧 적용 우선순위 규칙
+1. 만료일이 가장 가까운 크레딧이 1순위로 적용된다.
+2. 범위가 더 제한적인 크레딧이 전용 서비스에 우선 차감된다.
+3. 크레딧 생성/등록 일자가 빠른 크레딧부터 차감된다.
+
+---
+
+59번.
+- 문제 발문 포인트
+AWS Cloud Adoption Framework(CAF) 플랫폼 관점에서의 주요 이해관계자
+플랫폼 관점(Platform Perspective)
+확장 가능하고 엔터프라이즈급인 클라우드 인프라/플랫폼을 구축하고, 기존 워크로드를 현대화하며 신규 클라우드 네이티브 솔루션을 개발하는 관점
+
+- 정답
+Engineer : 실제로 아키텍처를 구현하고, 코드 작성 및 인프라 프로비저닝/개발을 담당하는 실무자
+Chief Technology Officer(CTO) : 기술 전략 및 전체적인 기술 플랫폼 방침을 총괄하는 최고 기술 책임자
++ Architects, Technology leaders도 포함됨
+
+- matching tips
+CISO / CCO / Compliance ➔ 무조건 Security
+SRE / System Admin / Patch ➔ 무조건 Operations
+CDO (Chief Data Officer) / Risk / Finance ➔ 주로 Governance
+Architect / Developer / Engineer ➔ Platform (단, 보안 엔지니어는 Security, SRE는 Operations)
+
+# 🏛️ AWS CAF (Cloud Adoption Framework) 6대 관점 & 이해관계자
+
+### 1. 기술적 관점 (Technical Perspectives)
+* Platform: 아키텍처 설계 및 구축/현대화 ➔ `CTO`, `Architects`, `Engineers`
+* Security: 데이터 및 워크로드 보호/규정 준수 ➔ `CISO`, `CCO`, `Security Engineers`
+* Operations: 일상적 운영, 가용성, 모니터링 ➔ `SRE`, `Ops Leaders`, `IT Service Managers`
+
+### 2. 비즈니스적 관점 (Business Perspectives)
+* Business: 클라우드 가치 실현 및 사업 목표 정렬 ➔ `CEO`, `CFO`, `COO`, `CIO`
+* People: 조직 문화 개선 및 클라우드 교육/역량 강화 ➔ `CIO`, `COO`, `HR/Cross-functional Leaders`
+* Governance: 리스크 관리, 비용 통제, 데이터 거버넌스 ➔ `CDO`, `CPO`, `CRO`, `CFO`
+
+---
+
+60번.
+- 문제 발문 포인트
+AWS 계정 내 활동이 거버넌스, 감사 기준을 충족하는지 확일할 수 있는 AWS 서비스
+
+- 정답
+AWS CloudTrail
+계정 활동 모니터링, 감사, 보안 추적을 수행하는 AWS 서비스
+AWS 계정에서 발생하는 모든 API 호출과 사용자/서비스 활동을 기록하는 서비스라고 생각하면 됨.
+주요 key words -> Account Activity, User Actions, Auditing, API History
+
+- 오답 선지 분석
+// AWS Config
+AWS 리소스의 설정 상태를 기록하고 규칙 준수 여부를 지속 평가
+주요 key words -> Resource Configuration, Compliance Rules, Change History
+
+// Amazon CloudWatch
+리소스 및 애플리케이션 실행 로그 등을 실시간 모니터링하고 알람을 울리는 도구
+-> 계정 활동에 대한 감사 도구가 아님
+
+// AWS Trusted Advisor
+비용 절감, 보안, 성능, 내결함성에 대해 개선할 점을 조언해주는 가이드 도구
+-> 계정 활동 기록이나 정식 감사 도구가 아님
+
+---
+
+61번.
+- 문제 발문 포인트
+빅데이터 분석 회사
+온-프레미스 데이터센터 to AWS Cloud
+AWS에서 사용하고자하는 서버 전용 소프트웨어 라이선스 보유 중
+
+- 정답
+회사의 서버 전용 소프트웨어 라이선스를 지원하는 EC2 인스턴스는 Dedicated Host가 유일함
+
+- 오답 선지 분석
+RI, On-Demand Instance, Dedicated Instance
+세 plan 모두 회사의 전용 소프트웨어 라이선스를 지원하지 못함
+Dedicated Instance와 Dedicated Host의 결정적인 차이점이 바로 Bring Your Own License의 지원 여부임
+Dedicated Host는 고객 전용 물리 서버 전체를 통째로 할당받지만, Dedicated Instance는 물리 서버 전체를 할당 받는 것이 아니라
+다른 계정의 고객과 물리적 하드웨어를 공유하지 않음. 따라서 하드웨어 레벨에서 격리되지만, 물리 서버 제어권과 소켓 정보는 제공되지 않음
+
+---
+
+62번.
+- 문제 발문 포인트
+비용 최적화를 위한 예약을 지원하는 AWS 서비스
+
+- 정답
+Amazon EC2
+가장 대표적인 예약 모델. 1/3년 약정으로 최대 72%의 할인 효과를 제공함
+Amazon RDS
+RDS Reserved DB instances: RDS도 DB서버를 계속 켜두고 쓰는 경우가 많으므로 예약 DB 인스턴스 형태로 할인을 제공함
+Amazon DynamoDB 
+Amazon DynamoDB Reserved Capacity: DynamoDB는 서버리스/NoSQL이지만, 읽기/쓰기 용량 단위인 RCU와 WCU를 지속적으로 일정 이상 사용해야한다면
+1/3년 단위로 예약 용량을 약정하여 큰 폭의 할인 혜택을 받을 수 있음
+
++ 예약 가능 서비스 리스트
+Comptue: EC2 Reserved Instances
+Database: RDS Reserved DB Instances, DynamoDB Reserved Capacity, ElastiCache Reserved Nodes
+Analytics / Warehouse: Redshift Reserved Nodes
+
++ Lambda나 S3 같은 초/밀리초 단위 이벤트 또는 데이터 용량 기반 충당 서비스는 예약 서비스가 제공되지 않음
+
+---
+
+63번.
+- 문제 발문 포인트
+공공 인터넷을 사용하지 않고 온-프레미스를 VPC로 연결할 수 있는 AWS 서비스
+
+- 정답
+AWS Direct Connect
+Direct Connect는 회사 데이터 센터와 AWS 사이에 전용 물리적 광케이블을 직접 깔아서 연결하는 서비스
+공용 인터넷망을 거치지 않고 우리 회사만 쓰는 전용 회선이므로 노출 위험이 없는 비공개 연결임
+물리적 광케이블을 사용하므로 인터넷망의 트래픽 혼잡에 영향을 받지 않아 항상 일정하고 뛰어난 속도와 일관된 낮은 지연 시간을 보장함
++ VPC도 AWS 안에서 사용자의 서버 인스턴스가 위치하는 네트워크 공간이므로 당연히 Direct Connect서비스를 사용할 수 있음
+
+- 오답 선지 분석
+// VPC Endpoint
+VPC 내부의 리소스가 인터넷망을 거치지 않고 S3, DynamoDB 등 다른 AWS 퍼블릭 서비스에 비공개로 접근할 수 있게 해주는 가상 장치
+-> VPC 내부에서 AWS 서비스로 통신할 때 사용하는 기술이지, 온프레미스 데이터센터와 VPC를 연결하는 기술이 아님
+// AWS Site-to-Site VPN
+Site-to-Site VPN도 온프레미스 데이터센터와 AWS를 연결해주지만 Site-to-Site VPN는 공용 인터넷망에 암호화 터널을 뚫어서 연결하는 방식임
+-> 공용 인터넷망을 활용하므로 정답이 될 수 없음
+// Internet Gateway
+-> VPC 내부의 리소스가 공공 인터넷과 통신할 수 있도록 문을 열어주는 게이트웨이임
+-> 공용 인터넷망을 활용하므로 정답이 될 수 없음
+
+---
+
+64번.
+- 문제 발문 포인트
+암호화를 기본으로 제공하는 AWS 서비스
+
+- 정답
+AWS CloudTrail Logs(보안 및 규정 준수가 매우 중요한 서비스)
+CloudTrail은 모든 API 호출 기록(로그)를 S3 버킷에 저장함.
+S3에서 자동 암호화를 제공하므로 자연스럽게 CloudTrail Logs로 기본 암호화를 제공하게 됨.
 
 
+- 오답 선지 분석
+// Amazon Elastic File System(Amazon EFS)
+// Amazon Relational Database Service(Amazon RDS)
+// Amazon Elastic Block Store(Amazon EBS)
 
++ 기본으로 암호화를 제공하는 AWS 서비스
+AWS CloudTrail Logs
+Amazon S3
+Amazon DynamoDB
+Amazon Secrets Manager / Systems Manager
 
++ 암호화 옵션 선택이 필요한 서비스
+Amazon EBS
+Amazon RDS
+Amazon EFS
 
+---
 
+65번.
+- 문제 발문 포인트
+DDoS 공격을 완화할 수 있는 AWS 서비스
 
+- 정답 
+AWS Shield
+DDoS 공격에 대한 내용이 등장하면 가장 먼저 생각나야 할 AWS 서비스가 바로 AWS Shield임.
+AWS Shield는 네트워크 경계에서 들어오는 무차별 트래픽 폭탄을 압도적인 대역폭으로 흡수하고 분삭시켜 인프라가 무너지지 않게 지탱하는 역할
+standard와 advanced로 구분됨.
+advanced는 상세한 공격 진단 및 정교한 DDoS 공격을 탐지하고 완화할 수 있는 기능을 제공하는 유료 서비스임.
+L3/4 레이어 방어 서비스
 
+- 오답 선지 분석
+// Amazon CloudWatch
+CloudWatch는 리소스 및 애플리케이션 실행 로그 등을 실시간 모니터링하고 알람을 울리는 도구임.
+-> DDoS 공격을 완화하는 서비스가 아님
+// AWS Key Management Service
+데이터를 암호화하고 복호화(잠금 해제)하는 데 사용되는 암호화 키(KMS 키)를 쉽게 생성, 제어, 관리할 수 있게 해주는 완전 관리형 서비스
+-> 보안과 관련된 서비스이지만 DDoS 공격을 완화할 수 있는 서비스가 아님
+// AWS Systems Manager
+AWS Systems Manager는 AWS의 인프라 상태나 서버의 상태를 한 곳에서 조회하고 시각화해주는 서비스. 즉 인프라 관리 서비스임
+-> DDoS 공격을 완화할 수 있는 서비스가 아님
 
++ AWS Shield vs AWS WAF
+AWS Shield -> DDos 공격 방어
+L3/L4 레이어 (네트워크/전송 계층)
+무차별 대역폭 공격 트래픽 흡수 및 분산
+key words -> DDoS Protection, Mitigate DDoS
 
+AWS WAF -> 웹 애플리케이션 공격 방어
+L7 (애플리케이션 계층)
+IP 차단, SQL Injection, 특정 국가 차단 등 Rule 기반
+key words -> SQL Injection, Cross Site Scripting(XSS), Web Traffic Rules
+
+fin.
