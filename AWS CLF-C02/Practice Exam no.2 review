@@ -1,0 +1,177 @@
+1번.
+- 문제 발문 포인트
+온프레미스 서버와 AWS Cloud를 연결할 수 있는 솔루션
+
+- 정답
+AWS Direct Connect
+온프레미스 서버와 AWS Cloud를 물리적 전용 회선을 통해 인터넷 정체의 영향을 받지 않고 항상 일정한 대역폭과 극상의 보안성, 낮은 지연시간을 보장하는 AWS 마이그레이션 서비스
+물리적 전용 선을 이용하므로 공용 인터넷을 사용하지 않음
+AWS Virtual Private Network(AWS VPN)
+공용 인터넷망 위에 IPsec 암호화 터널을 생성하여 온프레미스와 AWS VPC를 상시 연결해주는 AWS 서비스
+온프레미스와 AWS를 상시 연결하는 하이브리드 환경이 필요한 경우에 주로 사용됨.
+
++ 외부 데이터센터와 AWS 내부 네트워크를 연결하는 방식은 크게 전용선과 암호화 VPN 2가지 뿐
+
+- 오답 선지 분석
+// Internet Gateway
+AWS VPC 내부의 리소스가 공공 인터넷과 통신할 수 있도록 통로 역할을 해주는 가상 게이트웨이
+-> VPC를 외부 인터넷에 연결해주는 출입구일 뿐, 온프레미스와 AWS를 전용/암호화 방식으로 연결해주는 솔루션이 아님
+// Amazon Virtual Private Cloud(AWS VPC)
+AWS 계정 내에서 격리되어 생성되는 사용자 저너용 가상 네트워크 공간임. AWS 상에서 EC2, RDS 등의 리소스가 위치할 공간 자체를 의미함
+// Amazon Route 53
+Amazon Route 53은 가용성이 뛰어난 AWS의 도메인 네임 시스템(DNS)임. 도메인을 입력하면 해당하는 IP를 찾아서 해당 사이트로 연결해주는 서비스
+온프레미스 서버와 AWS Cloud를 연결해주는 서비스가 아님
+
++ AWS VPN의 세부 서비스
+1. AWS Site-to-Site VPN(네트워크 <-> 네트워크)
+거점과 거점 간의 연결(회사 데이터센터 to AWS VPC)을 지원하며 라우터/방화벽 장비 간의 항상 켜져있는 IPsec 터널을 통해 연결함
+온프레미스와 AWS를 상시 연결하는 하이브리드 환경이 필요한 경우 주로 사용됨.
+2. AWS Client VPN(개인 노트북 <-> AWS VPC)
+개인과 거점 간의 연결(재택 근무자 노트북 to AWS VPC)을 지원하며 개별 기기에 소프트웨어를 깔아 접속하는 방식을 사용함.
+카페나 집에서 일하는 개발자/임직원의 내부망 접근 등에 주로 사용됨.
+
+---
+
+2번.
+- 문제 발문 포인트
+클라우드 컴퓨팅의 능력 중 필요할 때 자원을 얻고 필요하지 않을 때 자원을 방출하는 능력의 명칭
+
+- 정답
+Elasticity(유연성)
+사용자가 필요한만큼 실시간/자동적으로 리소스를 유연하게 늘리고 줄이는 능력을 말함
+문제에서 질문한 능력의 특징과 정확히 일치함
+
+- 오답 선지 분석
+// Durability (내구성)
+저장한 데이터가 손실되거나 유실되지 않고 안전하게 보존하는 능력을 말함
+// Reliability (신뢰성)
+시스템이나 인프라에 문제가 발생하더라도 끊김없이 서버가 운영될 수 있는 능력을 말함
+// Resiliency (회복성)
+재해 등의 문제가 발생했을 때의 빠르고 정확하게 문제를 해결하고 회복할 수 있는 능력을 말함
+
++ Durabiliity(내구성) vs Availability(가용성)
+1. Durability(내구성)
+데이터의 손실 방지 및 보존율 -> 내 데이터가 사라지지 않고 잘 무사한가?
+ex) Amazon S3의 99.999999999(11 nines) Durability
+
+2. Availability(가용성)
+시스템의 가동 시간 및 접근 가능성 -> 지금 당장 내 데이터/시스템에 접근할 수 있는가?
+
+---
+
+3번.
+- 문제 발문 포인트
+AWS 데이터베이스 서비스
+유연한 스키마 -> 비관계형 데이터베이스
+document data models 지원 -> 비관계형 데이터베이스의 특징
+
+- 정답
+Amazon DynamoDB
+Amazon DynamoDB는 AWS의 대표적 비관계형 데이터베이스임
+또한 document data 모델과 key-value 모델을 지원함. 
+
+- 오답 선지 분석
+// Amazon Relational Database Service(RDS)
+AWS의 대표적 관계형 데이터베이스. 관계형 데이터베이스이므로 스키마가 매우 엄격함
+// Amazon Aurora
+AWS의 완전관리형 관계형 데이터베이스
+// Amazon Redshift
+AWS의 대규모 데이터 분석 전용 데이터베이스
+페타바이트(PB)급 대용량 데이터 웨어하우스로 방대한 과거 데이터를 모아두고 복잡한 통계/분석 쿼리를 돌리는 용도임
+또한 비즈니스 인사이트 분석을 용도로도 자주 사용됨.
+key words -> Data Warehouse, Business Intelligence, Analytics, Petabyte-Scale
+
+---
+
+4번.
+- 문제 발문 포인트
+EC2 인스턴스에 회사의 플래그십 어플리케이션이 작동 중
+새로운 정책으로 인해 새 포트나 공용 IP 주소 사용없이 EC2에 보안 쉘 접근이 가능한 최선의 방법을 찾고 있음
+
+- 정답
+AWS Systems Manager Session Manager
+AWS Systems Manager의 주요 기능 중 하나로, 브라우저나 CLI를 통해 EC2 인스턴스에 원격 터미널 접속(Shell Access)을 제공하는 서비스
+key words -> No open inbound ports, No public IP required, Secure shell access, Systems Manager Session Manager
+
+- 오답 선지 분석
+// Amazon EC2 Instance Connect
+브라우저나 SSH 클라이언트를 통해 EC2에 임시 SSH 키를 주입해서 간단하게 SSH 접속을 하게 해주는 도구임
+EC2 Instance Connect는 접속할 때 인스턴스에 Public IP가 존재해야하고, Security Group(보안그룹)에 22번 포트가 열려있어야 작동함
+따라서 문제의 조건(새 포트나 공용 IP주소 사용X)에 완전히 위배됨.
+// Amazon Inspector
+인스턴스 단위의 보안 서비스
+EC2 인스턴스, 컨테이너, Lambda 코드 등의 보안 취약점을 자동으로 검사 및 평가해주는 서비스
+인스턴스 접근/원격 쉘 접속 기능과 관련 없는 보안 취약점 스캐닝 도구임
+// Amazon Route 53
+AWS의 도메인 네임 서비스(DNS). 도메인 네임을 입력하면 IP 주소로 변환해 줌.
+인스턴스 접근/원격 쉘 접속 기능과 관련없음
+
+-> Port22 X + Public IP X = Session Manager
+
+---
+
+5번.
+- 문제 발문 포인트
+모든 리전의 모든 AWS서비스에 대한 전반적인 상태와 가용성의 최신정보를 제공하는 AWS 서비스
+
+- 정답
+AWS Health Dashboard - service health
+내가 서비스를 쓰든 안 쓰든 상관없이, 전 세계 모든 AWS 리전의 서비스들이 지금 정상 작동하고 있는지 전체 공개용으로 보여주는 전광판
+
+- 오답 선지 분석
+// AWS Health Dashboard - Your account health
+전체 전광판이 아니라, 오직 '본인 계정'에만 직접적인 영향을 주는 AWS 인프라의 문제나 공지사항을 알려주는 맞춤형 알림판
+-> AWS의 상태와 가용성에 대한 정보를 주지만, your account health는 본인 계정에 영향을 줄 수 있는 문제만 알려줌
+// AWS CloudFormation
+템플릿(JSON/YAML)을 작성하여 AWS 리소스를 코드 기반으로 자동 생성/배포하는 서비스
+-> 리소스를 빠르고 간단하게 배포해주는 서비스일 뿐 AWS의 인프라에 대한 상태를 알려주는 서비스가 아님
+// Amazon CloudWatch
+실시간으로 데이터를 수집하여 AWS 리소스들의 건강 상태를 체크하고 문제가 생기면 경보를 울리거나 서버를 자동으로 늘려주는 종합 인프라 관제탑
+-> 자신의 AWS 리소스들의 상태를 수집하고 관리하는 것이지 AWS의 자체 인프라에 대한 정보를 제공하는 서비스가 아님
+
+- 틀린 이유
+모든 리전의 모든 AWS 서비스에 대한 최신 정보, 가용성인데 이 부분을 제대로 보지 않았음
+모든 AWS 인프라 전체의 상태 -> AWS Health Dashboard
+내 EC2/RDS 서버의 상태 -. AWS CloudWatch
+
++ CloudWatch vs CloudTrail
+CloudWatch -> 서버의 상태를 측정하는 감시체계, 성능 지표 로그 등 수집
+주요 목적 -> 모니터링, 알람 설정, 자동 확장
+key words -> metrcis, alarms, performance, monitor
+
+CloudTrail -> 누가 들어왔다 갔는지 기록하는 방문록/CCTV, API 호출 기록(누가, 언제, 무슨 서비스/버킷을 삭제/생성했나)
+주요 목적 -> 보안 감사(Audit), 계정 작업 추적, 규정 준수
+key words -> API calls, User activity, Audit, Account history
+
+6번. 
+- 문제 발문 포인트
+AWS Lambda에 대한 옳은 진술
+
+- 정답
+AWS Lambda는 서버 프로비저닝/관리 없이 코드가 돌아갈 수 있도록 함.
+-> AWS Lambda는 서버리스 서비스이므로 고객이 서버의 존재자체를 알지 못해도 상관없음
+그러므로 당연히 서버 프로비저닝/관리 없이 코드가 돌아갈 수 있음.
+AWS Lambda에 사용한 compute time에 따라 비용을 지불함.
+-> AWS Lambda의 요금 측정 요소 2가지
+호출 횟수 (Total Requests)
+실행 시간 + 메모리 크기 (Duration & Memory)
+
+- 오답 선지 분석
+// AWS Lambda는 기본 서버리스 운영 체제에 데이터베이스를 설치할 수 있게 함.
+-> Lambda는 실행할 때마다 임시 컴퓨팅 환경이 생겼다 사라지는 휘발성(Stateless) 구조임. 따라서 지속적으로 상태를 유지해야 하는 데이터베이스를 OS 상에 직접 설치해서 운영하는 것은 불가능함.
+// AWS Lambda는 복잡한 컨테이너화된 애플리케이션을 원활하게 운영하기 위해 Docker 컨테이너를 오케스트레이션하고 관리할 수 있게 해줌.
+-> 최대 10GB까지 람다함수를 패키징과 배포를 위한 컨테이너로 사용할 수 있지만 Docker 컨테이너를 복잡하게 엮고 관리/배포하는 서비스는 Lambda의 역할이 아닌 ECS나 EKS의 역할임
+// AWS Lambda는 기본 OS에 접근하여 코드를 통해 그 동작을 제어할 수 있음.
+-> Lambda는 추상화된 서버리스 서비스이므로 기본 OS(Linux 등)에 루트/SSH로 접근하거나 OS 동작을 제어할 권한을 사용자에게 전혀 제공하지 않음.
+
+---
+
+7번. 
+- 문제 발문 포인트
+
+
+
+
+
+
+
