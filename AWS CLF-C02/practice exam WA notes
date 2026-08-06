@@ -1,0 +1,113 @@
+exam 1 - 2차 시도 오답 노트
+- 문제 발문 포인트
+AWS Shield Advanced가 확장된 DDoS공격 보안을 제공하는 AWS 리소스
+
+- 틀린 이유
+암기 부족
+
+- 정답
+AWS Global Accelerator
+Amazon Route 53
+
+- 암기 포인트
+Shield Advanced 보호 대상 5대장
+-> Shield Advanced는 네트워크 최전방에서 무차별 트래픽을 흡수하는 서비스임
+따라서 AWs의 외곽 경계선을 담당하는 5가지 리소스에만 직접 연결할 수 있음
+
+글로벌 엣지 3대장: CloudFront, Route 53, Global Acclerator
+인프라 입구 2대장: Elastic Load Balancing(ELB), Elastic IP(EIP)
+-> CRGEE(크르그이이)...
+
+- 함정 선지
+API Gateway는 백엔드 API를 구축하는 애플리케이션 레이어 서비스
+API Gateway 전면에 DDoS 방어를 적용하고 싶다면 API Gateway 자체에 Shield를 거는 것이 아니라, 앞단에 CloudFront나 WAF를 두고 거기에 Shield/WAF를 적용해야 함
+따라서 API Gateway는 Shield Advanced의 직접 보호 대상이 될 수 없음
+
+---
+
+- 문제 발문 포인트
+금융 서비스 회사의 AWS 계정 활동(account activity)이 거버넌스, 컴플라이언스, 감사 규범을 만족하는지 보장받고 싶어함
+
+- 정답
+CloudTrail
+
+- 틀린 이유
+CloudTrail, Config, CloudWatch 혼동
+
+- 문제 함정 포인트
+governance, compliance, auditing 등장 -> 자연스럽게 Config로 손이 갈 수 밖에 없음
+그러나 핵심은 account activity임
+누가 어떤 API를 호출해서 무슨 행동을 했는지 묻는다면?(about account activity) -> CloudTrail
+내 리소스의 설정 값이 보안 기준에 적합하게 유지되고 있는가?(about resource configuartion) -> AWS Config
+
++ 헷갈리는 3가지 서비스 비교
+- AWS CloudTrail
+비유: 출입구 및 복도 CCTV/방명록 -> 누가 들어와서 어떤 활동을 했는지(account activity)
+key words -> Account activity, User action, API calls
+- AWS Config
+비유: 건물의 소방/보안 장비 점검표 -> 지금 보안이 잘 유지되고 있고 규정에 맞는지(Resource configuration)
+key words -> Resource configuration, Compliance rules, Config history
+- Amazon CloudWatch
+비유: 건물의 화재 경보기/체온계 -> 서버 온도가 올라갔거나 수치가 이상한가?(Performance & Metrics)
+key words -> Metrics, Performance, Alarms, CPU utilization
+
+---
+
+- 문제 발문 포인트
+마이크로서비스 기반 어플리케이션의 요소를 분리(decouple)할 수 있는 AWS 서비스
+
+- 틀린 이유
+decouple 용어 파악 부족, 암기 부족
+
+- decouple이란?
+송신자가 수신자의 상태나 주소를 알 필요 없이 중간 매개체를 통해 메시지를 전달하는 구조
+
+- 정답
+Amazon SQS(Simple Queue Service)
+-> producer가 큐에 메시지를 쌓아두면, consumer가 원할 때 가져가서 처리함(1:1메시징)
+Amazon SNS(Simple Notification Service)
+-> publisher가 주제에 메시지를 1번만 던지면, SNS가 이를 구독 중인 여러 수신자에게 동시게 뿌려줌.
+
+두 서비스 모둔 송신자와 수신자가 서로를 직접 신경 쓸 필요가 없기 때문에 두 서비스 간의 의존성이 끊어지는 Decoupled 구조임
+
+SQS -> Pull방식(수신자가 큐에서 꺼내옴) / 메시지 큐에 보관 가능 
+SNS -> Push방식(SNS가 수신자에게 밀어넣음) / 메시지를 보관하지 않고 즉시 발송
+
+- SQS + SNS 팬아웃(Fan-out) 패턴
+시험에서 Fan-out이라는 단어나 하나의 이벤트를 여러 개의 수신자/시스템에게 동시에 전달하며 디커플링한다라는 문장이 나오면 SNS+SQS 조합 형태가 정답임
+ex. [주문 시스템] ──(발행)──► [SNS Topic] ├──► [SQS A] ──► [배송 시스템]
+                                         ├──► [SQS B] ──► [정산 시스템]
+                                         └──► [SQS C] ──► [재고 시스템]
+
+
+---
+
+- 문제 발문 포인트
+스타트업 회사가 IT 인프라를 AWS Cloud에 이동시기를 원하고 있음
+AWS로 이전할 경우 한 달에 얼마정도의 비용이 발생하는지 평가하고 싶어함.
+
+- 틀린 이유
+서비스 명칭 혼동(AWS Pricing Calculator vs AWS Cost Explorer)
+
+- 정답 
+AWS Pricing Calculator
+AWS 서비스를 실제로 사용하기 이전에 사용자의 유즈케이스를 분석하여 AWS 서비스를 사용할 경우 청구될 비용을 예측/평가할 수 있는 서비스
+
++ AWS Pricing Calculator vs AWS Cost Explorer
+AWS Cost Explorer는 고객의 이용 금액과 사용량을 사용자가 쉽게 이해할 수 있도록 도와주며 사용자의 사용량과 청구 비용을 시각화하고 관리할 수 있도록 하는 서비스
+과거 최소 24개월 동안 쌓인 결제 데이터를 바탕으로 향후 12개월의 비용을 예측해주는 기능도 갖추고 있어 AWS Pricing Calculator와 혼동할 수 있음
+그러나 Pricing Calculator는 과거 AWS 서비스 사용 내역이 전혀 없어도 비용을 예측할 수 있다는 점에서 차이가 있음
+즉, AWS 도입 전에 사용하는 것은 Pricing Calculator, 도입 후에 사용하는 것은 Cost Explorer임
+
+-----
+
+exam 2 - 2차 시도 오답 노트
+
+
+
+
+
+
+
+
+
