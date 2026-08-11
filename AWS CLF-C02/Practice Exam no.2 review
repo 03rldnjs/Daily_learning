@@ -1226,7 +1226,8 @@ AWS Web Application Firewall(AWS WAF)
 
 - 오답 선지 분석
 // Security group
-보안 그룹은 어플리케이션 레이어에 대한 보안이 아니라 
+보안 그룹은 어플리케이션 레이어에 대한 보안이 아니라 서브넷 단위의 보안임
+//
 
 
 
