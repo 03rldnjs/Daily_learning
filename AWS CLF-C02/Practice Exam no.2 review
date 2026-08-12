@@ -1504,6 +1504,111 @@ Multi-AZ의 Standby DB는 읽기/쓰기 트래픽을 전혀 받지 않는 순수
 
 ---
 
+56번.
+- 문제 발문 포인트
+전담 TAM을 지원하는 AWS Support Plan
+
+- 정답
+AWS Enterprise Support
+AWS Support Plan 중 가장 하이엔드 플랜으로 유일하게 전담 TAM을 지원함
+Enterprise On-Ramp Support도 전담 TAM을 지원한다고 오해할 수 있지만, 해당 서비스는 전담 TAM이 아니라 TAM pool과 연결지어주는 것임
+
+- 오답 선지 분석
+// AWS Business Support
+Enterprise보다 한 단계 낮은 support plan으로, 24x7 전화기반 기술 지원과 use-case에 따른 아키텍처적 가이던스를 제공하지만 전담 TAM을 지원하지는 않음
+// AWS Enterprise On-Ramp Support
+Enterprise Support의 보급형 plan으로 보다 저렴한 가격으로 높은 수준의 서비스를 제공받을 수 있음
+그러나 전담 TAM이 아닌, TAM pool과의 연결임
+// AWS Developer Support
+support plan 중 2번째 단계로, 업무 시간 내 이메일 서비스를 지원함
+
++ Business support plan 요약
+Basic ->	모든 고객 (무료)	결제/계정 문의, 기본 백서 접근
+Developer ->	실험/개발 단계	업무 시간 내 이메일 지원, 1인 접수
+Business	-> 프로덕션 워크로드	24/7 전화/채팅/이메일, Third-party software support
+Enterprise	-> 비즈니스 크리티컬	TAM (전담 기술 계정 관리자), 15분 이내 응답
+
++ AWS Enterprise On-Ramp -> 전담 TAM 대신, AWS TAM 전문가 그룹에 접근 권한이 부여되어 필요할 때 
+가이드나 조언을 받는 방식
+최우선 순위 장애가 발생할 경우 30분 이내 응답(그냥 enterprise는 15분 이내)
+대신 enterprise보다 훨씬 저렴한 금액으로 서비스를 이용할 수 있음
+
+---
+
+57번.
+- 문제 발문 포인트
+AWS Well-Architected Framework에 해당하는 기둥
+
+- 정답
+Cost Optimization
+Reliability
+
+AWS Well-Architected Framework의 6대 기둥
+- operational excellence(운영 우수성)
+시스템을 안정적으로 운영/모니터링하고, 비즈니스 가치를 전달하며, 운영 절차를 지속적으로 개선하는 능력
+service ex. CloudFormation, Systems Manager
+- security(보안)
+데이터, 시스템, 자산을 보호하는 동시에 위험 평가 및 완화 전략을 통해 클라우드 기술의 이점을 활용하는 능력
+service ex. IAM, KAM, WAF, GuardDuty
+- reliability(신뢰성/안정성)
+워크로드가 의도한 기능을 올바르고 일관되게 수행하며, 장애가 발생했을 때 이를 신속하게 복구하는 능력
+service ex. Auto Scaling, Multi-AZ, Route 53
+- performance efficiency(성능 효율성)
+컴퓨팅 요구사항을 충족하기 위해 리소스를 효율적으로 사용하고, 기술 변화 및 요구사항 증가에 맞춰 성능을 유지하는 능력
+service ex. Lambda, CloudFront, Gravition Processor
+- cost optimization(비용 최적화)
+가장 낮은 가격으로 최상의 비즈니스 가치를 창출하고, 불필요한 비용 지출을 방지하는 능력
+service ex. AWS Budgets, Cost Explorer, Savings Plans
+- sustainability(지속 가능성)
+클라우드 워크로드가 환경에 미치는 영향(에너지 소비 및 탄소 발자국)을 이해하고 이를 최소화하는 능력
+service ex. Customer Carbon Footprint Tool
+
+보/운/안/성/비/지
+SORPCS(솔픽스)
+
++ Route 53이 안정성에 기여하는 이유
+Route 53은 단순히 DNS 서비스 뿐만 아니라 트래픽을 지능적으로 분산하고 장애를 자율적으로 회피하는 역할도 함.
+따라서 안정성의 핵심 서비스로 꼽힘
+-> Route 5은 서버가 죽어도 트래픽을 살아있는 서버로 즉시 돌려주는 자동 우회 시스템을 탑재하고 있음
+따라서 안정성(Reliability)기둥의 핵심이 됨
+
+---
+
+58번.
+- 문제 발문 포인트
+Hadoop clusters에 있는 빅데이터 워크로드를 실행하기 위한 리소스 프로비저닝에 적합한 AWS 서비스
+
+- 정답
+Amazon EMR
+
+
+- 오답 선지 분석
+// AWS Step Functions
+여러 람다(Lambda) 함수나 AWS 서비스들을 연결해서 복잡한 워크플로를 만드는 서버리스 오케스트레이션 도구
+함수나 서비스를 순차적으로 구조화하여 절차에 맞게 실행되도록 도와주는 서비스
+// AWS Batch(batch = 집단)
+수많은 배치(집단/일괄) 연산 작업을 효율적이고 자동으로 실행해주는 완전 관리형 배치(집단/일괄) 처리 서비스
+개발자가 별도로 클러스터 관리 소프트웨어를 설치하거나 인프라를 프로비저닝할 필요 없이, 실행 작업에만 집중할 수 있도록 함
+// Amazon EC2
+AWS의 대표적인 compute 서비스로, 주로 가상 서버를 AWS에 프로비저닝하는데 사용됨
+
++ Batch vs Step Function
+1. 직접 연산 vs 상태 제어
+Batch는 높은 컴퓨팅 파워가 필요한 작업을 직접처리하는 반면, Step Function은 연산 자체를 수행하는 것이 아니라 연산 순서와 상태 전환, 로직 제어를 담당함
+2. 시각적 플로우차트
+Step Function은 시각적 플로우차트를 제공해서 각 단계별 입력/출력 데이터 전달 과정과 진행 상태를 한 눈에 모니터링할 수 있음
+Batch는 큐 단위로 제출된 작업의 성공/실패 상태 위주로 관리됨
+3. 상호 연동 관계
+Step Function이 전체 시스템 흐름을 지휘하다가, 무거운 컨테이너 연산이 필요한 특정 단계에서 Batch 작업을 호출하여 실행함
+
+
+
+
+
+
+
+
+
 
 
 
