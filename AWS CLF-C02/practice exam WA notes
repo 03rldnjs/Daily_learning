@@ -230,7 +230,33 @@ Systems Manager -> 누가 서버에 무슨 짓을 했는지 중앙에서 제어�
 ---
 
 - 문제 발문 포인트
+보안 그룹과 Network ACL에 대한 올바른 진술
 
+- 정답
+보안 그룹은 인스턴스 레벨의 방화벽 역할이고 Network ACL은 서브넷 레벨의 방화벽 역할이다
+
+- AWS의 네트워크 구조
+VPC = 아파트 단지 전체
+Subnet(서브넷): 아파트의 1개 동(ex. 101동, 102동 등)
+Instance(인스턴스): 동 안에 들어있는 각 개별 집(세대)
+
+- 구조별 AWS 보안 서비스
+VPC 전체 경계 방어: AWS Network Firewall / AWS WAF & Shield
+VPC 전체 트래픽 감시: VPC Flow Logs
+Subnet 보안: Network ACL
+Instance 보안: 보안 그룹(Security Group)
+
+서브넷 보안 -> Network ACL
+인스턴스 보안 -> 보안 그룹(Security Group)
+
++ 리전, AZ, 서브넷 관계 정리
+1. 리전 = 국가/도시 단위
+2. AZ = 리전 안의 물리적 데이터센터 건물
+3. VPC = 데이터센터 안에 할당된 나만의 가상 네트워크 구역
+4. Subnet = VPC를 다시 쪼갠 구역(1개 서브넷은 반드시 1개 AZ 안에만 존재)
+5. Instance = 서브넷 안에 들어가는 실제 가상 서버
+
+-----
 
 
 
