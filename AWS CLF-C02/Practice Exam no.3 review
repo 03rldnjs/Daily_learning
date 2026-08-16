@@ -391,6 +391,11 @@ VPC 내의 서브넷은 반드시 단 하나의 AZ에만 귀속됨
 특정 서버 랙 메인보드에 직접 꽂혀 있는 단일 장비용 임시 디스크
 고가용성은 커녕 서버가 켜졌다가 꺼지기만해도 담겨있던 데이터가 삭제되는 RAM같은 휘발성 메모리(단일 지점 장애(SPOF) 리소스)
 
++ 고가용성(High Availability) 기본 제공 서비스
+Amazon S3, Amazon DynamoDB, Amazon EFS, AWS Lambda, Amazon SQS/SNS, Amazon Route 53, Application Load Balancer
++ Amazon RDS는 Multi-AZ 옵션을 제공하지만 기본으로 제공하지는 않음
+
+
 ---
 
 
