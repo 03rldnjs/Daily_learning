@@ -526,7 +526,7 @@ IT 기업이 비용 최적화 작업 진행 중. 사용률이 낮은 모든 Amaz
 AWS Cost Explorer
 사용 내역을 바탕으로 비용을 알아보기 쉽게 시각화하고, 최소 24개월간의 비용 지출 내역과 사용 내역을 분석하여 향후 12개월의 예상 월 지출 비용을 계산해주는 서비스
 그런데 시험에 매우 자주 등장하는 핵심 내장 기능이 있음
-핵심 내장 기능 -> Rightsizing Recommendations:
+핵심 내장 기능 -> Rightsizing Recommendations
 기능: 사용자가 아무런 설정을 하지 않아도, Cost Explorer가 알아서 지난 14일간의 EC2 사용 패턴을 분석함
 -> 사용률이 낮거나 놀고 있는 EC2 인스턴스를 자동으로 식별해서 특정 EC2 목록과 함께 비용 절감액을 바로 보여 줌
 
@@ -605,7 +605,172 @@ AWS Site-to-Site VPN의 구성 요소
 Customer gateway
 Virtual private gateway(VGW)
 
+- 틀린 이유
+서비스 관련 암기 부족
 
+- 정답 해설
+온프레미스 데이터센터와 AWS VPC(Virtual Private Cloud)를 잇는 비밀 지하 터널임
+양쪽 건물을 터널로 연결하려면 양 끝에 출입문이 있어야하는데, 그 두 개의 문이 정답 선지임
+온프레미스 데이터센터는 AWS 클라우드를 사용하려는 고객의 소유이므로 '고객'의 이름을 따서 Customer gate way,
+반대쪽 문은 AWS의 VPC와 연결된 문이므로 'Virtual Private'를 따서 Virtual private gateway임.
+
+- 오답 선지 정리
+// Internet Gateway: VPC를 공용 인터넷에 연결하는 대문
+-> VPN은 사설망을 만드는 것이므로 공용 인터넷과의 연결하는 문인 Internet Gateway는 VPC의 구성요소가 아님
+// NAT Gateway: Privat Subnet의 서버가 인터넷으로 나갈 때 IP를 변환해주는 도구
+-> 내부 서버의 외부 인터넷 업데이트용 도구이지, 온프레미스와 연결하는 VPN 도구가 아님
+// AWS Storage Gateway: 온프레미스에서 AWS S3/EFS 스토리지에 접근하게 해 주는 온프레미스 연동 서비스
+-> 온프레미스와 AWS의 VPC를 연결하는 것이 아니라, 파일/블록/테이프 스토리지를 연동해주는 전용 서비스'
+
++ 그냥 암기 복습
+리전 -> AZ
+VPC = 리전 내의 AZ를 연결하는 망(리전 단위)
+subnet = 하나의 AZ에 있는 VPC의 부분 각각을 의미(AZ 단위)
+instance = 할당받은 공간에서 실제로 만든 서버
+subnet 보안 = networkACL
+instance 보안 = 보안 그룹(security group)
+
+---
+
+45번.
+- 문제 발문 포인트
+이커머스 기업이 개발과 운영 환경에 대한 별도의 분리된 청구서를 받기 원함
+해당 use-case에 가장 적합한 AWS 서비스
+
+- 정답
+개발과 운영 환경에 대한 각각의 AWS 계정을 만들어 개별 청구서를 받음
+-> AWS 청구서 발행 원칙: AWS에서 공식 청구서는 오직 AWS 계정 단위로만 발행됨
+
+- 틀린 이유
+AWS의 비용 청구 원칙 숙지 미흡
+
+- 오답 선지 분석
+// AWS Organizations를 통해 청구서를 분리한다
+AWS Organizatoins는 여러 계정을 묶어 하나로 관리하는 통합 청구 기능을 지원함.
+청구서를 각각 분리하는 기능은 없음.
+
+// 모든 AWS 계정의 리소스에 development나 production 태그를 붙인 후 이 태그를 활용하여 각각의 청구서를 생성함
+태그는 비용 할당 및 내부 분석을 위한 보조 도구. 보고서상에서 구분해서 볼 수는 있지만, AWS가 태그별로 청구서를 따로 끊어서 발행해주지는 않음
+
+// 분리된 청구서 발행을 위해 Cost Explorer를 사용하라
+Cost Explorer는 비용 시각화 및 분석/예측 도구일 뿐, 법적/공식 청구서를 발행하는 서비스가 아님
+
++ 비용 및 청구 관련 문항 핵심 패턴
+별도 청구서 필요: 독립된 AWS 계정 생성(분리) -> 청구서 발행의 단위는 계정
+여러 계정 비용 일괄 결제 및 할인: AWS Organizations(consolidated billing) -> 여러 계정 청구서를 하나로 합침. 볼륨 할인 혜택 공유 가능
+단일 계정 내 리소스별 비용 구분: Cost Allocation Tags(비용 할당 태그) -> 한 계쩡 안에서 태그별로 비용 추적 및 리포트 작성
+
+---
+
+46번.
+- 문제 포인트
+AWS Budget에서 생성할 수 있는 budget 타입
+
+- 정답
+Reservation budget, Usage budget, Cost budget
+- Reservation budget:
+예약 인스턴스를 구매했을 때 이를 모니터링하기 위해 사용하는 정식 예산 타입
+모니터링 대상: 사용률(Utilization = 사둔 RI를 낭비하지 않고 알뜰하게 사용하고 있는지 감시), 커버리지(Coverage = 전체 인스턴스 사용량 중 RI 할인을 받는 비율이 얼마나 되는지)
+존재 이유: RI는 선불/약정으로 돈이 이미 나간 상태이므로, 놀리고 있으면 그대로 손해임.
+따라서 AWS Budget에서 별도의 Reservation budget을 제공해서 이를 추적하도록 만들어 둔 것.
+
+- 틀린 이유
+지식 부족
+
+- 함정 선지 분석
+// Resource budget
+EC2 사용 시간, S3 용량 등 특정 리소스의 사용량을 추적하는 역할은 이미 Usage budget이 담당하고 있음.
+Resource budget이라는 명칭의 기능 자체가 존재하지 않음
+
+# 📊 4 Official AWS Budgets Types (3차 모의고사)
+
+### 1. Supported Budget Types
+1. Cost budget: 비용 지출 금액 ($) 모니터링.
+2. Usage budget: 서비스 사용량 (시간, GB 등) 모니터링.
+3. Reservation budget: Reserved Instances (RI)의 사용률/커버리지 모니터링.
+4. Savings Plans budget: Savings Plans의 사용률/커버리지 모니터링.
+
+---
+
+47번.
+- 문제 발문 포인트 
+AWS Billing의 Cost Allocation Tags에 대한 옳은 진술
+
+- 정답
+AWS에서 생성된 태그와 사용자 정의 태그는 Cost Explorer나 비용 할당 보고서에 나타나기 전에 각각 별도로 활성화해야 함.
+-> 리소스에 태그를 붙였다고 바로 Cost Explorer나 비용 보고서에 나타나지 않음. 따라서 AWS Billing 콘솔에 들어가서 AWS 생성 태그와 사용자 정의 태그를 각각 별도로 활성화해야만 비용 분석 보고서에 집계 됨
+각 리소스마다 각 태그 키는 고유해야 하며, 각 태그 키는 하나의 값만 가질 수 있음.
+-> AWS 태그의 문법 원칙. 하나의 리소스에서 Key는 중복될 수 없으며, 1개의 Key는 오직 1개의 Value만 가질 수 있음
+ex. 올바른 예: Key = Environment, Value = Production
+    잘못된 예: Key - Environment, Value = Production, Staging
+
+- 오답 선지 상세 분석
+// 태그는 리소스를 구성하는 데 도움을 주며, 보고서를 실행하기 위해 필수 구성 항목입니다
+-> 필수라는 단어가 틀렸음. 태그는 비용을 분류하기 위하나 선택적 도구일 뿐, 비용 보고서 등을 실행하기 위한 필수 구성 요소가 아님
+
+// 각 리소스마다 각 태그 키는 고유해야 하지만, 여러 값을 가질 수 있습니다
+-> 앞서 말했듯, 하나의 태그 키는 오직 단 하나의 값(Value)만 가질 수 있음
+
+// 사용자 정의 태그만 비용 탐색기나 비용 할당 보고서에 나타나기 전에 활성화해야 합니다
+-> 사용자 정의 태그 뿐만 아니라 AWS 생성 태그도 활성화가 필요하므로 Only 때문에 오답임
+
+---
+
+49번.
+- 문제 발문 포인트
+트래픽을 active-passive 구성으로 라우팅하기 위해 사용할 Amazon Route 53 라우팅 정책
+
+- 정답
+Failover routing
+Active-Passive 구성은 재해 복구 시스템이므로 장애 조치 라우팅인 Failover routing이 정답임
+
+- 틀린 이유
+active-passive 구성이 뭔지 몰랐음
+
++ Active-Passive 구성이란?
+Active-Passive 구성 = 주-예비 구성
+-> 메인 서버가 살아있을 때는 모든 트래픽을 거기로 보내고, 메인 서버가 터지면 비상용 보조 서버로 트래픽을 우회시키는 재해 복구 시스템
+
++ Active-Passive vs Active-Active 차이점
+Active-Passive (Failover):
+평소에는 Active(주) 서버 1개만 일을 하고, Passive(보조) 서버는 가만히 대기. Active가 헬스 체크(Health Check) 실패 시 Passive로 전환(Failover)됨.
+
+Active-Active (Weighted / Latency 등):
+여러 서버가 동시에 일을 나누어 처리하는 형태. (네가 고른 Weighted는 트래픽을 일정 비율로 분산하는 Active-Active 방식에 해당.)
+
++ Key Keyword Triggers for Exam
+* Failover: Active-Passive / Disaster Recovery / Primary & Secondary
+* Weighted: Traffic Ratio (e.g., 70:30) / A/B Testing
+* Latency: Lowest network latency / Performance optimization
+* Geolocation: User's geographic location (Country/Continent)
+* Multi-value Answer: Up to 8 healthy IP records with Health Check(헬스 체크를 통과한 정상 IP를 최대 8개까지 무작위 반환
+
+---
+
+64번.
+- 문제 발문 포인트
+IT 기업이 하이브리드 클라우드 아키텍처를 가지고 있으며, 서버 로그를 EC2 인스턴스와 온프레미스 서버에 집중시키기를 원함.
+가장 비용 효율적인 방안은?
+key words -> hybrid cloud, centralize server logs, EC2 and on-premises
+
+- 정답
+EC2 인스턴스와 온-프레미스 서버 양 쪽 모두에 CloudWatch Logs를 사용함
+CloudWatch Agent를 EC2와 온프레미스 실물 서버 양쪽에 설피하면, 인터넷이나 VPN/Direct Connect를 통해 모든 서버의 OS/어플리케이션 로그를 CloudWatch Logs 단일 창구로 모아줄 수 있음
+
+- 오답 선지 분석
+// Use AWS Lambda to send log data ~
+로그를 모으기 위해 굳이 Lambda 함수를 만들고 관리할 필요가 없음.
+CloudWatch Agent라는 전용 수집 도구가 이미 존재하므로, Lambda를 중간 다리로 쓰는 건 불필요하고 복잡한 방식임
+
+// AWS CloudTrail이 포함된 선지들
+CloudTrail은 서버 내부 로그를 수집하는 서비스가 아님
+CloudTrail은 AWS 계정 내의 모든 API 호출 기록을 수집함(누가, 언제, 콘솔/CLI로, 리소스를 생성/수정/삭제 했는지)
+
++ 하이브리드(Hybrid) 환경 관련 시험 단골 지식
+AWS 시험에서 "온프레미스 서버와 EC2를 함께 관리/통합한다"는 문장이 나오면 아래 서비스들이 정답 패턴으로 주로 등장함
+. CloudWatch Agent: EC2 + 온프레미스 서버의 로그 및 성능 메트릭(CPU, 메모리, 디스크 사용량) 중앙 수집.
+. AWS Systems Manager (SSM): EC2 + 온프레미스 서버에 SSM Agent를 설치하여 패치 관리, 원격 명령 실행, 소프트웨어 인벤토리 통합 관리.
+. AWS Outposts: AWS의 인프라 및 서비스를 온프레미스 데이터센터 내부로 직접 가져와 사용하는 하이브리드 솔루션.
 
 
 
