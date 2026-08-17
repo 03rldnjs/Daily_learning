@@ -392,11 +392,103 @@ VPC 내의 서브넷은 반드시 단 하나의 AZ에만 귀속됨
 고가용성은 커녕 서버가 켜졌다가 꺼지기만해도 담겨있던 데이터가 삭제되는 RAM같은 휘발성 메모리(단일 지점 장애(SPOF) 리소스)
 
 + 고가용성(High Availability) 기본 제공 서비스
-Amazon S3, Amazon DynamoDB, Amazon EFS, AWS Lambda, Amazon SQS/SNS, Amazon Route 53, Application Load Balancer
+Amazon S3, Amazon DynamoDB, Amazon EFS, AWS Lambda, Amazon SQS/SNS, Amazon Route 53, Application Load Balancer(ALB)
 + Amazon RDS는 Multi-AZ 옵션을 제공하지만 기본으로 제공하지는 않음
 
++ 걍 암기 복습
+리전 = 국가/도시 단위
+AZ = 리전 안의 물리적 데이터센터
+VPC = 데이터센터 안에 할당된 나만의 네트워크 구역 -> 리전 내의 AZ들을 사용자 전용으로 연결하는 가상 도로/네트워크 망 -> 리전 내의 AZ들을 연결하므로 리전 단위임
+subnet = VPC를 다시 쪼갠 구역(1개 서브넷은 1개 AZ에만 존재) -> 각각의 AZ에 차려놓은 구역들
+Instance = 서브넷 안에 들어가는 실제 가상 서버
+
++ VPC는 데이터센터 안에 할당된 구역인데 왜 리전 단위일까?
+AWS는 우리가 리전에 VPC를 하나 만들면, 그 리전 안에 있는 모든 가용 영역을 논리적으로 하나의 커다란 가상 네트워크 망으로 묶어버림
+커다란 IP 대역 하나를 VPC 전체에 할당해 두고, 이 큰 대역을 쪼개서 각 AZ 데이터센터에 나누어 배치하는 구조
+
+subnet 보안 = networkACL
+instance 보안 = 보안 그룹(Security Group)
+
+VPC: 여러 AZ를 아우르는 리전 범위의 가상 네트워크
+Subnet: 반드시 단 하나의 AZ 내부 물리 데이터센터에 귀속되는 가상 공간
+-> 그래서 서브넷은 단일 AZ에 귀속되므로 고가용성이 없고, 고가용성을 만들기 위해 VPC라는 하나의 네트워크로 묶어서 관리함
 
 ---
+
+29번.
+- 문제 발문 포인트
+AWS의 공동 책임 모델에 따라, 고객(사용자)에게 책임이 귀속되는 경우
+
+- 정답
+EC2 인스턴스에 대한 OS 패치 및 업데이트
+-> EC2는 내부 운영체제 패치, 보안 업데이트, 방화벽 등의 조치가 100% 고객의 책임임
+따라서 해당 선지는 고객의 책임에 해당함
+IAM user과 roles 관리 -> 당연한 것
+
+- 틀린 이유
+EC2의 특성 고려 미흡 + 공동 책임 모델에 대한 이해 부족
+
+- 함정 선지 분석
+// 고객 데이터에 AWS 직원이 접근하지 못하도록 차단 보장
+-> AWS 직원이 고객 데이터에 무단으로 접근하지 못하도록 물리적,절차적,기술적 통제 장치를 마련하는 것은 100% AWS의 책임임
+이유: 공동 책임 모델의 핵심 -> 클라우드 자체 = AWS 책임, 클라우드 내부 = 사용자 책임
+AWS 직원은 AWS의 물리 데이터센터, 하이퍼바이저, 물리적 서버 및 스토리지 인프라에 접근할 수 있는 권한을 가지고 있음
+AWS는 그들의 임직원들이 고객의 데이터나 가상 머신에 무단으로 절대 접근할 수 없도록 엄격한 내부 보안 절차를 구축할 책임이 있음
+AWS가 AWS 임직원을 통제하는 것이므로 클라우드 내부의 보안이라고 볼 수 없음
+따라서 해당 선지는 AWS의 책임에 해당함
+
+---
+
+30번.
+- 문제 발문 포인트
+온프레미스에서 AWS 클라우드로의 데이터 마이그레이션에 특화된 AWS 서비스
+
+- 정답 
+. AWS Database Migration Service
+온프레미스 DB를 AWS로 동작 중단 최소화 하며 이관. 동종 DB 및 이종 DB 이전 지원 
+. AWS Snowball
+인터넷 대역폭이 부족할 때 데이터 이관용 실물 하드웨어 장비를 택배로 받아 직접 데이터를 담아 AWS로 보냄(페타바이트 급 대용량)
+
+- 틀린 이유
+발문에 적혀있는 데이터 마이그레이션을 놓치고 온프레미스와 AWS 클라우드 간의 연결에만 매몰
+
+- 함정 선지 분석
+// AWS Direct Connect
+온프레미스와 AWS 간에 인터넷을 거치지 않는 전용 회선을 물리적으로 연결해주는 전송 파이프
+// AWS Site-to-Site VPN
+공용 인터넷 망 위에 암호화된 IPsec VPN 터널을 뚫어 온프레미스와 VPC를 안전하게 이어주는 연결 도구
+// AWS Transit Gateway
+네트워크 허브로, 수많은 VPC와 온프레미스 네트워크망을 중앙에서 하나로 묶어 라우팅(routing)해주는 중앙 허브
+
+-> 즉, 내가 선택했던 Direct Connect와 Site-to-Site VPN은 데이터 마이그레이션을 지원하는 서비스가 아니라 온프레미스와 AWS 클라우드를 연결해주는 연결 도구임
+(데이터를 옮겨주는 주체가 아니라, 도로만 뚫어주는 서비스. 도로가 뚫렸다고 해서 마이그레이션에 필요한 복제, 동기화, 변환 작업 등이 자동으로 일어나는 게 아님)
+
+# AWS Data Migration vs Network Connectivity
+
+### 1. Data Migration Dedicated Services (마이그레이션 전용)
+* AWS DMS(Data Migratoin Service): DB 이관 (Zero Downtime, 이종 DB 스키마 변환 시 AWS SCT 연동).
+* AWS DataSync: 파일/객체 데이터 자동 고속 온라인 동기화 (NFS/SMB ➔ S3/EFS/FSx).
+* AWS MGN(Application Migration Service): 물리/가상 서버 통째로 EC2로 이관 (Lift-and-Shift).
+* AWS Snowball: 네트워크 대역폭 한계 시 실물 물리 장비 택배 배송 (오프라인 PB급 전송).
+
++ AWS Migration Hub: 여러 마이그레이션 도구(DMS, MGN 등)의 진행 상황을 한곳에서 진단하고 추적하는 중앙 대시보드.
+
+### 2. Network Connectivity Services (단순 네트워크 연결 파이프)
+* AWS Direct Connect: 전용 회선 (Private, 고성능, 일정한 대역폭).
+* AWS Site-to-Site VPN: 암호화된 인터넷 터널 (Public Internet, 빠른 구축).
+* AWS Transit Gateway: 중앙 네트워크 라우팅 허브 (VPC & On-Premise 통합 관리).
+
+데이터 자체를 복제/동기화/이전하는 도구인지 아니면 그냥 망을 이어주는 도로인지를 생각하면 쉽게 구분할 수 있음
+
+---
+
+32번.
+- 문제 발문 포인트
+
+
+
+
+
 
 
 
