@@ -888,6 +888,90 @@ Virtual MFA device
 ---
 
 8번.
+- 문제 발문 포인트
+개발팀이 AWS 고객의 가장 빈번한 질문과 요청 그리고 AWS가 제공하는 솔루션이 함께 적혀있는 포럼을 찾는 중
+문제를 해결하고 솔루션을 확인하는데 사용될 수 있는 AWS 포럼/서비스
+
+- 정답
+AWS Knowledge Center
+AWS 고객들이 가장 자주 묻는 질문과 대표적인 장애 상황, 그리고 그에 대한 AWS 엔지니어의 공식 해결책을 모아둔 공식 지식 창고/FAQ 포럼
+key words -> Most frequent questions, AWS provided solutions, Troubleshooting articles, How-to guides
+
+- 오답 선지 분석
+// AWS Support Center
+AWS Support plan에 대한 관리와, AWS 기술 지원 엔지니어와 1:1로 티켓(case)를 주고 받는 창구.
+= AWS 계정 소유자가 AWS 서포트 팀에게 직접 문의를 제출하고 관리하는 1:1 창구
+-> 포럼이나 공용 문서고가 아님
+// AWS Marketplace
+서드파티 소프트웨어를 AWS 고객이 구매/사용/배포할 수 있도록 한 플랫폼. 온라인 소프트웨어 스토어라고 생각하면 됨
+-> AWS 고객의 질문과 요청, 솔루션이 담겨있는 서비스가 아님 
+// AWS Health Dashboard - service health
+AWS Health Dashboard는 기본적으로 AWS 서비스를 운영하는데 필요한 인프라들의 현재 상태를 실시간으로 시각화하여 고객에게 보여주는 서비스
+옵션에 따라 모든 인프라의 상태(service health), 혹은 고객 개개인의 서비스에 영향을 미칠 수 있는 인프라의 상태(your account health)만 볼 수도 있음
+
++ AWS Support Center
+. 주요 기능
+Support Case 생성: 결제 문의, 기술 문제, 리소스 쿼터 증가 요청 등을 티켓으로 작성
+플랜 관리: 현재 계정의 Support Plan(Developer, Business, Enterprise 등)의 상태 확인
+tip -> 특정 고객과 AWS 엔지니어 간의 1:1 개인 문의 창구
+
++ AWS Health Dashboard
+- Service Health
+보여주는 내용: AWS 전체 리전의 서비스 작동 여부
+상황 예시: 서울 리전 S3 서비스 정상 작동 중
+접근 권한: 로그인 없이도 웹에서 확인 간으
+
+- Your Account Health
+보여주는 내용: 내 계정의 리소스에 직접 영향을 미치는 인프라 장애/점검 일정
+상황 예시: 회원님의 EC2 인스턴스가 위치한 랙에 점검이 예정되어 있습니다.
+접근 권한: AWS 계정 로그인 필요
+
+---
+
+9번.
+- 문제 상황
+사이버 보안 에이전시가 AWS Cloud 사용 중. 
+AWS의 별도의 사전 허가 없이 해당 에이전시 소유의 AWS 인프라에 대한 보안 평가를 원함
+
+- 정답
+Penetration Testing(침투 테스트)
+시스템의 취약점을 찾아내기 위해 모의 해킹을 시도하는 보안 평가 행위
+AWS 정책 변경:
+예전에는 모의 해킹을 하려면 AWS에 일일이 사전 신청서를 내고 허가를 받아야 했음
+하지만 현재는 사용자가 소유한 8가지 주요 서비스에 대해서는 사전 승인 없이 언제든지 모의 해킹을 진행할 수 있도록 정책이 변경되었음
+허용 서비스 8가지: EC2, RDS, CloudFront, Aurora, API Gateway, Lambda, Lightsail, Elastic Beanstalk
+출제 포인트 -> security assessment, simulated attack, without prior approval
+
+- 오답 선지 분석
+// Network Stress Testing
+네트워크에 대량의 트래픽을 고의로 발생시켜 과부하(DDoS 공격 형태)를 견디는지 테스트하는 행위
+이는 사전 승인 없이 불가능함.
+AWS는 여러 고객이 물리적 인프라를 공유하는 multi-tenant 환경임. 한 고객이 사전 승인 없이 네트워크 스트레스 테스트를 강행하면, 동일한 물리 네트워크를 공유하는 다른 고객의 서비스에가지 마비가 발생하는 피해를 줄 수 있음
+AWS 정책: 스트레스 테스트나 DDoS 시뮬레이션은 사전 허가 없이 실행하는 것이 엄격히 금지되어 있음
+// Amazon Inspector
+인스턴스/Lambda/컨테이너 단위에 대한 보안 서비스. 자동으로 주기적 보안 검사를 진행하고 취약점을 평가해주는 서비스
+// AWS Secrets Manager
+보안에 필수적인 암호를 관리하고 주기적으로 자동 변경해주는 AWS 서비스
+
+---
+
+17번.
+- 문제 발문 포인트
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
