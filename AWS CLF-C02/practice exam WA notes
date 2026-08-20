@@ -356,7 +356,7 @@ CRR에 대한 지식 부족
 기업 CTO는 AWS 비용을 시간단위로 쪼개어 분석한 자세한 보고서를 S3에 받고 싶어함
 
 - 정답
-AWS Cost&Usage Report(AWS CUR)
+AWS Cost & Usage Report(AWS CUR)
 비용 관련 문제에서 S3 버킷에 보고서를 내보낸다라는 문구가 나오면 무조건 AWS Cost&Usage Report가 정답임
 
 + AWS Cost&Usage Report(AWS CUR)
@@ -366,7 +366,7 @@ CTO가 원하는 '시간별 세부 리포트'와 'S3 버킷 저장' 두 조건�
 - 내가 선택한 오답
 // AWS Cost Explorer
 Cost Explorer는 AWS 관리 콘솔에서 비용 패턴을 시각적 차트/그래프로 확인하거나 향후 12개월간의 비용을 예측하는 용도
-웹 콘솔에서 사용자가 CSV 파일을 직접 수동 다운로드할 수는 있지만, S3 버킷으로 시간별 상세 보고서 데이터를 주기적으로 자동 전달할 수는 없어
+웹 콘솔에서 사용자가 CSV 파일을 직접 수동 다운로드할 수는 있지만, S3 버킷으로 시간별 상세 보고서 데이터를 주기적으로 자동 전달할 수는 없음
 
 -----
 
