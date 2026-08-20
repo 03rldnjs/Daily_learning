@@ -413,6 +413,391 @@ AWS 전용 백본 네트워크 -> AWS가 전 세계에 직접 깔거나 대여�
 
 31번.
 - 문제 발문 포인트
+금융 서비스 회사는 아마존 심플 스토리지 서비스(Amazon S3)의 데이터 레이크에 업로드되는 모든 고객 데이터가 항상 비공개로 유지되도록 보장되기를 원함
+가장 효율적인 솔루션
+
+- 정답
+S3 리소스의 private함이 유지되도록 Amazon S3 Block Public Access를 사용한다.
+버킷 스위치 하나만 켜두면, 누군가가 실수로 객체나 버킷 정책을 public으로 설정하더라도 AWS가 이를 강제를 무시하고 퍼블릭 접근을 무조건 차단해 줌
+
+- 내가 고른 오답 선지
+// Amazon S3에 업로드되는 각 객체의 개인정보 설정을 검토하기 위해 고위 자문 위원회를 구성합니다
+사람의 수동 작업이 들어가므로 전혀 자동화되지 않고, 전혀 효율적이지 않음
+전형적인 개소리 선지
+
+- 틀린 이유
+S3 Block Public Access에서의 Block을 블록 스토리지의 Block으로 오해함
+
+- 오답 선지 분석
+// Amazon S3에 객체가 업로드될 때마다 람다 함수를 실행함. 람다 함수는 객체 설정을 변경하여 해당 객체가 비공개 상태를 유지하도록 함
+불가능한 솔루션은 아니지만 이미 S3에 클릭 한 번으로 public 접근을 제한하는 기능을 만들어두었음
+더 비효율적인 방법을 사용할 이유가 없음
+
+// CloudWatch를 통해 S3 리소스의 private함을 유지함
+CloudWatch는 각종 성능 지표와 CloudTrail의 로그 지표를 모니터링하고 알람을 보내는 역할을 함
+S3에 대한 퍼블릭 접근 자체를 차단하거나 강제로 통제할 수 있는 기능이 없음
+
++ S3 핵심 기능 top 6
+
+① S3 Block Public Access (퍼블릭 액세스 차단)
+키워드: Ensure resources stay private, Prevent accidental public exposure
+설명: 계정 및 버킷 수준에서 실수로 외부 공개되는 것을 클릭 한 번으로 원천 차단.
+
+② S3 Versioning (버전 관리)
+키워드: Accidental deletion recovery, Overwrite protection, Keep multiple variants of an object
+설명: 실수로 파일이 삭제되거나 덮어씌워졌을 때 이전 버전으로 복구 가능하게 해주는 기능.
+
+③ S3 Lifecycle Rules (수명 주기 규칙)
+키워드: Automated data transition, Cost reduction, Move old data to Glacier
+설명: 시간이 지난 오래된 객체를 자동으로 S3 Standard ➔ Standard-IA ➔ Glacier로 이동시키거나 정해진 기간 후 자동 삭제하여 비용 절감.
+
+④ S3 Object Lock & WORM (수정 불가 보관)
+키워드: WORM (Write Once, Read Many), Compliance requirement, Prevent deletion for legal reasons
+설명: 일정 기간 동안 그 누구도(루트 유저 포함) 파일을 수정하거나 삭제할 수 없도록 법적/규정상 고정해 두는 기능.
+
+⑤ S3 Replication (CRR / SRR - 복제)
+키워드: Cross-Region Replication (CRR), Same-Region Replication (SRR), Disaster Recovery (DR), Compliance
+설명: 지리적 재해 복구(DR)나 법적 보관 목적으로 다른 리전(CRR)이나 같은 리전의 다른 버킷(SRR)으로 객체를 자동 복제.
+
+⑥ S3 Transfer Acceleration (전송 가속화)
+키워드: Long-distance file upload speed-up, Uses CloudFront Edge Locations
+설명: 멀리 떨어진 해외에서 S3로 장거리 업로드할 때, AWS 엣지 로케이션망을 이용해 업로드 속도를 대폭 높여주는 기능.
+
+---
+
+33번.
+- 문제 발문 포인트
+다음 Amazon Simple Storage Service(Amazon S3) 스토리지 클래스 중 객체에 대해 최소 저장 기간 요금 제약이 없는 클래스
+
+- 정답
+Amazon S3 Standard
+S3 Standard는 저장 단가가 가장 높은 기본 클래스이지만, 최소 보관 기간이나 최소 크기 제약이 전혀 없음
+파일 하나를 올린 뒤 1초만에 바로 삭제하더라도 딱 1초 분량의 비용만 청구
+
+- 틀린 이유
+S3 클래스의 특징은 알지만, 요금 청구 조건에 대한 지식이 부족했음
+
+- 내가 고른 선지
+Amazon S3 Glacier Flexible Retrieval
+
+- S3의 비용 청구 방식
+저장 단가가 낮을수록, 요금이 청구되는 최소 저장 기간이 늘어남
+
+- 서비스별 단가 및 최소 보관 기간
+S3 Standard
+저장 단가: 가장 높음
+최소 보관 기간: 없음
+
+S3 Standard-IA / One Zone-IA
+저장 단가: 중간
+최소 보관 기간: 30일
+
+Glacier instant/Flexible Retrieval
+저장 단가: 낮음
+최소 보관 기간: 90일
+
+Glacier Deep Archive
+저장 단가: 가장 낮음
+최소 보관 기간: 180일
+
++ IA 및 Glacier 계열은 데이터 조회 시 추가 요금이 발생함
+저장 요금이 저렴한 대신, 파일을 꺼내거나 조회할 때 GB당 데이터 조회 수수료가 별도로 청구됨(그래서 자주 보지 않는 데이터만 넣는 것이 중요)
+
++ S3 Intelligent-Tiering은 자동 분류 수수료가 붙음
+청구 방식: 액세스 패턴을 자동 분석해서 Standard <-> IA <-> Glacier 계층으로 자동적으로 이동시킴
+특징: 최소 보관 기간은 존재하지만, 데이터 조회 수수료는 없음. 대신 객체당 소액의 자동 분류 및 모니터링 수수료가 붙음
+
+S3 비용 청구 방식
+1. 단가가 저렴할수록 최소 보관 기간이 늘어난다
+2. IA / Glacier 계열은 저장 단가가 저렴하지만 조회 및 접근에 대한 수수료가 별도로 청구된다
+3. Intelligent-Tiering은 조회 수수료는 없지만, 자동 이동에 대한 소액의 수수료가 부과된다
+
+--- 
+
+36번.
+- 문제 발문 포인트
+Amazon RDS에 대한 옳은 진술
+
+- 정답 
+read replicas와 multi-AZ 모두 재해 복구에 사용될 수 있다
+
+- 틀린 이유 
+read replicas에 대한 이해 부족 및 오해
+
+- 내가 고른 오답 선지
+read replicas는 읽기 성능 향상만을 위해, multi-AZ는 재해복구만을 위해 사용할 수 있음
+-> 거의 맞는 말이지만, only가 들어가서 틀림. Read Replica는 읽기 성능 확장 뿐만 아니라 재해 복구에도 사용될 수 있음
+
+- Read Replica는 원래 scale out을 통한 읽기 성능 확장(Scale-out)이 목적이지만, 재해 복구다 가능한 이유
+1. 독립적인 DB로 승격 가능(독립 DB로 승격시 Read/Write가 모두 가능한 메인 DB로 변함)
+메인 DB에 장애가 발생하면, Read Replica를 독립된 새로운 Standalone 메인 DB로 승격시켜 서비스를 계속 운영할 수 있
+2. 교차 리전 복제
+Read Replica는 다른 AWS 리전에도 둘 수 있음. 만약 메인 리전 전체에 대형 재해가 발생해도, 다른 리전에 있는 Read Replica를 메인 DB로 승격시켜서 서비스를 유지할 수 있음
+(+ 한 번 메인 DB로 승격한 DB는 다시 예전의 Read Replica 상태로 돌려놓을 수 없음)
+(다시 복제본 상태로 만들고 싶다면, 해당 DB는 그대로 두고, 새로 Read Replica를 생성해야 함)
+
+---
+
+38번.
+- 문제 발문 포인트
+소셜 미디어 분석 기업이 AWS의 서버리스 stack으로 마이그레이트하길 원함
+Lambda로 다룰 수 있는 시나리오는?
+
+- 정답
+. AWS Lambda는 DynamoDB table 업데이트 같은 이벤트에 반응하여 코드를 실행시킬 수 있음
+. AWS Lambda는 데이터가 Amazon S3 버킷에 저장되기 전에 전처리하는 데 사용할 수 있음
+S3에 데이터를 저장하기 직전, Lambda가 중간에서 데이터 양식을 정제하거나(JSON 변환, 필드 추출 등) 압축/가공하는 전처리(Preprocessing) 작업을 수행하기에 가장 적합해.
+
+- 내가 고른 오답 선지
+// AWS Lambda에 컨테이너 서비스를 설치할 수 있음
+Lambda는 코드나 라이브러리 용량이 클 때, Docker 컨테이너 이미지 형태로 코드를 말아서 배포하는 기능을 지원함. 
+즉, 코드를 컨테이너 이미지로 포장해서 Lambda에 올려 실행할 수 있는 것.
+그러나 Lambda는 코드가 실행될 때 잠시 생성되었다가 사라지는 휘발성 및 무상태 환경임
+그러니 당연히 컨테이너를 직접 설치해서 띄워둘 수 없음
+-> 컨테이너 실행 및 관리를 원한다면 AWS ECS, EKS, Fargate를 사용해야 함
+(Lambda가 최대 15분의 실행시간을 지닌 휘발성 인스턴스임을 생각했다면 절대 고르지 않았을 선지
+각 서비스의 본질적 특징을 생각하고 풀자)
+
+- 틀린 이유
+AWS Lambda에 대한 세부적 이해 부족 + 본질 망각
+
+- 오답 선지 분석
+// 저지연 데이터베이스를 Lambda에 설치할 수 있음
+컨테이너와 동일한 이유로 불가.
+데이터를 영구 저장해야하는 데이터베이스는 당연히 설치할 수 없음
+// AWS Lambda는 민감한 환경 변수를 저장하는 데 사용할 수 있음
+민감한 비밀번호나 API 키 같은 환경 변수는 AWS Secrets Manager나 AWS Systems Manager Parameter Store에 저장하는 것이 안전함
+Lambda는 이벤트 기반 실행 환경일 뿐 저장소가 아님
+
+-> Lambda가 이벤트 기반 실행 환경이며, 휘발성을 지닌 함수임을 기억했다면 절대 틀리지 않았을 것
+
++ AWS 시험 오답 선지 패턴 4가지
+1. 기술적으로 불가능한 구성
+ex. Lambda에 컨테이너 설치, Global Accelerator에 S3 버킷 연결 등
+
+2. 클라우드 자동화 철학에 반하는 수동 방식
+ex. 고위 위원회 구성하여 검토하기, 사람이 24시간 모니터링하기 등
+-> AWS는 자동화와 관리형 서비스를 지향 -> 수동 인적 자원이 들어가는 것은 100% 오답
+
+3. 극단적 제약 단어 포함(only, always, never)
+ex. Read Replica는 오직 읽기 성능 향상에만 쓰인다
+
+4. 과도한 엔지니어링
+ex. 이미 편리한 기능이 존재하는데, Lambda 코드를 짜서 구조 설계
+
+--- 
+
+44번.
+- 문제 발문 포인트
+Amazon EC2 인스턴스를 시작(Launch)할 때 부트스트랩 스크립트를 실행하기 위해 사용할 수 있는 것
+
+- 정답
+Amazon EC2 instance user data
+EC2에서는 인스턴스를 생성할 때 user data라는 입력 칸을 제공함
+여기에 부트스트랩 스크립트를 작성해 넣으면, 인스턴스가 최초 부팅될 때 root 권한으로 해당 코드가 자동 실행됨
+
+- 오답 선지 분석
+// Amazon EC2 instance metadata(대표적 낚시 선지)
+메타데이터는 인스턴스의 자기 정보임(인스턴스 ID, 프라이빗/퍼블릭 IP 주소, IAM role 이름 등)
+인스턴스 내부에서 IP로 요청을 보내서 자신의 정보를 조회할 때 쓰는 데이터이지, 스크립트를 실행하는 공간이 아님
+
+// Amazon EC2 instance AMI data
+AMI는 OS와 어플리케이션의 상태를 정적으로 저장해 둔 이미지(붕어빵 틀)일 뿐, 인스턴스 생성 시점에 동적으로 스크립트를 넣어 실행하는 기능이 아님
+
+// Amazon EC2 instance configuration data
+공식 용어 아님. 걍 오답용 단어 조합
+
+- user data vs meta data
+1. User Data
+개념: 사용자가 부팅 시 실행할 명령/스크립트
+주요 용도: 패키지 설치, 환경 설정(Bootstrapping)
+접근 방식: 인스턴스 생성 시 입력 -> 최초 1회 자동 실행
+
+2. Metadata
+개념: 인스턴스 자신의 상태/설정 정보
+주요 용도: 자신의 IP, 인스턴스 ID, IAM Role 정보 조회
+접근 방식: 인스턴스 내부에서 호
+
++ AMI(Amazon Machine Image)란?
+EC2 인스턴스를 찍어내기 위한 미리 완성된 OS 및 소프트웨어 패키지 틀
+OS 뿐만 아니라 필요한 프로그램, 환경 설정, EBS 볼륨 상태(스냅샷)까지 통째로 저장해 둔 템플릿이라서, AMI만 있으면 똑같은 설정의 EC2 인스턴스를 몇 초 만에 수십대씩 즉시 복제해서 띄울 수 있음
+핵심 특징 4가지
+1. 완전한 시스템 백업/템플릿: EC2 생성에 필요한 모든 정보가 포함되어 있음
+2. 리전 종속적: AMI는 특정 리전에 생성/저장됨. 다른 리전에서 같은 AMI로 EC2를 띄우려면 별도의 기능을 사용해야 함
+3. 재사용성 및 가속화: 인스턴스를 켤 때마다 User Data 스크립트로 하나씩 앱을 설치하는 것보다, Custom AMI로 쉽게 켜는게 부팅 및 서비스 준비 속도가 휠씬 빠름
+4. 보안 및 권한 관리: AMI를 개인만 쓸 수도 있고, 다른 AWS 계정과 공유하거나, 전체 공개 또는 AWS Marketplace에 판매할 수도 있음
+
+- CLF-C02 시험 출제 패턴 (정답 키워드)
+
+① "동일한 환경의 EC2를 빠르게 대량 복제하고 싶을 때"
+시험 지문: Launch multiple identical EC2 instances quickly, Standardized environment for EC2
+해설: 원하는 세팅을 마친 EC2로 Custom AMI를 만들어 두고, 이를 기반으로 인스턴스를 띄우는 것이 정답.
+
+② "다른 리전으로 EC2 인스턴스를 이전/복제하고 싶을 때"
+시험 지문: Copy EC2 instance configuration to another Region
+해설: EC2 인스턴스의 AMI를 생성 ➔ 해당 AMI를 타겟 리전으로 복사(Copy AMI) ➔ 새 리전에서 EC2 생성.
+
+③ "User Data vs AMI 차이 묻기"
+User Data: 부팅될 때 동적으로 스크립트를 실행해서 프로그램을 하나씩 설치 (동적/시간 소요됨).
+AMI: 아예 프로그램이 다 들어있는 정적 이미지를 가져와서 바로 실행 (정적/부팅 빠름).
+
++ EC2 인스턴스 찍어내기는 CloudFormation도 가능한데, 뭐가 다른가?
+AMI (Amazon Machine Image): EC2 전용 디스크 이미지
+범위: 오직 EC2 인스턴스 1대 내부(OS, 설치된 소프트웨어, 파일 시스템).
+비유: 컴퓨터의 '윈도우/리눅스 복구 디스크'.
+
+AWS CloudFormation: AWS 인프라 전체 설계도 (IaC)
+범위: EC2뿐만 아니라 VPC(네트워크), S3(스토리지), RDS(데이터베이스), IAM(권한) 등 AWS 리소스 전체의 연결 조합.
+비유: 데이터센터 전체를 짓는 '건축 설계도'.
+
+즉, AMI는 EC2만 다루는 EC2 특화 서비스이고, CloudFormation은 리소스들의 조합을 설계한 설계도
+
+---
+
+51번.
+- 문제 포인트
+이커머스 기업이 EC2의 RI 사용량이 특정 기준값보다 줄어들면 알림을 받고 싶어함
+이에 적합한 AWS 서비스
+
+- 정답
+AWS Budgets
+
+- 틀린 이유
+문제에 등장하는 alert의 정확한 의미 파악 미흡
+
+- 내가 고른 오답 선지
+AWS Cost Explorer
+
+- 왜 Cost Explorer는 정답이 될 수 없는가?
+Cost Explorer는 사용자가 직접 콘솔에 들어가서 차트를 확인하고, 놀고 있는 인스턴스가 있는지 조회를 해야 알 수 있는 보고서/대시보드 서비스임
+조건에 따라 이메일을 보내주거나 알림을 전달하는 'Alert' 매커니즘이 존재하지 않음
+그에 반해 Budgets은 알림 전송에 특화된 서비스임
+사용자가 임계값을 지정해 두면, 조건이 충족되는 순간 이메일이나 SNS로 메시지를 직접 쏴주는 서비스
+
+- AWS Budgets의 숨겨진 대표 기능
+1. Cost Budgets: 설정한 비용을 초과할 때 알림
+2. Usage Budgets: 설정한 사용량을 초과할 때 알림
+3. RI / Savings Plans Budgets
+RI Utilization Budget: 예약 인스턴스 사용률이 특정 % 미만으로 떨어지면 알림 (drops below a threshold).
+RI Coverage Budget: 전체 인스턴스 중 RI로 커버되는 비율이 목표치에 미달하면 알림.
+
+---
+
+53번.
+- 문제 발문 포인트
+AWS Well-Architected Framework의 어떤 기둥이 워크로드 요구사항에 맞는 적절한 리소스 유형과 크기를 선택하도록 보장하는가
+
+- 정답
+Performance Efficiency(올바른 스펙 선택 -> 최고의 효율)
+핵심 -> 내 작업의 특성에 꼭 맞는 전용 서버 타입과 크기를 골라 최고 효율을 내는 것
+ex. 메모리를 많이 쓰는 작업에는 메모리 최적화를, 연산이 많은 작업에는 컴퓨팅 최적화를 선택하는 스펙 맞춤 설정
+
+- 틀린 이유
+AWS Well-Architected Framework에 대한 정확한 이해 부족
+
+- 내가 고른 오답 선지
+Operational Exellence(시스템 자동화 및 운영/모니터링)
+핵심 -> 시스템을 어떻게 자동화하여 운영하고 모니터링할 것인가?
+-> 리소스의 스펙을 고르고 유형, 크기를 선택하는 것이 아니라, 코드로서의 인프라, 자동 배초, 패치 관리, 운용 절차 개선이 이 기둥에 해당함
+
++ Well-Architected Framework
+보안 -> 데이터 및 시스템 보호
+운영 우수성 -> 시스템 자동화 및 운영/모니터링
+신뢰성 -> 장애 복구 및 서비스 지속성
+성능 효율성 -> 요구에 맞는 스펙의 서비스/기술 선택을 통 최고의 효율
+비용 최적화 -> 불필요한 비용 낭비 방지
+지속 가능성 -> 환경 관련(탄소 발자국 등)
+
+---
+
+55번.
+- 문제 발문 포인트
+VPC를 SQS Queue에 공용 인터넷 없이 private하게 연결할 수 있는 AWS entitiy
+
+- 정답
+VPC Interface Endpoint
+Interface Endpoint는 AWS PrivateLink 기술을 활용해 서브넷 내에 프라이빗 IP를 가진 가상 네트워크 인터페이스를 생성함
+SQS, SNS, CloudWatch, Systems Manager등 S3와 DynamoDB를 제외한 대부분의 AWS 서비스는 이 방식을 통해 사설 연결을 구현함
+
+- 틀린 이유
+서비스 기능 및 명칭 숙지 미흡
+
+- 내가 고른 오답 선지
+// VPC Gateway Endpoint
+Gateway Endpoint는 라우팅 테이블에 타깃을 등록하는 특수한 엔드포인트임
+Gateway Endpoint가 지원하는 서비스는 오직 S3와 DynamoDB 딱 2개임
+지문에는 SQS를 물었으므로 Interface Endpoint가 정답임
+
+- 오답 선지 분석
+// Internet Gateway
+Internet Gateway는 공용 인터넷을 사용하므로 문제에서 요구한 private connect 조건에 위배됨
+
++ Gateway vs Interface
+1. Gateway Endpoint
+지원 서비스: S3, DynamoDB (딱 2개)
+구현 방식: 라우팅 테이블에 타깃 지정
+비용: 무료
+key words: S3, DynamoDB, Route Table, Free
+
+2. Interface Endpoint
+지원 서비스: SQS, SNS, Kinesis 등 대부분의 서비스
+구현 방식: 서브넷 내 프라이빗 IP 생성
+비용: 시간당 사용료 + 데이터 처리 비용 발생
+key words: PrivateLink, ENI, Private IP, SQS/SNS
+
++ 각각 이름이 붙은 이유
+1. Gateway Endpoint(이정표/관문 방식)
+S3나 DynamoDB로 갈 때는 이 '관문(Gateway)'으로 나가라고 타깃을 등록하는 방식으로 작동해서 Gateway라는 이름이 붙었음
+
+2. Interface Endpoint(네트워크 카드/사설 IP 방식)
+AWS에서 가상 네트워크 카드를 ENI(Elastic Network 'Interface')라고 불렀음
+이 엔드포인트를 만들면 내 서브넷 안에 실제 네트워크 '인터페이스'(ENI 카드)가 꽂히면서 사설 IP를 부여받기 때문에 Interface라는 이름이 붙었음
+
+라우팅 테이블 관문(Gateway)만 터주는 S3/DynamoDB
+서브넷에 네트워크 카드(Interface) 꽂아서 IP 만들어주는 나머지 서비스
+
+---
+
+56번.
+- 문제 발문 포인트
+다음 AWS 인증 메커니즘 중 컴퓨터의 USB 포트에 연결할 수 있는 AWS 다중 인증(AWS MFA) 장치를 지원하는 것
+
+- 정답
+U2F security Key
+실문 보안 키로, PC의 USB 포트에 꽂거나 NFC로 태그해야 하는 하드웨어 기기임
+문제 발문에서 USB 포트에 연결할 수 있는 MFA 장치를 원했으므로 가장 적절한 선지임
+
+- 틀린 이유
+이미 배운 내용인데 복습을 쳐 안했음
+
+- 내가 고른 오답 선지
+Hardware MFA device
+= 액정 화면이 달리 열쇠고리 형태의 실물 기기(은행에서 준 OTP장치를 본 적이 있을 것임)
+화면에 뜨는 6자리 일회용 숫자를 눈으로 보고 직접 입력하는 방식임(USB 포트에 꽂는 기기가 아님)
+
+- 다시 AWS 공식 지원 MFA
+AWS 공식 지원 MFA 3가지
+1. 패스키 및 보안키(FIDO2 표준) -> 기기 내장 인증키, 패스키, 실물 보안 키 등의 형태가 존재(U2F security Key도 여기에 해당)
+2. Virtual MFA device(Virtul Authenticator App) -> 소프트웨어 기반이라 무료이고 구성이 매우 간편함
+3. 하드웨어 TOTP 토큰(Hardware MFA device) -> 흔히 알고 있는 물리 OTP 장치 
+
++ U2F security Key
+-> 실물 보안 키를 의미
+-> PC의 USB 포트에 직접 꽂거나 NFC로 태그해야 하는 하드웨어 기기
+-> AWS 공식 지원 MFA 중 1번인 FIDO2에 해당함(패스키 및 보안키)
+
+---
+
+57번.
+- 문제 발문 포인트
+
+
+
+
+
+
+
+
 
 
 
