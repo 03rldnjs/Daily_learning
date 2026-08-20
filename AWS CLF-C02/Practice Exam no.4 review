@@ -790,12 +790,60 @@ AWS 공식 지원 MFA 3가지
 
 57번.
 - 문제 발문 포인트
+AWS Trusted Advisor가 일반적인 보안 설정 오류 중 알림을 제공할 수 있는 것
 
+- 정답
+. S3 버킷에 퍼블릭 액세스를 허용한 경우
+. AWS CloudTrail의 user activity logging을 켜지 않은 경우
+-> 계정 내에서 누가 무슨 작업을 했는지 기록하는 CloudTrail이 꺼져있느면 보안 사고 발생 시 추적이 불가함으로 경고 알림을 보냄
 
+- 내가 고른 오답 선지
+// IAM 사용자 자격 증명을 다른 사람과 공유한 경우
+AWS 입장에서는 어떤 사람이 IAM 계정의 ID/비번이나 Access Key를 다른 사람에게 말로 알려주거나 메모장으로 적어서 공유했는지 시스템적으로 알 방법이 없음
+Trusted Advisor가 체크하는 IAM 관련 항목:
+계정 공유 여부가 아니라, "Root 계정에 MFA가 설정되어 있는가?", "Access Key가 오래되었는가?", "사용하지 않는 IAM 자격 증명이 있는가?" 같은 AWS 내 설정값(Configuration)을 검사
 
+- 오답 선지 분석
+// S3 Glacier의 데이터 암호화를 활성화하지 않았을 때
+-> S3의 데이터 암호화는 기본값으로, 자동으로 시행됨.
+사용자가 임의로 활성화/비활성화할 수 있는 기능이 아님
 
+// Amazon S3 버킷에 tag를 붙이지 않았을 때
+tagging은 사용자의 관리/분류 편의를 위한 optional한 행동
+필수적인 행위도 아니고 보안 상의 오류라고 보기도 어려움
 
+---
 
+65번.
+- 문제 발문 포인트
+AWS Global Accelerator에 대해 옳은 진술
+
+- 정답
+Global Accelerator는 애플리케이션에 고정된 진입점 역할을 하는 정적 IP 주소를 제공함
+AWS Global Accelerator는 비HTTP 사용 사례에 적합함
+-> 모두 맞는 설명임
+Global Accelerator는 AWS 글로벌 전용 백본 네트워크를 활용하여 사용자와 애플리케이션 간의 네트워크 지연시간 및 패킷 손실 최소화하는 서비스
+글로벌 사용자가 먼 리전에 있는 자신의 리소스에 접근할 때, 공용 인터넷을 거치지 않고 가장 가까운 엣지 로케이션으로 바로 들어오게 한 다음, 목적지까지 AWS의 초고속 전용 백본 네트워크를 통해 데이터가 이동하도록 해줌
+공용 인터넷을 거치지 않으므로 손실이나 지연 시간이 거의 발생하지 않음
+고정 IP 2개 제공를 제공하며 Global Accelerator는 HTTP/HTTPS가 아닌 TCP, UDP 프로토콜을 지원하므로 비HTTP 사용 사례에 적합함
+게임 서버나 IoT기기, 실시간 채팅 등 비HTTP 서비스에 아주 강력함
+외부로 노출되는 고정 IP 2개를 제공하여, 방화벽 규칙을 바꿀 필요 없이 유연하게 백엔드 인스턴스나 ELB를 교체할 수 있다는 장점도 있음
+
+- 내가 고른 오답 선지
+// AWS Global Accelerator는 AWS 글로벌 네트워크와 그 엣지 로케이션을 사용한다. 하지만 Global Accelerator에서 사용하는 엣지 로케이션은 Amazon CloudFront 엣지 로케이션과 다르다.
+-> 거의 맞는 말이지만, AWS Global Accelerator가 사용하는 엣지 로케이션과 동일함
+
+- 틀린 이유
+개념 부족 및 선지 읽기 소홀
+
+- 오답 선지 분석
+// Global Accelerator는 정적 웹사이트 호스팅하는데 사용될 수 있음
+-> Global Accelerator는 S3나 EC2처럼 웹사이트를 호스팅하는 역할이 아니라 리소스에 대한 접근 속도를 빠르게 만들어주는 서비스
+웹사이트 호스팅과는 전혀 관련이 없음
+// Global Accelerator는 ELB와 함께 배치될 수 없음
+-> ELB(ALB & NLB), EC2, Elastic IP 등과 함께 배치 가능. 또한 ELB는 Global Accelerator 뿐만 아니라 CloudFront와도 함께 사용 가능
+
+-----
 
 
 
