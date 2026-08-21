@@ -49,16 +49,21 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   Amazon EMR: 오픈소스 프레임워크 기반 빅데이터 분산 처리
   Amazon Athena: S3에 저장된 데이터를 SQL 문법으로 서버리스 분석
   (데이터베이스나 스토리지가 아니라, S3에 저장된 데이터를 직접 조회하는 서버리스 대화형 쿼리 서비스)
-  Amazon Redshift: 페타바이트 급 데이터 웨어하우스, 데이터 분석도 제
+  Amazon Redshift: 페타바이트 급 데이터 웨어하우스, 데이터 분석도 제공
+
+---
 
 # AWS Developer Support plans의 계정 담당자 수 및 케이스 오픈 제한 규칙
 지정된 1명의 담당자만 기술 지원 케이스 작성 & 문의
 담당자는 1명으로 제한되지만, 그 1명이 오픈할 수 있는 문의 케이스의 개수는 무제한
+
 + All support plan 비교
   Basic: 담당자 제한 없지만 기술문의가 아닌 일반 문의만 가능
   Developer: 1명, 영업시간 내 이메일로 가능(12시간 이내 응답)
   Business: 담당자수 무제한, 24/7 이메일, 전화, 채팅(1시간 이내 응답)
   Enterprise: 담당자수 무제한, 24/7 이메일, 전화, 채팅(치명적 오류 시 15분 이내 응답), 지정 TAM 제
+
+---
 
 # AWS EventBridge
 - 핵심 기능 3가지
@@ -85,4 +90,42 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   - Amazon EventBridge(Event Bus 방식)
     컨텐츠 패턴 규칙 기반의 스마트 디커플링
     이벤트의 내용을 읽어서 조건에 따라 정교하게 라우팅해줌. AWS 서비스 및 타사와의 연동에 특화되어 있음
+
+---
+
+# 예약 인스턴스가 가능한 AWS 서비스
+
+- Amazon EC2
+  가장 표준적인 RI 모델로, 가상 서버 용량을 미리 예약하고 최대 72~75%의 할인을 받음
+  표준 RI와 사양 변경이 가능한 Convertible RI로 나뉨
+- Amazon RDS
+  관계형 데이터베이스 인스턴스용 예약 요금제
+  Reserved DB Instance라고 부르며, 24시간 계속 구동되는 DB 인프라 특성상 RI 사용시 할인 효과가 매우 큼
+- Amazon DynamoDB
+  NoSQL(비관계형) 데이터베이스. 스키마가 엄격하지 않으며 Key-Value 모델과 Document 모델을 지원함
+  읽기/쓰기 용량 단위에 대해 미리 예약하여 할인을 받는 Reserved Capacity 방식을 지원함
+- Amazon ElastiCache/MemoryDB
+  Redis/Memcached 기반의 인메모리 캐시 및 데이터베이스 서비스
+  Reserved Nodes 형태로 1년/3년 약정을 통해 노드 비용 할인을 받음
+- Amazon Redshift
+  대규모 데이터 웨어하우스 서비스로 데이터 분석도 제공함
+  Reserved Nodes 개념으로 노드 비용을 크게 절감할 수 있음
+  
+---
+
+# AWS Oranizations의 통합 결제 기능
+
+- 4대 핵심 규칙
+  1. 단일 결제 주체: 조직의 관리 계정이 모든 연결된 계정의 비용을 일괄 지불함
+  2. 볼륨 할인 공유: AWS의 대부분의 리소스는 사용량이 늘어날수록 GB당 단가가 낮아지는데, 계정을 통합하면서 할인 구간이 상승하여 더 저렴한 단가로 서비스 이용이 가능함
+  3. RI 및 Savings Plans 혜택 공유: 한 멤버 계정에서 구매한 RI나 Savings Plans를 해당 계정이 다 쓰지 못해 남는 경우, 조직 내 다른 멤버 계정의 온디맨드 사용량으로 할인이 자동으로 넘어감
+  4. 무료 티어 합산: 무료 티어 혜택은 계정마다 적용되는 것이 아니라, 조직 전체를 통틀어 1개 계정 분량만 통합 합산되어 적용됨
+
+- RI / Savings Plans 할인 공유 조건 및 주의사항
+  1. 조건 일치 필수: 인스턴스 타입, 리전, AZ 등의 사양이 일치해야 할인이 공유됨
+  2. 비활성화 옵션: 조직 관리자는 필요에 따라 특정 계정 간에 RI/Savings Plans 할인이 공유되지 않도록 비활성화할 수 있음
+
+
+
+
 
