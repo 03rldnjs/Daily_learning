@@ -125,7 +125,92 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   1. 조건 일치 필수: 인스턴스 타입, 리전, AZ 등의 사양이 일치해야 할인이 공유됨
   2. 비활성화 옵션: 조직 관리자는 필요에 따라 특정 계정 간에 RI/Savings Plans 할인이 공유되지 않도록 비활성화할 수 있음
 
+# AWS Storage Gateway
+- 온프레미스와 AWS 클라우드 스토리지를 연결해주는 하이브리드 클라우드 스토리지 (서비스의 이름 그대로 스토리지를 이어주는 문/서비스)
+- 온프레미스 서버의 로컬 캐시를 사용한다는 점이 핵심
+- AWS에 모든 데이터를 보관하지만, 자주 사용하는 데이터는 온프레미스 장비의 로컬 캐시에 남겨두어 빠른 응답 속도 제공
+
+- Storage Gateway의 3가지 핵심 세부 유형
+  1. S3 File Gateway(파일 형태)
+     - 연결 방식: NFS, SMB 표준 '파일' 프로토콜 사용
+     - 작동: 온프레미스의 파일 데이터를 AWS S3의 객체 형태로 저장
+     - 유스케이스: 온프레미스 앱이 기존 파일 시스템 방식 그대로 S3에 파일을 백업 및 저장하고 싶을 때
+  2. Volume Gateway(블록 형태)
+     - 연결 방식: iSCSI 블록 스토리지 프로토콜 사용
+     - 작동: 온프레미스 서버에 가상 하드디스크처럼 붙여 쓰며(EBS와 비슷한 운영), 백업본은 EBS Snapshot으로 저장
+     - 운영 모드(정반대의 두 개 방식)
+       - Cached Volume: 전체 데이터는 S3에 두고, 자주 쓰는 데이터만 로컬 캐시에 보관
+       - Stored Volume: 전체 데이터는 로컬에 보관하고, AWS에는 백업본만 비동기 복사
+  3. Tape Gateway(테이프 백업 형태)
+     - 연결 방식: iSCSI-VTL(가상 테이프 라이브러리)
+     - 작동: 기존 온프레미스의 실물 물리 테이프 백업 시스템을 대체하여 S3 Glacier / Glacier Deep Archive에 장기 보관
+    
+- CLF-C02 시험용 정답 키워드
+  - hybrid Cloud storage: 온프레미스와 AWS를 잇는 다리 역할(스토리지)
+  - On-premises Local Cache: 클라우드로 전송되는 데이터의 로컬 읽기/쓰기 속도 향상
+  - NFS / SMB / iSCSI: '기존 온프레미스 프로토콜을 수정 없이 그대로 사용'
+
+# Legacy Third-party Database
+- Legacy: 옛날에 만들어져서 오래된 구형 시스템/소프트웨어
+- Third-party: AWS 자체 서비스가 아닌 제 3의 외부 전문 업체가 만든 소프트웨어
+- 합친 의미: AWS에서 관리형 서비스로 공식 지원하지 않는 외부 업체의 오래되거나 특수한 데이터베이스
+
+- Legacy Third-party Database를 운영할 수 있는 AWS 서비스 = EC2 인스턴스
+  AWS RDS가 지원하지 않는 마이너하거나 오래된 레거시 DB는 AWS가 자동으로 설치해주거나 관리해 줄 수 없음
+  따라서 사용자가 직접 빈 가상 서버(EC2)를 하나 임대한 뒤, OS 위에 해당 레거시 DB 설치 파일을 직접 올려서 운영하는 방법밖에 없음
+
+- Amazon EC2의 3대 키워드
+  1. Legacy / Custom / Unsupported Software (특수/오래된/미지원 소프트웨어)
+     - 지문에 RDS나 DynamoDB 등 관리형 서비스에서 지원하지 않는 비표준 DB나 소프트웨어를 실행해야한다고 할 때
+  2. Full OS Access / OS-level Control / Root Access (OS 제어권 필요)
+     - OS 단에 직접 접속해서 제어해야하는 경우(RDS같은 완전 관리형 서비스는 OS에 대한 접근 권한이 주어지지 않음)
+     - Amazon EC2가 IaaS(Infra as a Service)이기 때문에 가능함
+  3. Install custom plugins or database engines (커스텀 플러그인 / 엔진 설치)
+     - 관리형 DB 서비스가 제공하는 기본 설정 범위를 벗어나 직접 환경을 개조해야 할 때
 
 
+# Amazon S3 + CloudFront
+- Amazon S3(객체 스토리지 - 원본 저장소)
+  - 대용량 비디오, 이미지, 문서 같은 정적 객체를 가장 저렴하고 안전하게 보관할 수 있는 글로벌 스토리지
+- Amazon CloudFront(CDN/Content Delivery Network)
+  - 전 세계에 배치된 Edge Location 네트워크를 이용해 S3에 있는 파일들을 캐싱해 두고, 전 세계 사용자에게 가장 낮은 지연 시간으로 쏘아주는 역할
+ 
+-> Origin(Amazon S3) + CDN/Distribution(Amazon CloudFront) = 전 세계 빠른 정적 컨텐츠 배포
 
+- EFS나 EBS는 정적 컨텐츠의 빠른 배포에 적합하지 않은 이유
+ 1. Amazon EFS(Elastic File System):
+    - 리눅스 EC2 인스턴스 여러대에 동시에 마운트해서 사용하는 네트워크 공유 파일 시스템
+    - CloudFront와 바로 연결 불가, 비용도 S3에 비해 매우 비쌈
+   
+ 2. Amazon EBS(Elastic Block Storage):
+    - 특정 EC2 인스턴스 1대에 직접 연결되는 단일 가상 하드디스크(HDD/SSD)
+    - 전 세계에 멀티미디어 파일을 직접 서빙하는 용도로 사용되지 않음
+   
+# AWS CloudFront와 연동 가능한 주요 AWS 리소스/오리진
+- Amazon S3 Bucket
+  - 가장 대표적인 조합. 이미지, 비디오 파일 등 정적 웹 자산 저장 및 전송
+- Application Load Balancer(ALB)
+  - 동적 웹 어플리케이션 앞단에서 글로벌 캐싱 및 SSL/TLS 오프로딩 처리
+- Amazon EC2 instance
+  - 단일 EC2 웹 서버 퍼블릭 IP/DNS를 직접 오리진으로 지정하여 전송 속도 향상
+- AWS Elemental MediaStore / MediaPackage
+  - 비디오 스트리밍 및 라이브 방송 컨텐스 전송
+- Amazon API Gateway
+  - REST API / HTTP API 응답을 캐싱하고 전 세계 엣지에서 빠르게 응답
+- AWS Lambda
+  - 오리진은 아니지만, CloudFront 엣지 로케이션에서 코드를 직접 실행하여 요청/응답을 조작 및 커스텀 로직 처리 가능
++ AWS 외부에 있는 HTTP/HTTPS 웹 서버도 URL 주소만 입력하면 CloudFront CDN 적용 가능
++ Third-party Cloud Storage / Web Server에도 CloudFront 적용 가
 
+# AWS 공동 책임 모델 구분법
+- 클라우드 자체에 대한 관리/보안 -> AWS의 책임
+- 클라우드 내부에 대한 관리/보안 -> customer/고객의 책임
+
+- 헷갈리는 선지
+  1. Account password policies (= IAM password polices)
+     - 그냥 Account라고 언급하면, 고객이 소유한 AWS 계정 내의 사용자 비밀번호 정책임
+     - 이는 클라우드 '자체'에 대한 관리/보안이라고 볼 수 없음 -> 따라서 고객의 책임
+  2. Patching of storage systems
+     - 스토리지 '시스템'을 패치하고 업데이트하는 것은 클라우드 '자체'에 대한 관리/보안임 -> 따라서 AWS의 책임
+     - 주의: 만약 지문이 Patching of EC2 OS / Guest OS -> 이는 클라우드 내부에 대한 관리/보안이므로 고객의 책임
+    
