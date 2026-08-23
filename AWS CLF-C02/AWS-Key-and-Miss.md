@@ -26,6 +26,17 @@ AWS의 설정 상태를 지속적으로 기록하고, 변경 이력을 추적하
   Trusted Advisor: AWS 모범 사례를 기반으로 한 종합적인 가이드(비용, 성능, 보안 등) 제공
   Config: 사용자가 정의한 맞춤형 컴플라이언스 규칙에 맞춰 커스텀 모니터링 가능
 
+- 구체적인 문항 예시
+  액세스 키가 60일이 지나면 자동으로 비활성화되는 기업 규정이 있음.
+  규정에 맞지 않는 접근 키를 확인할 수 있는 AWS 서비스는?
+  -> AWS Config의 핵심 기능 4가지 중 '규정 준수 평가' 영역에 해당함
+
+- 4가지 핵심 기능별 문제 유형 예시
+  - 규정 준수 평가: 60일이 지난 Access Key나, 퍼블릭으로 열린 S3 버킷처럼 회사 보안 정책을 위반한 리소스 식별
+  - 자동 수정: 규정을 위반한 Access Key를 식별했을 때, 사람의 개입 없이 자동으로 비활성화하고 싶다
+  - 설정 이력 기록: 특정 보안 그룹의 규칙이 과거 30일 동안 어떻게 변경되었는지 타임라인 변경 내역을 주적하고 싶다
+  - 특정 EBS 볼륨이 삭제되기 전에 이 볼륨이 어떤 EC2 인스턴스에 연결되어 있었는지 연관관계를 확인하고 싶
+   
 ---
 
 # Shield Advanced가 보호하는 리소스
@@ -95,25 +106,25 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
 
 # 예약 인스턴스가 가능한 AWS 서비스
 
-- Amazon EC2
+- Amazon EC2:
   가장 표준적인 RI 모델로, 가상 서버 용량을 미리 예약하고 최대 72~75%의 할인을 받음
   표준 RI와 사양 변경이 가능한 Convertible RI로 나뉨
-- Amazon RDS
+- Amazon RDS:
   관계형 데이터베이스 인스턴스용 예약 요금제
   Reserved DB Instance라고 부르며, 24시간 계속 구동되는 DB 인프라 특성상 RI 사용시 할인 효과가 매우 큼
-- Amazon DynamoDB
+- Amazon DynamoDB:
   NoSQL(비관계형) 데이터베이스. 스키마가 엄격하지 않으며 Key-Value 모델과 Document 모델을 지원함
   읽기/쓰기 용량 단위에 대해 미리 예약하여 할인을 받는 Reserved Capacity 방식을 지원함
-- Amazon ElastiCache/MemoryDB
+- Amazon ElastiCache/MemoryDB:
   Redis/Memcached 기반의 인메모리 캐시 및 데이터베이스 서비스
   Reserved Nodes 형태로 1년/3년 약정을 통해 노드 비용 할인을 받음
-- Amazon Redshift
+- Amazon Redshift:
   대규모 데이터 웨어하우스 서비스로 데이터 분석도 제공함
   Reserved Nodes 개념으로 노드 비용을 크게 절감할 수 있음
   
 ---
 
-# AWS Oranizations의 통합 결제 기능
+# AWS Organizations의 통합 결제 기능
 
 - 4대 핵심 규칙
   1. 단일 결제 주체: 조직의 관리 계정이 모든 연결된 계정의 비용을 일괄 지불함
@@ -213,4 +224,65 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   2. Patching of storage systems
      - 스토리지 '시스템'을 패치하고 업데이트하는 것은 클라우드 '자체'에 대한 관리/보안임 -> 따라서 AWS의 책임
      - 주의: 만약 지문이 Patching of EC2 OS / Guest OS -> 이는 클라우드 내부에 대한 관리/보안이므로 고객의 책임
+    
+# AWS Web Application Firewall
+- 웹 어플리케이션 계층(Layer 7)으로 들어오는 HTTP/HTTPS 악성 요청을 차단하는 방화벽
+- 웹 요청의 '입구'역할을 하는 HTTP/HTTPS 엔드포인트 서비스들에 직접 연결되어 보호하는 기능
+
+- AWS WAF를 적용할 수 있는 주요 서비스 목록
+  - Application Load Balancer(ALB)
+    - 이름에서 알 수 있듯, 어플리케이션 레이어(L7) 전용 로드 밸런서로, WAF를 연결하면 웹 트래픽이 EC2나 컨테이너로 전달되기 전 가장 앞단에서 악성 웹 트래픽을 미리 필터링할 수 있음
+  - Amazon CloudFront
+    - 글로벌 CDN(Content Delivery Network) 서비스의 엣지 로케이션 레벨에서 WAF를 적용할 수 있음
+      악성 트래픽이 원본 서버(S3, ALB 등)까지 도달하지도 못하게 전 세계 엣지에서 사전에 차단하는데 매우 효과적
+  - Amazon API Gateway
+    - 백엔드 서버로 들어오는 API 요청을 보호하기 위해 연결. 악성 파라미터나 SQL Injection이 포함된 API 호출을 차단함
+   
+- 시험에 자주 나오는 WAF 특징(WAF vs Shield)
+  - WAF(Layer 7 보호)
+    - HTTP/HTTPS 요청 내용을 뜯어보고 SQL Injection, XSS, 특정 IP 차단, 봇 컨트롤 수행
+  - AWS Shield(standard 기준 Layer 3/4 보호)
+    - 볼륨형 대규모 DDoS 공격 차단 전용 서비스 (Shield Advanced 사용 시 WAF 기능이 일부 포함되어 Layer 7에 대한 보호도 가능해짐)
+   
+# Amazon API Gateway
+- 개발자가 종류와 규모에 상관없이 API를 손쉽게 생성, 게시, 유지 관리, 모니터링 및 보안 처리할 수 있게 해주는 완전 관리형 API 프론트엔드 서비스
+- 클라이언트(모바일 앱, 웹 브라우저 등)와 백엔드 서비스(AWS Lambda, EC2, DynamoDB 등) 사이에서 교통정리를 해주는 단일 진입점 역할을 함
+- 핵심 기능
+  1. 서비리스 지원: AWS Lambda와 결합하여 서버를 직접 관리하지 않고 완벽한 서버리스 아키텍처를 구축할 수 있음
+  2. 트래픽 관리 및 제어: 갑작스러운 트래픽 폭주 시 Throttling(요청 제한) 및 Rate Limiting(초당 요청 수 제한)기능을 제공하여 백엔드 시스템이 과부하로 다운되는 것을 막아줌
+  3. 캐싱: 자주 요청되는 API 응답을 자체 캐시에 저장해 두어 백엔드 호출 없이 빠르게 응답(지연 시간 감소 및 비용 절감)
+  4. 보안 및 인증: API Key, AWS Cognito User Pool, IAM 권한 및 AWS WAF와 연동하여 무단 API 접근을 차단함
+
+- 시험에 나오는 전형적인 정답 키워드
+  1. Serverless API / AWS Lambda Integration
+     - Lambda 함수와 연동하여 서버리스 API 엔드포인트를 노출하고 싶다
+  2. API Management / Rate Limiting / Throttling
+     - 백엔드 서버 보호를 위해 API 요청 수나 트래픽을 제어하고 관리해야 한다
+  3. RESTful APIs & WebSocket APIs
+     - 웹/모바일 어플리케이션을 위한 HTTP/REST 또는 실시간 양방향 통신 API를 구축한다
+    
+# Identity and Access Management(IAM)***
+- 시험 대비 핵심 정리
+  1. Root User vs IAM User
+     - Root User: 계정을 생성할 때 만들어지는 최상위 사용자. 모드나 권한을 가짐
+       - 시험 포인트: 일상적인 작업에 절대 사용하지 말고, 생성 직후 MFA 설정 + Root Access Key 삭제/미생성이 모범 사례
+     - IAM User: 계정 내의 사람 또는 어플리케이션을 위한 개별 체제. 기본 권한은 Deny(모두 거부) 상태
+  2. IAM Group vs IAM Role
+     - IAM Group: 여러 사용자들의 집합체(중첩 불가, 자격 증명 없음, 계층 구조 형성 불가)
+     - IAM role:
+       - 임시 권한을 부여하는 핵심 매커니즘
+       - 사용 주체: EC2 인스턴스, Lambda 함수 등 AWS 서비스가 다른 AWS 서비스에 접근할 때 또는 외부 연동 사용자가 접근할 때 사용
+       - 시험 포인트: EC2에 Access Key를 하드코딩하지 않고 S3에 접근하게 하려면 -> IAM Role을 EC2에 연결
+  3. IAM Policy(정책) & 최소 권한의 원칙
+     - JSON 문서 형태: Effect, Action, Resource로 구성(Effect, Action은 필수 요소)
+     - Principle of Least Privilege(최소 권한의 원칙):
+       사용자나 서비스에게 업무에 딱 필요한 최소한의 권한만 부여해야 한다는 보안 대원칙
+     - 명시적 거부 우선 법칙:
+       Allow와 Deny가 충돌할 경우 Deny 우선 적용
+  4. 자격 증명 방식(Credentials)
+     - Console Password: AWS Management Console 웹 로그인용
+     - Access Key ID & Serect Access Key: CLI(명령줄) 또는 SDK/API를 통합 접근용 -> 프로그래밍적 접근.(웹 콘솔 로그인용이 아님)
+  5. Multi-Factor Authentication(MFA)
+     - Password 입력 외에 추가 인증을 거치는 보안 레이어
+     - 시험 포인트: Root User 및 모든 관리자 계정에 MFA 적용 필수
     
