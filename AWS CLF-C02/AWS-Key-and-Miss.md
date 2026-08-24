@@ -449,9 +449,34 @@ IAM User나 Role에 직접 붙이는 아이덴티티 정책(Identity-based Polic
 - Resource 키워드:
   - S3 Bucket, ARN (Amazon Resource Name), Target, Database table
 
+# AWS Elastic Beanstalk가 compute 서비스인 이유
+- 컴퓨팅 환경을 자동으로 배포하고 관리해주는 컴퓨팅 전용 PaaS 서비스
+- 본질은 'EC2 기반 프로비저닝'
+  - Beanstalk는 새로운 별개의 시스템을 만드는 것이 아니라, 앱 코드를 실행할 EC2 인스턴스, ALB, Auto Scaling Group을 대신 구축해주는 서비스임
+- OS 및 연산 자원 실행
+  - 결국 코드가 실제로 작동하고 연산이 일어나는 공간이 EC2(AWS의 대표적 compute 서비스) 기반 환경이므로 AWS에서 공식적으로 Compute 카테고리로 분류함
 
+# AWS Batch
+- 수천~수십만 개의 Batch 작업을 효율적으로 실행할 수 있도록 컴퓨팅 자원을 자동으로 스케줄링하고 배포해 주는 서비스
+- Batch = 일괄 처리 작업 (ex. 매일 밤 12시에 대용량 데이터 1000만 건을 분석하라)
+- 작동 방식
+  - 개발자가 연산 작업을 제출하면, Batch가 알아서 필요한 만큼의 EC2 인스턴스나 Spot 인스턴스를 띄워 연산(Compute)을 수행하고 작업이 끝나면 인스턴스를 자동으로 종료함
+- 시험 키워드: Batch computing, Run hundreds of thousands of batch jobs, Dynamically provisions compute resources
 
+# CLF-C02 필수 Compute 서비스 4개
+1. Amazon EC2: 가장 기본적인 가상 서버(IaaS)
+2. AWS Lambda: 서버 관리 없이 코드만 실행하는 서버리스
+3. AWS Elastic Beanstalk: 코드를 올리면 EC2/ALB 인프라를 자동 구축해 주는 웹 앱 배포 도구(PaaS)
+4. AWS Batch: 대규모 일괄 처리 '연산' 작업을 위한 자동 컴퓨팅 스케줄러
 
+# Trusted Advisor의 5대 핵심 점검 영역
+Cost Optimization (비용 최적화): 사용률이 낮은 EC2 인스턴스 탐지
+Performance (성능): EBS 성능 병목 탐지
+Security (보안): S3 버킷의 공공 열람 권한, MFA 미설정 탐지
+Fault Tolerance (결함 허용): Multi-AZ 미적용, 백업 부재 탐지
+Service Limits (서비스 제한):
+현재 사용 중인 리소스가 AWS 기본 제한 한도(Limit)의 80% 이상에 도달했는지 실시간 모니터링해 줌 
+(ex. 80%에 도달하면 경고를 띄워 한도 증가 요청을 하라고 알려줌)
 
 
 
