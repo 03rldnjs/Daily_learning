@@ -315,3 +315,27 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   - Federated Identity / SSO
     -> 기존 기업 계정과 연동하여 IAM Role 할당
 
+# AWS Data Exchange
+- AWS 클라우드용 외부 데이터 마켓 플레이스
+- 기업이 비즈니스 분석이나 인공지능 학습에 필요한 외부 3rd-party 데이터를 AWS 콘솔 내에서 손쉽게 검색하고, 구매/구독하여 곧바로 S3나 Redshift로 가져올 수 있게 해주는 데이터 거래 플랫폼
+- AWS Marketplace처럼 거래 플랫폼의 형태이지만, 거래 대상이 완전히 다름
+  - AWS Marketplace: 3rd-party 소프트웨어, 라이선스, SaaS, AMI를 사고파는 곳
+  - AWS Data Exchange: 3rd-party 순수 데이터세트를 사고파는 곳(ex. 금융 주가 데이터, 기상 정보, 인구 통계 데이터 등)
+- 키워드: Find and subsciribe to third-party data, Exchange or sell datasets in AWS Cloud
+
+# AWS Software Development Kit(SDK)
+- 개발자가 자기가 작성하는 프로그래밍 언어의 코드 안에서 AWS 서비스를 제어할 수 있게 해주는 라이브러리/도구 모음
+- AWS 상호작용 3대 접근 방식 비교
+  1. AWS Management Console
+    - 방식: Web GUI 화면
+    - 대상: 일반 사용자 / 초보자
+    - 인증: ID + Password(+ MFA)
+  2. AWS CLI(Command Line Interface)
+    - 방식: 터미널/커맨드 라인(명령어)
+    - 대상: 시스템 관리자
+    - 인증: Access Key + Secret Access Key
+  3. AWS SDK
+    - 방식: 소스 코드 라이브러리
+    - 대상: 어플리케이션 개발자
+    - 인증: Access Key + Secret Access Key(또는 IAM Role)
+ 
