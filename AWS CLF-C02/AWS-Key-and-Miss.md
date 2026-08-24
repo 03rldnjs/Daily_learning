@@ -285,4 +285,33 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   5. Multi-Factor Authentication(MFA)
      - Password 입력 외에 추가 인증을 거치는 보안 레이어
      - 시험 포인트: Root User 및 모든 관리자 계정에 MFA 적용 필수
-    
++ IAM 헷갈리는 개념
+  - IAM Role을 IAM Group에 부여/연결(Attach) -> 기술적으로 불가능
+  - IAM Policy(정책)을 IAM Group이나 IAM User에게 연결 -> 이건 가능
+  - IAM Role을 EC2, Lambda 등 서비스나 사용자에게 위임하는 것 -> 이것도 가능
+
++ IAM 주요 함정 패턴
+  1. EC2에서 S3에 접근할 때 Access Key를 저장/하드코딩한다(X)
+     - Access Key를 저장하거나 하드코딩하는 행위는 심각한 보안상의 문제를 초래할 수 있음
+     -> IAM Role을 생성하여 EC2 인스턴스에 연결해야 함
+  2. IAM은 리전별로 생성해야 한다(X)
+     - IAM은 글로벌 서비스이므로 글로벌 단위로 관리됨 -> 리전별로 생성할 필요 없음
+  3. IAM Group에 다른 Group을 중첩시키거나 Role을 할당한다(X)
+     - 그룹 중첩은 불가능, Role은 Group에 붙일 수 없음(Policy만 Group에 Attach 가능)
+  4. 웹 콘솔 로그인을 위해 Access Key를 사용한다(X)
+     - ACcess Key는 프로그래밍적 접근(CLI, SDK, API) 접근 전용, 콘솔 로그인은 비밀번호 + MFA를 사용
+
++ 빈출 키워드 매칭
+  - Least Privilege (최소 권한의 원칙)
+    -> 업무에 필요한 최소한의 권한만 IAM Policy로 부여
+  - Temporary Credentials (임시 자격 증명)
+    -> IAM Role
+  - Cross-Account Access (타 계정 접근 권한 부여)
+    -> IAM Role을 활용해 다른 AWS 계정에 안전하게 접근
+  - Root User Security (루트 사용자 보안)
+    -> MFA 활성화 + Access Key 삭제 + 일상적 사용 X
+  - Explicit Deny (명시적 거부)
+    -> Allow 정책과 Deny가 충돌하는 경우 Deny 우선
+  - Federated Identity / SSO
+    -> 기존 기업 계정과 연동하여 IAM Role 할당
+
