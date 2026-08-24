@@ -339,3 +339,123 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
     - 대상: 어플리케이션 개발자
     - 인증: Access Key + Secret Access Key(또는 IAM Role)
  
+# AWS Elastic Load Balancer(ELB)
+- 어플리케이션으로 들어오는 트래픽을 여러 대상(EC2, 컨테이너, IP 주소 등)으로 자동으로 분산해주는 서비스
+- 서버의 부하를 줄여주고, 특정 서버가 고장나더라도 정상적인 서버로만 트래픽을 보내 서비스가 중단되지 않도록 만드는 고가용성(High Availability)의 핵심
+- ELB의 핵심 특징
+  1. 자동 확장성
+     - 트래픽이 급증하거나 급감해도 ELB 자체가 알아서 성능을 늘리거나 줄임
+  2. 헬스 체크
+     - 연결된 EC2 인스턴스들이 정상 동작 중인지 주기적으로 상태를 점검함
+     - 비정상 상태인 인스턴스가 발생하면 트래픽 전달을 즉시 중단하고 정상 인스턴스로만 전달함
+  3. 단일 리전 / 멀티 AZ 단위 서비스
+     - 1개의 ELB는 동일 리전 내 여러 AZ에 나뉘어 있는 EC2에 트래픽을 분산할 수 있음(단, 타 리전은 불가)
+  4. 보안 통합
+     - SSL/TLS 암호화 certificates(증명서)를 ELB 단에서 처리해 개별 EC2의 암호화 부담을 줄여주는 SSL Offloading 기능을 제공함
+      
+- ELB의 4가지 유형
+  1. Application Load Balancer
+     - Layer 7(HTTP/HTTPS)
+     - 웹 기반 어플리케이션 특화, URL 경로 기반 및 호스트 기반 라우팅, 컨테이너(ECS) 연동
+     - HTTP/HTTPS, Path-based routing, Web application
+  2. Network Load Balancer
+     - Layer 4 (TCP/UDP)
+     - 초고성능/극초저지연, 초당 수백만건의 트래픽 처리, 고정 IP 제공
+     - Ultra-low latency, High performance, TCP/UDP, Static IP needed
+  3. Gateway Load Balancer
+     - Layer 3
+     - 타사 방화벽 및 침입 탐지 등의 가상 네트워크 어플라이언스를 배포/관리할 때 사용
+     - Third-party virtual appliances, Firewall inspection
+  4. Classic Load Balancer
+     - Layer 4/7
+     - 구형 로드밸런서(시험에서는 이전 세대 키워드로만 언급되며 새로 사용하는 것은 비권장)
+    
+# AWS Outposts
+- 온프레미스 환경에 AWS의 물리적 렉 서버 하드웨어를 직접 설치하여 사용하는 하이브리드 클라우드 서비스
+- 온프레미스 물리 공간에 설치되지만, 서버 운영, 관리, 패치 등은 AWS가 알아서 처리하며, 기존 AWS Cloud 콘솔 및 API와 100% 동일한 방식으로 사용할 수 있음
+- 사용 목적:
+  - 극초저지연: 온프레미스 장비나 공장 설비 바로 옆에서 데이터 처리 필요시
+  - 데이터 로컬 처리 및 규제: 법적/규제상의 이유로 데이터를 반드시 자체 데이터센터에 보관해야 할 때
+- 주요 특징:
+  - AWS 물리 하드웨어가 내 데이터 센터로 들어오는 구조이지만, 서비스의 기본 정체성은 '내 데이터 센터로 확장된 AWS 리전의 일부'로 동작
+ - 주요 키워드:
+   - Hybrid Cloud + On-premises data center + AWS Infrastructure
+   - Ultra-low latency to local systems
+   - Run AWS services on-premises
+   - Extend VPC to on-premises(Connect와 Extend가 전혀 다름, Connect는 AWS Direct Connect나 AWS site-to-site VPN이, Extend는 Outposts가 담당함)
+
+# Amazon MSK(Managed Streaming for Apache Kafka) - 출제 가능성 낮음, 알아만 두기
+- 약자 그대로 AWS가 알아서 서버를 관리해주는 Apache Kafka 서비스
+- 기존에 오픈소스 Apache Kafka로 작성된 어플리케이션 코드를 전혀 수정하지 않고 그대로 가져와 쓸 수 있도록, AWS가 Kafka 클러스터의 생성, 패치, 유지 보수를 완전히 대신해주는 서비스
+- 비교 (Amazon Kinesis vs Amazon MSK)
+  - Amazon Kinesis: AWS의 자체(Native) 실시간 스트리밍 데이터 처리 서비스
+    - AWS 전용 API와 SDK를 사용해서 개발해야 함. Apache Kafka 기반으로 작성된 오픈소스 코드나 생태계에 대한 직접적인 호환성은 없음
+  - Amazon MSK: 오픈소스 Apache Kafka 기반의 실시간 스트리밍 데이터 처리 서비스
+    - 오픈소스 Apache Kafka를 쓰건 기업이 코드 수정 없이 AWS 클라우드로 그대로 옮겨와 사용할 수 있음
+- 키워드: Apache Kafka + Managed Service / Avoid infrastructure overhead
+
+# AWS Developer Tools
+- 개발자가 코드를 저장하고, 빌드하고, 서버에 배포하고, 전체 과정을 자동화하는 CI/CD(지속적 통합/지속적 배포) 흐름을 담당함
+- CodeCommit -> CodeBuilt -> CodeDeploy -> CodePipeline
+1. CodeCommit
+   - 코드 저장소(AWS판 GitHub/Git)
+   - 키워드: Source control, Version control system, Git repository, Code stroage
+2. CodeBuild
+   - 코드 컴파일 & 검수 (빌드 및 테스트)
+   - 키워드: Compile source code, Run tests, Produces build artifacts
+3. CodeDeploy
+   - 서버 배포 도구(EC2, Lambda 등에 배포)
+   - 키워드: Automate code deployment, Deploy to EC2/Lambda/On-premises
+4. CodePipeline
+   - 전체 파이프라인 관리자(CI/CD 자동화)
+   - 키워드: Workflow automation, CI/CD pipeline, Orchestrate build, test and deploy
+
+- 코드 작성 및 저장(CodeCommit) -> 코드 빌드(실행) 및 검수(CodeBuild) -> 코드 배포(CodeDeploy)
+- 전체 워크플로우 하나로 묶어 자동화(CodePipeline)
+- CodePipeline 자체는 코드를 저장하거나 빌드/배포를 직접 수행하는 주체가 아니라, 각 단계들의 연결 및 흐름을 제어하는 역할만 수행함
+
+
+# Amazon RDS Custom
+- Amazon RDS는 AWS가 제공하는 완전 관리형 관계형 데이터베이스로, 완전 관리형이라 OS에 대한 Root/SSH 접근 권한을 제공하지 않지만, OS 루트 권한이나 사용자 지정 OS 패치가 필수적인 특정 기업 환경을 위해 RDS Custom을 만들었음
+- 관리형 서비스이지만, OS root Access가 가능함
+- 일반 RDS -> OS 접근 불가 / OS 접근이 필요한 경우 = EC2 or RDS Custom
+
+# 보안 그룹(Security Group)과 NetworkACL에 대한 보안 책임
+- AWS의 책임: VPC, subnet, NetworkACL, Security Group이라는 방화벽 기능과 네트워크 인프라 틀 자체를 만들고 제공
+- 고객 책임: AWS가 만들어둔 방화벽의 규칙을 어떻게 설정하고 업데이트할지 결정
+-> Configuring ~ (설정하기), Updating rules ~ (규칙 업데이트하기)처럼 설정 작업이 들어가면 무조건 고객의 책임
+-> 즉, AWS는 인프라 틀 자체만 제공하고, 설정하고 업데이트 등의 관리 책임은 전적으로 고객에게 있음
++ 선지에 Underlying이 적혀있으면 고민없이 AWS의 책임이라고 생각하면 됨
+
+# JSON 정책 문서의 5대 구성 요소 - 출제 가능성 낮음
+- Principal(누구에게, 사람/주체)
+  - 권한을 부여받거나 거부당하는 주체(IAM User, Role, AWS Account, Service)를 지정
+- Effect(허용/거부)
+  - Allow 또는 Deny로 권한 행사 여부 결정
+- Action (무엇을 할 수 있는가)
+  - 허용하거나 거부할 작업 명시
+- Resource(어느 대상에, 물건/대상)
+  - 작업이 적용될 대상 AWS 리소스 ARN을 명시
+- Condition(어떤 조건에서)
+  - MFA 인증 여부, 특정 IP 대역 등의 제약 조건 지정
+[Principal]이 [Resource]에 대해 [Action]을 수행하는 것을 [Effect]한다
+
++ IAM Identity Policy와 다른 점
+IAM User나 Role에 직접 붙이는 아이덴티티 정책(Identity-based Policy)은 '누구에게' 적용되는지 이미 결정되어 있어서 Principal 요소가 필요 없음. 반면 S3 Bucket Policy처럼 리소스 쪽에 붙이는 리소스 기반 정책(Resource-based Policy)은 외부의 '누가' 접근하는지 명시해야 하므로 Principal이 필수임.
+
++ Principal vs Resource
+- Principal 키워드:
+  - User, Account, Role, Group, Who is granted access, Identity
+- Resource 키워드:
+  - S3 Bucket, ARN (Amazon Resource Name), Target, Database table
+
+
+
+
+
+
+
+
+
+
+
