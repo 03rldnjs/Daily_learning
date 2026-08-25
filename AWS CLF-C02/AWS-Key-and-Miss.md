@@ -334,7 +334,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
     - 방식: 터미널/커맨드 라인(명령어)
     - 대상: 시스템 관리자
     - 인증: Access Key + Secret Access Key
-  3. AWS SDK
+  3. AWS SDK(Software Development Kit)
     - 방식: 소스 코드 라이브러리
     - 대상: 어플리케이션 개발자
     - 인증: Access Key + Secret Access Key(또는 IAM Role)
@@ -477,6 +477,51 @@ Fault Tolerance (결함 허용): Multi-AZ 미적용, 백업 부재 탐지
 Service Limits (서비스 제한):
 현재 사용 중인 리소스가 AWS 기본 제한 한도(Limit)의 80% 이상에 도달했는지 실시간 모니터링해 줌 
 (ex. 80%에 도달하면 경고를 띄워 한도 증가 요청을 하라고 알려줌)
+
+# Amazon ElastiCache
+- 일반 DB가 서재 책상에 책을 보관하는 것이라면, ElastiCache는 책상 위에 자주 읽는 책을 꺼내두는 것(RAM 메모리 저장)과 같음. Disk 기반의 DB보다 검색 속도가 월등히 빠름
+- 지원 엔진: Redis 및 Memcached
+- 주요 사용 목적:
+  1. 데이터베이스 부하 감소: 자주 조회되는 Query 결과를 메모리에 저장하여 데이터베이스의 부담을 완화
+  2. 읽기 성능 극대화: 캐시 메모리로 저장하여 초고속 응답 속도 제공
+  3. 세션 관리: 웹 어플리케이션 로그인 세션 정보 저장
+- 주요 출제 키워드
+  - In-memory cache / In-memory data store
+  - Redis / Memcached
+  - Improve database read performance (DB 읽기 성능 향상)
+  - Sub-millisecond latency (초저지연 응답)
+ 
+# AWS Management Console
+- AWS 클라우드의 모든 서비스를 시각적으로 관리하고 제어(리소스 배포/생성도 가능)할 수 있는 웹 기반 GUI(Graphical User Interface)
+- 자주 출제되는 핵심 특징
+  - 모바일 앱 지원: AWS Console Mobile Application을 제공하여 이동 중에도 리소스 상태 모니터링 및 알람 확인 가능
+  - AWS CloudShell 통합: 브라우저 내 콘솔 화면에서 별도 설치 없이 바로 터미널을 열어 CLI 명령어를 실행할 수 있는 CloudShell 환경 제공
+  - 모든 웹 브라우저 지원: 별도의 소프트웨어 설치 없이 웹 브라우저만 있으면 접속 가능
+- 주요 출제 키워드
+  - Web-based user interface / GUI
+  - Access via Username and Password
++ 주요 함정
+  - Console에 접속하기 위해 Access Key를 사용한다 -> X
+    - Access Key는 CLI/SDK(프로그래밍적 접근)를 위한 것이지 Console 웹 로그인을 위한 용도가 아님
+  - 개발자가 앱 코드 내에서 S3에 파일을 올리기 위해 Console을 사용한다 -> X
+    - 코드 내부 연동은 AWS SDK의 역할(애초에 코드와 관련된 언급이 있으면 Console이 아니라고 생각하면 됨)
+  - 반복적이 관리 작업을 자동화 스크립트로 만들 때 Console을 사용한다 -> X
+    - 스크립트 자동화는 AWS CLI의 역할
+   
+# Amazon Athena
+- Amazon S3에 저장된 데이터를 서버를 띄우지 않고 표준 SQL문으로 즉시 조회/분석할 수 있게 해주는 서버리스 서비스
+- 핵심 기능
+  - 보통 S3에 있는 파일 데이터를 분석하려면 DB나 데이터 웨어하우스로 옮기는 작업이 필요하지만, Athena는 S3에 있는 파일 그 자체에 쿼리를 날릴 수 있음
+- 특징
+  - 서버리스: DB 인스턴스를 관리하거나 인프라를 프로비저닝할 필요가 전혀 없음
+  - Pay-per-query: 실행한 SQL 쿼리가 스캔한 데이터 용량만큼만 비용을 지불함
+- 주요 출제 키워드
+  - Analyze Data directly in Amazon S3 using standard SQL(S3 데이터를 표준 SQL로 직접 분석)
+  - Serverless query service (서버리스 쿼리 서비스)
+  - No infrastructure to manage / pay per query (쿼리당 과금)
+
+    
+
 
 
 
