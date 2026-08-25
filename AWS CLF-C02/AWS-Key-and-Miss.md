@@ -224,6 +224,10 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   2. Patching of storage systems
      - 스토리지 '시스템'을 패치하고 업데이트하는 것은 클라우드 '자체'에 대한 관리/보안임 -> 따라서 AWS의 책임
      - 주의: 만약 지문이 Patching of EC2 OS / Guest OS -> 이는 클라우드 내부에 대한 관리/보안이므로 고객의 책임
+  3. Updating Operation System
+     - Underlying 없이 단순히 Updating Operation System이라고만 적혀있으면 기본적으로 고객이 직접 관리하는 EC2(IaaS)의 Guest OS를 의미함. 관리형 서비스일 경우에만 AWS의 책임이므로 특정 유즈케이스가 제시된 것이 아니라면 고객의 책임으로 보는 것이 더 타당함
+  4. Host / Physical 단어의 법칙
+     - Host, Physical, Infrastructure, Data Center 같은 단어가 포함되어 있다면 고객이 물리적으로 접근할 수 없는 영역이므로 100% AWS의 책임임(Host는 자주 등장하지 않지만 나오면 치명적일 수 있으므로 꼭 기억하기)
     
 # AWS Web Application Firewall
 - 웹 어플리케이션 계층(Layer 7)으로 들어오는 HTTP/HTTPS 악성 요청을 차단하는 방화벽
@@ -261,7 +265,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   3. RESTful APIs & WebSocket APIs
      - 웹/모바일 어플리케이션을 위한 HTTP/REST 또는 실시간 양방향 통신 API를 구축한다
     
-# Identity and Access Management(IAM)***
+# Identity and Access Management(IAM)*** - 출제 가능성 매우 높음
 - 시험 대비 핵심 정리
   1. Root User vs IAM User
      - Root User: 계정을 생성할 때 만들어지는 최상위 사용자. 모드나 권한을 가짐
@@ -300,6 +304,8 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
      - 그룹 중첩은 불가능, Role은 Group에 붙일 수 없음(Policy만 Group에 Attach 가능)
   4. 웹 콘솔 로그인을 위해 Access Key를 사용한다(X)
      - ACcess Key는 프로그래밍적 접근(CLI, SDK, API) 접근 전용, 콘솔 로그인은 비밀번호 + MFA를 사용
+  5. 고객 관리형 정책 대신 인라인 정책을 사용해라
+     - 인라인 정책은 권한 수정 시 사용자마다 일일이 찾아가서 수정해야 함. 이렇게 되면 상당한 관리 부담이 생김. AWS는 재사용이 가능한 Managed policy 사용을 강력히 권장
 
 + 빈출 키워드 매칭
   - Least Privilege (최소 권한의 원칙)
@@ -314,6 +320,12 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
     -> Allow 정책과 Deny가 충돌하는 경우 Deny 우선
   - Federated Identity / SSO
     -> 기존 기업 계정과 연동하여 IAM Role 할당
+  - Create Individual IAM Users
+    -> 계정 하나를 여러 사람이 공유하지 말고, 사람마다 개인 ID를 하나씩 생성, 그래야 누가 서비스에서 무슨 활동을 했는지 개별 추적할 수 있음
+  - Use groups to assign permissions to IAM users
+    -> 사용자 개개인에게 일일히 권한을 부여하지 말고, 그룹을 만들어 권한을 붙인 뒤 사용자를 그 그룹에 넣음
+
+-> 사람마다 개인 ID(Individual IAM Users)를 만들어주고, 권한은 그룹(Group)으로 묶어서 주는 것이 IAM의 핵심
 
 # AWS Data Exchange
 - AWS 클라우드용 외부 데이터 마켓 플레이스
@@ -560,11 +572,123 @@ Service Limits (서비스 제한):
    - 역할: 여러 AWS 계정을 그룹화하여, 자체적인 내부 정산 로직이나 내부 마진/할인율을 적용한 맞춤형 청구서를 따로 만들어 줌
    - 비유: AWS에서 받은 원본 영수증을 가져와서, 회사 내부 부서별 정산 규칙에 맞게 내부용 맞춤 영수증으로 다시 출력해주는 계산기
 
+-> AWS 기본 영수증 확인은 Billing & Cost management, 내부 정산용 맞춤 영수증 재발급은 Billing conductor
 
+# AWS Snowball & Snowball Edge
+- AWS Snowball: 대용량 데이터베이스를 이전할 때, 이전하려는 데이터베이스가 격오지에 위치하거나, 대용량 데이터를 인터넷으로 전송하기에는 네트워크 트래픽이 너무 느리거나 불안정한 경우, AWS가 자체 하드웨어를 배송하여 해당 하드웨어를 통해 오프라인으로 안전하게 데이터베이스를 이전하도록하는 하드웨어 마이그레이션 서비스.
 
+- AWS Snow Family
+- 물리 데이터 전송 장비 라인업
+  1. AWS Snowcone
+     - 용량/크기: 약 8TB
+     - 용도: 소규모 데이터 이동 및 공간이 제한된 환경
+  2. AWS Snowball(기본/Edge)
+     - 용량/크기: 50TB ~ 210TB
+     - 종류:
+       - Storage Optimized: 순수 데이터 대용량 이동에 최적화
+       - Compute Optimized: EC2/Lambda 등을 장비 자체에서 실행하는 엣지 컴퓨팅 탑재
+  3. AWS Snowmobile
+     - 용량/크기: 최대 100PB
+     - 용도: 데이터 센터 전체를 이전하는 초대형 프로젝트
 
+- Snowball의 주요 특징 및 보안
+  - 강력한 내구성: 충격, 먼지, 방수 기능이 완비된 특수 케이스로 제작되어 어떠한 거친 환경에서도 견딤
+  - 자동 암호화: 장비에 저장되는 모든 데이터는 KMS 256비트 암호화 키로 자동 암호화됨
+  - E-Ink 배송 라벨: 장비 표면에 전자식 배송 라벨이 달려 있어서, 데이터 복사가 완료되면 택배 주소가 자동으로 AWS 데이터 센터 목적지로 변경됨
+ 
+- Snowball Edge
+  - 그냥 Snowball처럼 단순히 파일만 담는 장비가 아니라, 데이터 센터나 통신이 잘 안터지는 오지에서 장비 자체적으로 컴퓨팅 연산을 수행할 수 있게 만들어짐
+  - EC2 지원: 장비 내부에 Amazon EC2 AMI 및 AWS Lambda 기능을 기본 탑재하고 있음. 따라서 인터넷이 없는 상태에서도 장비 안에서 직접 가상 서버를 띄워 데이터를 실시간 처리/분석할 수 있음
+ 
+-> Snowball Standard: 오직 데이터 전송/이동, Snowball Edge: 데이터 전송 + 현장 연산 처리(EC2 & Lambda 지원)
 
+# AWS Budgets
+- 핵심 역할: 예산 설정 및 경고 알림(임계치 도달시 알림/액션 실행)
+- AWS Budgets의 4가지 유형
+  1. Cost Budget(비용 예산): 추적 대상액을 정해놓고 비용 모니터링
+  2. Usage Budget(사용량 예산): EC2 작동 시간이나 Data Transfer 용량 등 사용량 모니터링
+  3. RI / Savings Plans Utilization Budget(사용률 예산): 내가 구매한 예약 인스턴스/Savings Plans를 목표치만큼 충분히 활용하고 있는지 모니터링(목표치 아래로 떨어지면 알림)
+  4. RI / Savings Plans Coverage Budget(보장 범위 예산): 전체 EC2 작업 중 할인 혜택을 받고 있는 비중이 얼마나 되는지 모니터링
+ 
+- 알림 기준: 실제값 vs 예측값
+  - 실제값(Actual): 이미 발생한 비용이 설정한 임계치에 도달했을 때 알림
+  - 예측값(Forecasted): 현재 사용 추세대로 가면 월말에 설정한 임계치를 초과할 것으로 예상될 때 사전에 알림
 
+- AWS Budgets Actions (자동화 조치)
+  - 기본 동작: 이메일 전달 또는 Amazon SNS를 통한 알림 전송
+  - Budgets Actions 기능: 예산 초과 시 미리 설정한 액션을 자동 실행하거나 승인 후 실행 가능
+    - 특정 IAM 정책/SCP 적용(ex. 새로운 EC2 생성 권한 차단)
+    - 특정 EC2 또는 RDS 인스턴스 자동 중지
+   
++ AWS Budgets vs AWS Service Quotas (알림 vs 제한)
+  - AWS Budgets
+    - 기능: 예산 설정 및 경고
+    - 특징: 임계치 도달 시 알림/액션 실행
+    - 대표 키워드: Set target, Alert, Threshold
+      
+  - AWS Service Quotas
+    - 리소스 생성 최대 한도 관리/제한
+    - 계정당 EC2 갯수 제한 등 물리적 한도 설정
+    - Limits, Quota increase request
 
+# AWS Secrets Manager
+- '애플리케이션이 사용하는 DB 암호'나 'API 키' 등 시스템 자격 증명을 코드 하드코딩 없이 안전하게 저장하고 자동으로 교체(Rotation)해 주는 서비스
+- 주요 관리 대상:
+  - Database Credentials (RDS/Aurora등의 DB 접속 아이디 및 비밀번호)
+  - API Keys (외부 결제 모듈, 외부 서비스 연동용 API 키)
+- 핵심 기능
+  - 소프트웨어 개발 시 코드 안에 DB 비밀번호를 하드코딩하지 않고, 코드(SDK)가 실행될 때 Secrets Manager에서 비밀번호를 안전하게 가져와 접속하게 만듦
 
++ 주의 사항
+  - Management Console은 Secrets Manager의 적용 대상이 아님
+    - 사람이 AWS Management Console에 로그인할 때 사용하는 계정 정보(IAM/Root Password)는 IAM 영역에서 통합 관리됨
+    - 따라서 Management Console은 IAM Password Policy와 AWS MFA에 의해 보안을 유지함
 
+- 키워드 요약
+- Database credentials / API Keys / Automatic Rotation / Avoid hardcoding in app code
+-> AWS Secrets Manager
+
+- Console Login Security / IAM Password complexity / Multi-Factor Authentication
+-> Strong Password Policies & AWS MFA
+
++ 프로그래밍적 접근의 기본 자격 증명과 Secrets Manager의 역할 분담
+  - 사람의 콘솔 접근 보안: IAM Password Policy(강력한 비밀번호 정책) + MFA
+  - 사람/시스템의 프로그래밍적(CLI,SDK) 접근 보안: IAM Access Key / Secret Access Key(또는 IAM Role)
+  - 어플리케이션이 외부 시스템에 접근할 때의 보안: AWS Secrets Manager(DB 비밀번호, API 등을 하드코딩하지 않고 안전하게 로테이션하며 불러옴)
+ 
+-> 프로그래밍적 AWS 접근 자체는 IAM Access Key/Role이 담당하고, 그 코드 내부에서 쓰는 DB 암호나 외부 API 키를 안전하게 관리하는 게 Secrets Manager
+
+# Amazon Simple Email Service(SES)
+- 개념: 마케터나 개발자가 고객에게 대규모 이메일을 안전하고 신뢰성있게 발송하기 위한 전용 이메일 플랫폼 서비스
+- 주요 용도
+  - Transactional Emails: 주문 확인서, 비밀번호 재설정, 결제 영수증 등 사용자 행동에 따라 1:1로 자동 발송되는 이메일
+  + 주문 확인서, 비밀번호 재설정, 결제 영수증 등에 Transactional이라는 이름이 붙은 이유
+    -> Transactional의 2가지 의미
+      - 비즈니스/금융적 의미: 돈을 송금하거나 제품을 구매하는 1:1 거래를 의미
+      - 컴퓨터 공학적 의미: 원인이 발생하면 그에 따른 결과가 한 세트로 확실하게 처리되어야하는 일련의 작업
+      - 원인-결과 1:1 매칭: 사용자가 버튼을 누르거나 주문을 하는 등 특정 행동(Trigger Event)을 일으켰을 때만 1:1로 즉각 응답해서 발송되는 메일
+  - Marketing Emails: 뉴스레터, 프로모션 행사 메일 등 대량 발송
+
+- Amazon SES vs Amazon SNS
+  - Amazon SES: 이메일 전용 서비스. 주문 확인서나 비밀번호 재설정 링크처럼 복잡하고 규격화된 메일을 높은 도달률(스팸함으로 빠지지 않게)로 보내는데 최적화되어 있음
+  - Amazon SNS: Pub/Sub(발행/구독) 기반의 알림 서비스. SNS도 이메일을 보낼 수는 있지만, 주로 짧은 경고 메시지, SMS(문자), Moblie Push 알림을 보낼 때 사용. 시스템 경고나 간단한 텍스트 알림을 여러 구독자에게 뿌리는 용도이지, 예쁘고 복잡한 템플릿의 이메일 전송 도구가 아님
+ 
+# AWS Activate for Startups - 출제 가능성 낮음
+- 기술 스타트업 기업이 AWS 위에서 빠르게 비즈니스를 시작하고 성장할 수 있도록 돕는 스타트업 전용 지원 프로그램
+- 주요 혜택
+  - AWS Promotional Credits: 인프라 비용 부담을 줄여주기 위해 무료로 사용할 수 있는 크레딧 제공
+  - Technical Support: AWS Developer/Business Support 플랜 무료 이용 혜택
+  - Training & Resource: 전문가 1:1 상담, 교육 자원 및 멘토링 프로그램 제공
+
+# Service Control Policy(SCP)
+- '조직' 내 여러 AWS 계정들이 사용할 수 있는 최대 권한의 한계선을 설정하는 정책
+- 적용 대상: 개별 IAM 사용자나 그룹이 아니라, 'AWS Organizations' 단에서 조직 전체, 조직 단위, 또는 특정 AWS 계정에 연결되어 작동
+- 시험에 나오는 'SCP = AWS Organizations' 출제 패턴 3개
+  - SCP가 무엇과 연결되는가?
+    ➔ 정답: AWS Organizations (Root, OU, Member Account)
+  - 여러 AWS 계정(Multi-account)의 "최대 권한 한계(Maximum permissions)"를 설정/제한하고 싶다.
+    ➔ 정답: SCP (Service Control Policy)
+  - 계정의 루트 사용자(Root user)조차도 무시할 수 없는 가드레일(Deny 정책)을 치고 싶다.
+    ➔ 정답: SCP
+
+-> SCP가 보이면 걍 Organizations를 찾으면 됨
