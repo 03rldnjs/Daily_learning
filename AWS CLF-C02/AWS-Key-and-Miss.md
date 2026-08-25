@@ -493,13 +493,16 @@ Service Limits (서비스 제한):
  
 # AWS Management Console
 - AWS 클라우드의 모든 서비스를 시각적으로 관리하고 제어(리소스 배포/생성도 가능)할 수 있는 웹 기반 GUI(Graphical User Interface)
+  
 - 자주 출제되는 핵심 특징
   - 모바일 앱 지원: AWS Console Mobile Application을 제공하여 이동 중에도 리소스 상태 모니터링 및 알람 확인 가능
   - AWS CloudShell 통합: 브라우저 내 콘솔 화면에서 별도 설치 없이 바로 터미널을 열어 CLI 명령어를 실행할 수 있는 CloudShell 환경 제공
   - 모든 웹 브라우저 지원: 별도의 소프트웨어 설치 없이 웹 브라우저만 있으면 접속 가능
+    
 - 주요 출제 키워드
   - Web-based user interface / GUI
   - Access via Username and Password
+    
 + 주요 함정
   - Console에 접속하기 위해 Access Key를 사용한다 -> X
     - Access Key는 CLI/SDK(프로그래밍적 접근)를 위한 것이지 Console 웹 로그인을 위한 용도가 아님
@@ -510,17 +513,53 @@ Service Limits (서비스 제한):
    
 # Amazon Athena
 - Amazon S3에 저장된 데이터를 서버를 띄우지 않고 표준 SQL문으로 즉시 조회/분석할 수 있게 해주는 서버리스 서비스
+  
 - 핵심 기능
   - 보통 S3에 있는 파일 데이터를 분석하려면 DB나 데이터 웨어하우스로 옮기는 작업이 필요하지만, Athena는 S3에 있는 파일 그 자체에 쿼리를 날릴 수 있음
+    
 - 특징
   - 서버리스: DB 인스턴스를 관리하거나 인프라를 프로비저닝할 필요가 전혀 없음
   - Pay-per-query: 실행한 SQL 쿼리가 스캔한 데이터 용량만큼만 비용을 지불함
+    
 - 주요 출제 키워드
   - Analyze Data directly in Amazon S3 using standard SQL(S3 데이터를 표준 SQL로 직접 분석)
   - Serverless query service (서버리스 쿼리 서비스)
   - No infrastructure to manage / pay per query (쿼리당 과금)
 
+# AWS Glue
+- 다양한 출처의 데이터를 통합, 정리, 변환하여 분석 및 데이터 웨어하우스로 전송해주는 완전 관리형 서버리스 ETL(Extract, Transform, Load) 서비스
+
+- ETL(Extract, Transform, Load)
+  - Extract(추출): 여러 장소(S3, RDS, DynamoDB 등)에서 원시 데이터를 가져옴
+  - Transform(변환): 쓸모없는 데이터를 잘라내고 분석하기 적합한 형태로 가공
+  - Load(적재): 분석용 DB(Amazon Redshift, S3 등)로 정돈된 데이터를 밀어 넣음
     
+- 핵심 기능
+  - Glue Data Catalog: 데이터의 메타데이터를 한 곳에 저장하는 Central Repository 역할 수행
+  - Crawler(크롤러): S3나 DB를 자동으로 훑어보고 데이터 구조를 파악해 Data Catalog 테이블을 자동 생성해 줌
+  - Serverless: 인프라 관리가 필요 없으며, ETL 작업이 실행될 때 사용한 컴퓨팅 자원에 대해서만 과금됨
+  
+- 주요 출제 키워드
+  - ETL(Extract, Transform, Load) service
+  - Serverless data integration service
+  - Prepare and transform data for analytics(분석을 위한 데이터 준비 및 변환)
+  - Data Catalog / Discover and catalog metadata
+  
+- Glue vs Athena vs Redshift
+  1. AWS Glue: 데이터를 가져와 변환하고 정돈하는 'ETL' 도구(Data Catalog 관리)
+  2. Amazon Athena: S3에 저장된 데이터에 대고 즉시 SQL 쿼리를 날려 분석하는 도구(별도의 수정 작업 불필요)
+  3. Amazon Redshift: 대규모 복합 데이터 분석을 위해 데이터를 저장하는 데이터 웨어하우스
+-> ETL이 보이거나 데이터 변환/통합(Transfer/Integrate) 얘기가 나오면 Glue를 선택
+
+# AWS Billing and Cost Management vs AWS Billing Conductor - 출제 가능성 낮음
+1. AWS Billing and Cost Management
+   - 역할: 청구서 확인, 결제 수단 관리, 비용 분석, 예산 설정 등의 메뉴로 들어가는 중앙 통합 콘솔
+   - 특징: AWS가 실제로 청구하는 원래 가격을 기반으로 단순 모니터링 및 결제 처리
+   
+2. AWS Billing Conductor
+   - 역할: 여러 AWS 계정을 그룹화하여, 자체적인 내부 정산 로직이나 내부 마진/할인율을 적용한 맞춤형 청구서를 따로 만들어 줌
+   - 비유: AWS에서 받은 원본 영수증을 가져와서, 회사 내부 부서별 정산 규칙에 맞게 내부용 맞춤 영수증으로 다시 출력해주는 계산기
+
 
 
 
