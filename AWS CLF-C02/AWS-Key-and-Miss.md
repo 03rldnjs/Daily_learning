@@ -476,10 +476,12 @@ IAM User나 Role에 직접 붙이는 아이덴티티 정책(Identity-based Polic
 - 시험 키워드: Batch computing, Run hundreds of thousands of batch jobs, Dynamically provisions compute resources
 
 # CLF-C02 필수 Compute 서비스 4개
+- AWS에서 'Compute'카테고리는 가상 서버, 컨테이너, 서버리스 코드 등 사용자의 어플리케이션/연산 코드를 실행해주는 서비스들을 모두 포함함
 1. Amazon EC2: 가장 기본적인 가상 서버(IaaS)
 2. AWS Lambda: 서버 관리 없이 코드만 실행하는 서버리스
-3. AWS Elastic Beanstalk: 코드를 올리면 EC2/ALB 인프라를 자동 구축해 주는 웹 앱 배포 도구(PaaS)
-4. AWS Batch: 대규모 일괄 처리 '연산' 작업을 위한 자동 컴퓨팅 스케줄러
+3. 컨테이너 기반 컴퓨팅: Amazon ECS, Amazon EKS, AWS Fargate 
+4. AWS Elastic Beanstalk: 코드를 올리면 EC2/ALB 인프라를 자동 구축해 주는 웹 앱 배포 도구(PaaS)
+5. AWS Batch: 대규모 일괄 처리 '연산' 작업을 위한 자동 컴퓨팅 스케줄러
 
 # Trusted Advisor의 5대 핵심 점검 영역
 Cost Optimization (비용 최적화): 사용률이 낮은 EC2 인스턴스 탐지
