@@ -41,7 +41,7 @@ AWS의 설정 상태를 지속적으로 기록하고, 변경 이력을 추적하
 
 # Shield Advanced가 보호하는 리소스
 -> 먼저, Shield Advanced는 명백한 '리소스'에만 보호를 제공함
-CloudFront, Elastic IPs(EC2), ALB/ELB, Route 53, Global Acceleratoro
+CloudFront, Elastic IPs(EC2), ALB/ELB, Route 53, Global Accelerator
 (+ EC2는 직접적으로 보호되는 것이 아니라, Elastic IP 주소와 연관되어있는 경우에만 보호를 제공받음)
 
 ---
@@ -93,14 +93,22 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
 
 - Decoupling 관점에서 SNS, SQS와의 차이점
   - Amazon SQS(Queue 방식)
-    버퍼를 통한 시간적 디커플링
-    생산자가 메시지를 던져두면 소비자가 자기 속도에 맞춰 메시지를 가져옴 -> 소비자가 잠시 다운되어도 메시지는 안전하게 쌓여있음
+    - 공식 정의: "Amazon SQS decouples application components so that they can <run independently>"
+(Amazon SQS는 애플리케이션 구성 요소를 분리하여 독립적으로 실행될 수 있도록 합니다.)
+    - 버퍼를 통한 시간적 디커플링
+    - 생산자가 메시지를 던져두면 소비자가 자기 속도에 맞춰 메시지를 가져옴 -> 소비자가 잠시 다운되어도 메시지는 안전하게 쌓여있음
+    - 수신 측이 복구된 후 원하는 시점에 꺼내어 처리하면 되므로 <Run Independently> 달성 / 수시ㅏㄴ측의 상태와 완전히 무관
+      
   - Amazon SNS(Pub/Sub방식)
-    Fan-out을 통한 1:N 디커플링
-    하나의 이벤트 발생 시 이메일, SMS, Lambda, SQS 등 여러 수신처에 동시에 즉시 Push하여 전달
+    - "Amazon SNS is a fully managed <pub/sub> messaging service for decoupling microservices, distributed systems, and serverless applications."
+(Amazon SNS는 마이크로서비스 간 Pub/Sub 메시징을 통해 결합을 해제하는 서비스입니다.)
+    - Fan-out을 통한 1:N 디커플링
+    - 하나의 이벤트 발생 시 이메일, SMS, Lambda, SQS 등 여러 수신처에 동시에 즉시 Push하여 전달
+    - 수신 측이 가동 상태여야 문제없이 기능 수행 가능
+      
   - Amazon EventBridge(Event Bus 방식)
-    컨텐츠 패턴 규칙 기반의 스마트 디커플링
-    이벤트의 내용을 읽어서 조건에 따라 정교하게 라우팅해줌. AWS 서비스 및 타사와의 연동에 특화되어 있음
+    - 컨텐츠 패턴 규칙 기반의 스마트 디커플링
+    - 이벤트의 내용을 읽어서 조건에 따라 정교하게 라우팅해줌. AWS 서비스 및 타사와의 연동에 특화되어 있음
 
 ---
 
@@ -266,6 +274,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
      - 웹/모바일 어플리케이션을 위한 HTTP/REST 또는 실시간 양방향 통신 API를 구축한다
     
 # Identity and Access Management(IAM)*** - 출제 가능성 매우 높음
+- 기본 통제 단위: 단일 계정 내부(해당 IAM이 존재하는 그 계정 안에서만 권한을 제어함), 다른 멤버 계정들이 존재하는 사용자나 역할의 API 접근 제한을 중앙에서 일괄 제어하는 통제는 Organizations의 역할
 - 시험 대비 핵심 정리
   1. Root User vs IAM User
      - Root User: 계정을 생성할 때 만들어지는 최상위 사용자. 모드나 권한을 가짐
@@ -429,6 +438,8 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
 
 # Amazon RDS Custom
 - Amazon RDS는 AWS가 제공하는 완전 관리형 관계형 데이터베이스로, 완전 관리형이라 OS에 대한 Root/SSH 접근 권한을 제공하지 않지만, OS 루트 권한이나 사용자 지정 OS 패치가 필수적인 특정 기업 환경을 위해 RDS Custom을 만들었음
+- 밀리초 수준의 충분히 빠른 응답 속도를 제공하지만, 밀리초 미만 단위의 속도를 제공하지는 못함
+  (+ 밀리초 미만 단위의 속도를 제공하는 기술은 In-Memeory 스토리지임)
 - 관리형 서비스이지만, OS root Access가 가능함
 - 일반 RDS -> OS 접근 불가 / OS 접근이 필요한 경우 = EC2 or RDS Custom
 
@@ -694,6 +705,7 @@ Service Limits (서비스 제한):
     ➔ 정답: SCP
 
 -> SCP가 보이면 걍 Organizations를 찾으면 됨
+-> Member Account나 Multi-account + 계정 간 통제 = AWS Organizations & SCP
 
 # Amazon S3
 - 객체 스토리지로서 무제한 용량과 99.9999999의 내구성을 가진 AWS의 대표적인 스토리지
@@ -739,8 +751,93 @@ Service Limits (서비스 제한):
       
 -> S3는 한 번 써두고 자주 읽는 정적 데이터에 최적화되어 있음
 
+# Amazon WorkSpace
+- AWS에서 제공하는 완전 관리형 VDI(가상 데스크톱 인프라, Virtual Desktop Infrastructure) 및 DaaS(Desktop as a Service) 솔루션
+- 복잡한 온프레미스 가상 데스크톱 서버 구축 없이 클릭 몇 번으로 Cloud 상에 Windows나 Linux 기반의 개인용 가상 PC 환경을 생성하고 인터넷이 연결된 어디서나 접속할 수 있게 해 줌
+- 핵심 특징
+  - 어디서나 접속
+    - 노트북, 태블릿, 스마트폰, 웹 브라우저 등 다양한 기기에서 전용 앱이나 브라우저로 Workspace 가상 데스크톱에 접속 가능
+  - 고급 데이터 보안
+    - 데이터가 사용자의 로컬 기기에 저장되지 않고, 오직 AWS 클라우드 내부에 안전하게 암호화되어 저장됨
+  - 관리 편의성 & 확장성
+    - 직원들에게 개별 사양의 PC를 순식간에 할당하거나 회수할 수 있으며, 소프트웨어 설치 및 패치를 중앙에서 제어 가능
+  - 유연한 요금제
+    - 시간제: 접속해서 사용한 시간만큼 정산(파트타임)
+    - 월정액: 고정 월 비용 납부(전업 근무자용)
+- 주요 Use-Case
+  - 재택 근무 및 원격 근무: 직원들에게 사내망 접근이 가능한 가상 PC 환경을 안전하게 제공
+  - 외주 개발자 및 계약직: 외부 인력에게 회사 소유의 실제 노트북을 지급하지 않고, 권한이 제한된 가상 데스크톱만 부여하여 보안 유지
+  - BYOD 정책: 직원이 개인 소유 기기를 사용하되, 업무용 작업은 독립된 가상 PC인 WorkSpaces 안에서만 처리하도록 분리
 
+-> 재택근무나 외주 개발자에게 안전한 원격 윈도우/리눅스 PC 전체를 빌려줄 때는 Amazon WorkSpace 떠올리
 
+# VPC Gateway 3대장 키워드 정리
+1. Internet -> Internet Gateway(IGW)
+   - 키워드: Public Internet, Inbound & Outbound, Public Subnet
+   - 원리: VPC와 퍼블릭 인터넷 간의 양방향 통신 관문
+2. Private Subnet + Outbound Only -> NAT Gateway
+   - 키워드: Private Subnet, Outbound Interent, Block Inbound
+   - 원리: 외부에서 들어오는 연결은 막고, 내부에서 패치나 업데이트를 위해 밖으로 나가는 통신만 일방통행으로 허용
+3. VPN / On-premises -> Virtual Private Gateway(VGW)
+   - 키워드: Site-to-Site VPN, On- premises, Encrypted Tunnel
+   - 원리: 인터넷이 아닌 회사 데이터센터와 암호화된 VPN 연결을 할 때 AWS 쪽에 달아두는 관문
++ VPN의 구성요소: Virtual Private Gateway(AWS 쪽 관문) & Customer Gateway(고객 쪽 관문)
 
+# AWS Control Tower - 출제 가능성 30% 정도 
+- 여러 개의 AWS 계정을 사용하는 기업 환경에서 AWS Best practice에 맞는 안전한 기본 인프라를 자동으로 구축하고 통제해 주는 거버넌스 관리 서비스
+- 핵심 역할과 특징
+  1. Landing Zone 자동 생성:
+     - 기업이 AWS를 처음 사용할 때, 각종 서비스들을 수동으로 세팅할 필요 없이, 클릭 몇 번으로 완벽하게 보안 설정이 끝난 표준 멀티 계정 환경을 만들어 줌
+  2. Guardrails
+     - 필수 및 권장 보안 규칙을 자동으로 적용
+     - ex. S3 버킷의 퍼블릭 접근을 절대 허용하지 않는다, MFA를 설정하지 않은 계정 생성을 차단한다 등의 정책을 중앙에서 강제함
+  3. Account Factory:
+     - 개발팀, 재무팀 등 새로운 팀이 들어왔을 때, 보안 및 규정 정책이 이미 완벽히 세팅된 표준 AWS 계정을 몇 분 만에 뚝딱 찍어내듯 생성해 줌
+    
++ Multi-account environment, Set up a Landing Zone, Enforce Guardrails 같은 문구가 대놓고 나올 때만 Control Tower가 정답임. 보안 규칙 검사나 계정 생성만 보고 판단하면 AWS Config나 AWS Organizations와 헷갈릴 수 있으니 주의가 필요함
 
+# AWS IAM Access Analyzer
+- 역할: S3 버킷, KMS 키, IAM Role 등 내 계정의 리소스 중 외부 조직이나 다른 계정(External Principals)에 접근 권한이 열려 있는 리소스를 자동으로 분석해서 알려주는 IAM의 세부 기능
+- 핵심 원리: 논리적 수학 검증을 통해 퍼블릭 또는 교차 계정으로 접근 가능한 리소스를 감지
+-> 외부로 공유된 리소스 탐지 등장 = IAM Access Analyzer
+
+# AWS Fargate
+- Amazon ECS 및 EKS와 함께 작동하는 컨테이너용 서버리스 컴퓨팅 엔진
+- 핵심 특징
+  1. 서버리스 방식
+     - EC2 가상 머신을 프로비저닝하거나 관리할 필요가 전혀 없음
+     - 가상 머신 크기 선택, 클러스터 스케일링, OS 패치 및 보안 업데이트를 AWS가 알아서 처리함
+  2. 유연한 리소스 및 요금 모델
+     - 컨테이너가 필요로 하는 vCPU와 메모리의 양만 지정하면 됨(서버리스)
+     - 실행된 컨테이너가 사용한 vCPU 및 메모리 자원 사용과 실행 시간에 대해서만 비용을 지불함
+  3. 격리된 보안 환경
+     - 고유한 격리된 VM 경계 내에서 실행되어서 다른 어플리케이션과의 리소스 공유로 인한 보안 리스크가 차단됨
+
+# Edge Location 관련 핵심 AWS 서비스
+1. Amazon CloudFront
+   - 역할: CDN(Content Delivery Network). Edge Location에 컨텐츠(이미지, 동영상)를 캐싱하여 빠르게 제공/전달
+2. AWS Shield(및 AWS AWF)
+   - 역할: DDoS 방어 및 웹 어플리케이션 방화벽(WAF). Edge Location 단에서 트래픽을 미리 검사하고 차단
+3. Amazon Route 53
+   - 역할: DNS(Domain Name Service) 서비스. Edge Location을 통해 사용자와 가장 가까운 위치에서 지연시간이 적은 DNS 응답 제공
+4. AWS Global Accelerator
+   - 역할: AWS의 글로벌 백본 네트워크를 이용해 트래픽을 최단 경로로 라우팅하여 어플리케이션 성능 향상
+
+# 보안 그룹 vs NetworkACL(NACL)
+- 보안 그룹(Security Group)/인스턴스 바로 앞 개별 문지기
+  - 적용 수준: 인스턴스 레벨
+  - 지원 규칙: Allow만 가능(서버는 허용된 안전한 트래픽 외에는 전부 닫아두는 것이 가장 안전함)
+  - 상태 유지: Stateful(인바운드 허용 시 응답 자동 허용)
+- NetworkACL(서브넷 전체를 아우르는 울타리)
+  - 적용 수준: subnet 레벨
+  - 지원 규칙: Allow/Deny 모두 가능
+  - 상태 유지: Stateless(인바운드/아웃바운드 각각 설정)
+    - 이유: 서브넷 레벨에는 수많은 인스턴스가 존재하는데, 이 연결 상태를 모두 기억하면 메모리와 성능에 과부하가 유발됨. 따라서 상태를 기억하지 않는 stateless로 설계되었음
+-> 선지에 Block이나 Explicitly Deny가 등장하면 Deny가 가능한 NetworkACL이 무조건 정답에 해당하게 됨
+
+# Amazon MemoryDB - 출제 가능성 낮음
+- Redis(또는 Valkey)와 호환되는 In-memory 기반의 초고속 데이터베이스 서비스
+- ElastiCache와의 결정적 차이점
+  - ElastiCache: 단순 캐시 용도로 메모리가 꺼지면 데이터가 휘발될 수 있음
+  - MemoroyDB: 메모리 기반으로 마이크로초 수준의 읽기/쓰기 속도를 제공하면서도, 3개 AZ로 영구 저장해주기 때문에 메인 데이터베이스로 직접 사용할 수도 있음
   
