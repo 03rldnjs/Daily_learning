@@ -2,29 +2,29 @@
 AWS의 설정 상태를 지속적으로 기록하고, 변경 이력을 추적하며, 사전 정의된 규칙에 부합하는지 준수 여부를 평가하는 관리 서비스
 -> AWS 리소스 상태 전용 cctv 및 감사관
 - 핵심 기능
-  설정 이력 기록: 특정 리소스가 시간에 따라 어떻게 변경되었는지 타임라인 형태로 기록함
-  규정 준수 평가: S3, 보안 그룹 등에 대한 규칙을 정해두고, 이를 위반하면 위반 상태로 표시해 줌
-  자동 수정: 위반 사항이 발견되면 Systems Manager Automation 등을 연결해 자동으로 설정을 올바르게 복구
-  리소스간 관계 파악: 보안 그룹이 어떤 EC2 인스턴스나 EBS와 연결되어 있는지 등 리소스간의 연관관계를 시각적으로 보여줌
+  - 설정 이력 기록: 특정 리소스가 시간에 따라 어떻게 변경되었는지 타임라인 형태로 기록함
+  - 규정 준수 평가: S3, 보안 그룹 등에 대한 규칙을 정해두고, 이를 위반하면 위반 상태로 표시해 줌
+  - 자동 수정: 위반 사항이 발견되면 Systems Manager Automation 등을 연결해 자동으로 설정을 올바르게 복구
+  - 리소스간 관계 파악: 보안 그룹이 어떤 EC2 인스턴스나 EBS와 연결되어 있는지 등 리소스간의 연관관계를 시각적으로 보여줌
 
 - 출제 포인트
-  Configuration History(설정 이력 추적)
-  Compliance Check(규정/정책 준수 평가)
-  Auditing/Change Management(감사 및 변경 관리)
-  Resource Relationships(리소스 간 관계 추적)
+  - Configuration History(설정 이력 추적)
+  - Compliance Check(규정/정책 준수 평가)
+  - Auditing/Change Management(감사 및 변경 관리)
+  - Resource Relationships(리소스 간 관계 추적)
 
 - 헷갈리기 쉬운 서비스
   1. CloudTrail vs Config
-  CloudTrail: 누가 무슨 API를 호출했는지 행위를 기록
-  Config: 그 행위의 결과로 리소스의 설정 상태가 어떻게 변했는지 기록
+  - CloudTrail: 누가 무슨 API를 호출했는지 행위를 기록
+  - Config: 그 행위의 결과로 리소스의 설정 상태가 어떻게 변했는지 기록
 
   2. Inspector vs Config
-  Inspector: EC2 내부, 컨테이너, Lambda등의 취약점 주기적 자동 진단
-  Config: 리소스의 설정 규칙 위반을 모니터링
+  - Inspector: EC2 내부, 컨테이너, Lambda등의 취약점 주기적 자동 진단
+  - Config: 리소스의 설정 규칙 위반을 모니터링
 
   3. Trusted Advisor vs Config
-  Trusted Advisor: AWS 모범 사례를 기반으로 한 종합적인 가이드(비용, 성능, 보안 등) 제공
-  Config: 사용자가 정의한 맞춤형 컴플라이언스 규칙에 맞춰 커스텀 모니터링 가능
+  - Trusted Advisor: AWS 모범 사례를 기반으로 한 종합적인 가이드(비용, 성능, 보안 등) 제공
+  - Config: 사용자가 정의한 맞춤형 컴플라이언스 규칙에 맞춰 커스텀 모니터링 가능
 
 - 구체적인 문항 예시
   액세스 키가 60일이 지나면 자동으로 비활성화되는 기업 규정이 있음.
