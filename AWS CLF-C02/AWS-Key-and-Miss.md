@@ -236,6 +236,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
      - Underlying 없이 단순히 Updating Operation System이라고만 적혀있으면 기본적으로 고객이 직접 관리하는 EC2(IaaS)의 Guest OS를 의미함. 관리형 서비스일 경우에만 AWS의 책임이므로 특정 유즈케이스가 제시된 것이 아니라면 고객의 책임으로 보는 것이 더 타당함
   4. Host / Physical 단어의 법칙
      - Host, Physical, Infrastructure, Data Center 같은 단어가 포함되어 있다면 고객이 물리적으로 접근할 수 없는 영역이므로 100% AWS의 책임임(Host는 자주 등장하지 않지만 나오면 치명적일 수 있으므로 꼭 기억하기)
+  + Virtualization Layer = 하이퍼바이저 및 관련 관리 소프트웨어 계층(순수 인프라 영역) -> 전적으로 AWS의 책임
     
 # AWS Web Application Firewall
 - 웹 어플리케이션 계층(Layer 7)으로 들어오는 HTTP/HTTPS 악성 요청을 차단하는 방화벽
@@ -902,4 +903,89 @@ Service Limits (서비스 제한):
   - Social Identity Providers (구글, 페이스북 등 소셜 로그인 연동)
   - User Pools & Identity Pools
   - Temporary AWS Credentials for app users (앱 사용자용 임시 AWS 자격 증명)
+
+# 비동기 통합(Asynchronous Integration)
+- 개념: 어플리케이션의 여러 구성 요소(component)들이 통신할 때, 요청을 보낸 쪽이 상대방의 작업 처리가 끝날 때가지 기다리지 않고 곧바로 자신의 다음 작업을 진행하는 방식
+- 구성 요소들이 서로 직접 엮여있지 않도록하여 한 쪽에 장애가 생기거나 병목 현상이 일어나도 전체 시스템에 영향이 없도록 함(Decoupling)
+- 비동기 통합(Asynchronous Integration)을 통해 Decoupling을 이루어낸다고 생각하면 됨
+- 키워드
+  - Decouple application conponents (앱 구성요소 결합도 낮추기)
+  - Asynchronous Integration(비동기 통합)
+  - Loose coupling (느슨한 결합)
+- 비동기 통합(Asynchronous Integration) & Decoupling 지원 서비스
+  - SNS, SQS, Step Functions, EventBridge
+
+# AWS Application Discovery Service
+- 역할: 온프레미스 데이터센터의 서버 성능 데이터, 서버 간의 의존성, 하드웨어 사양 등을 자동으로 탐지/수집하는 서비스
+- 목적: 수집한 데이터를 기반으로 AWS 마이그레이션 계획을 수립 및 적절한 인스턴스 스펙 및 비용 예측
+- 키워드: On-premises data centers, Planning a migration, Collect server data
+- 서비스 이름에 Application이 들어가는 이유
+  -> 단순히 물리 하드웨어나 OS 정보만 긁어오는 것이 아니라, 어플리케이션 단위의 연관 관계를 파악하기 위한 서비스이기 때문
+  -> 서버들 간의 관계를 분석하여 어플리케이션 그룹핑 및 의존성 지도를 그림
+  -> 이를 바탕으로 마이그레이션할 때 '어플리케이션' 단위로 함께 클라우드로 옮길 수 있도록 그룹화함
+
+# AWS AI/ML Services 요약
+- 이미지/영상 속 얼굴/물체 찾기 ➔ Rekognition
+- 글자(Text)를 목소리(Speech)로 읽기 ➔ Polly
+- 목소리(Audio)를 글자(Text)로 받아쓰기 ➔ Transcribe
+- 음성/텍스트 대화형 챗봇 만들기 ➔ Lex
+- 텍스트의 긍정/부정 감정 분석하기 ➔ Comprehend
+- 문서 모음집에서 자연어로 검색하기 ➔ Kendra
+- 개발자가 직접 ML 모델을 구축/학습/배포하기 ➔ SageMaker
+
+# AWS Support Plan 등급별 최대 심각도 & 응답 시간 비교
+(Basic Plan은 기술 지원(Technical Support Case)자체가 아예 제공되지 않으므로 생략)
+1. Developer Plan
+   - 지원 최상위 심각도: 시스템 손상(System Impaired)
+   - 목표 응답 시간: 12시간 이내
+   - TAM 유무: 무
+2. Business Plan
+   - 지원 최상위 심각도: 운영 시스템 중단(Production system down)
+   - 목표 응답 시간: 1시간 이내
+   - TAM 유무: 무
+3. Enterprise On-Ramp
+   - 지원 최상위 심각도: Business-critical system down
+   - 목표 응답 시간: 30분 이내
+   - TAM 유무: 전담 TAM이 아닌 TAM Pool 지원
+   - Concierge 팀 지원(결제 및 계정 문의 전담 처리반)
+4. Enterprise
+   - 지원 최상위 심각도: Business-critical system down
+   - 목표 응답 시간: 15분 이내
+   - TAM 유무: 전담 TAM 배정
+   - Concierge 팀 지원(결제 및 계정 문의 전담 처리반)
+  
+# AWS PrivateLink
+- 개념: 퍼블릭 인터넷에 노출시키지 않고, AWS 내부 네트워크(Direct Connect, VPC Endpoint 등)을 통해 특정 서비스/어플리케이션에 1:1 사설 IP로 안전하게 접근하게 해주는 기술
+- 작동 방식
+  - 내 VPC 안에 인터페이스 VPC 엔드포인트라는 사설 가상 랜카드 생성
+  - 온프레미스 데이터센터에서 Direct Connect 등을 타고 들어와 퍼블릭 인터넷을 거치지 않고 오직 내부 사설 IP로만 타사 SaaS 앱이나 다른 VPC의 특정 서비스에 연결하게 해 줌
+- 유사 서비스 키워드 요약
+  1. Site-to-Site VPN
+     - On-premises to VPC + Encrypted IPsec tunnel
+  2. AWS Direct Connect
+     - On-premises to VPC + Private Dedicated Connection
+  3. AWS PrivateLink
+     - No Public Internet + Private IP access to services/SaaS + VPC Endpoint
+
+# VPC Endpoint
+- AWS 내부 네트워크 망을 이용해 VPC와 다른 AWS 서비스 또는 외부 SaaS 서비스를 안전하게 연결해 주는 가상 장치
+- 인터넷 게이트웨이, NAT 게이트웨이, VPN, Direct Connect 같은 통로를 거치지 않고 퍼블릭 인터넷 노출 없이 AWS 백본망 내부에서만 통신할 수 있게 해 줌
+- VPC Endpoint가 필요한 이유
+  - S3, DynamoDB 같은 AWS 서비스들은 퍼블릭 IP를 가진 퍼블릭 엔드포인트 형태로 제공됨
+  -> VPC Endpoint가 없다면 퍼블릭 인터넷 구간을 거쳐야하므로 보안 위험과 NAT gateway 비용이 발생함
+  -> VPC Endpoint를 사용하면 외부 인터넷 사용 없이 AWS 내부 사설 망으로 직접 꽂혀서 통신하므로 최고의 보안성을 확보할 수 있고 NAT 비용도 절감할 수 있음
+- VPC Endpoint의 핵심 유형 2가지
+  1. Gateway Endpoint
+    - 작동 방식: VPC 라우팅 테이블에 타겟으로 등록하여 트래픽 라우팅
+    - 지원 서비스: Amazon S3, DynamoDB
+    - 비용: 무료
+  2. Interface Endpoint
+    - 작동 방식: 서브넷 안에 사설 IP를 가진 가상 랜카드를 생성하여 1:1통신
+    - 지원 서비스: S3, DynamoDB를 제외한 대부분의 AWS 서비스 + 타 사 SaaS 서비스
+    - 비용: 유료(시간당 요금 + 데이터 처리량 요금)
  
+# 글로벌 서비스 vs 리전 서비스
+1. 글로벌 서비스
+   : IAM, Route 53, CloudFront, AWS WAF, AWS Organizations, AWS Shield, AWS Global Accelerator
+2. 리전 서비스
+   : EC2, VPC, RDS, EBS, S3(S3는 네임페이스는 글로벌(전세계에 같은 이름이 2개 있으면 안됨)이지만 버킷 생성 위치는 리전 단위)
