@@ -317,6 +317,16 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   5. 고객 관리형 정책 대신 인라인 정책을 사용해라
      - 인라인 정책은 권한 수정 시 사용자마다 일일이 찾아가서 수정해야 함. 이렇게 되면 상당한 관리 부담이 생김. AWS는 재사용이 가능한 Managed policy 사용을 강력히 권장
 
++ IAM 핵심 구성 요소 & 필수 숙지 포인트
+  1. IAM Group에는 Group을 넣을 수 없다(중첩/Nested 불가)
+    - 오직 User만 포함 가능
+  2. IAM Role은 사람이 아닌 서비스나 임시 사용자를 위한 것
+     - ID/PW나 Access Key 같은 고정 자격 증명을 가지지 않고, 임시 자격증명을 발급받아 사용함
+  3. User는 여러 Group에 포함될 수 있음
+  4. Root User vs IAM User
+    - Root User: 계정 생성 시 만들어지는 최고 권한 사용자. 일반적인 작업에는 절대 사용하지 않고 MFA 필수 적용 + 계정 삭제/결제 플랜 변경 등 특수 작업에만 사용하는 것이 권장 사항
+    - IAM User: 일상적인 작업을 위해 사람(직원) 개개인에게 부여하는 계정
+  
 + 빈출 키워드 매칭
   - Least Privilege (최소 권한의 원칙)
     -> 업무에 필요한 최소한의 권한만 IAM Policy로 부여
@@ -802,6 +812,12 @@ Service Limits (서비스 제한):
 - 핵심 원리: 논리적 수학 검증을 통해 퍼블릭 또는 교차 계정으로 접근 가능한 리소스를 감지
 -> 외부로 공유된 리소스 탐지 등장 = IAM Access Analyzer
 
+# IAM Access Advisor
+- 역할: IAM 사용자/그룹/역할에 부여된 권한 중 마지막으로 사용된 날짜 및 시간을 보여주는 IAM 기능
+- 목적: 어떤 사용자에게 S3, EC2, RDS 권한을 다 줬는데, Access Advisor를 통해 확인해보니 특정 리소스를 1년간 사용하지 않았다면 해당 권한이 불필요하므로 제거할 수 있게 도와줌
+- 최소 권한의 원칙: 불필요한 권한을 회수하여 최소한의 권한만 유지하도록 돕는 핵심 보안 도구
+- 핵심 키워드: Identify unnecessary permissions, Last accessed information, Least privilege
+
 # AWS Fargate
 - Amazon ECS 및 EKS와 함께 작동하는 컨테이너용 서버리스 컴퓨팅 엔진
 - 핵심 특징
@@ -1015,3 +1031,25 @@ Service Limits (서비스 제한):
    - 개인 사용자와 네트워크를 연결하는 방식
    - 재택근무자나 출장자가 소프트웨어를 실행해 개별적으로 VPC에 접속할 때 사용
    - 특징: 장소에 상관없이 인터넷만 연결되어 있으면 안전하게 VPC 내부 리소스에 접속 가능
+
+# AWS CloudWatch Logs Insight vs Log Streams
+1. Logs insights
+  - 역할: CloudWatch Logs에 쌓인 수많은 로그 데이터를 쿼리 문법을 사용해 검색, 대화형 분석, 시각화할 수 있는 분석 도구
+  - 핵심 키워드: Perform queries, Search and analyze logs, Interactive query
+2. Log Streams
+  - 동일한 출처에서 발생하는 로그 이벤트의 단순 연속적인 집합(파일/흐름)
+  - 로그 데이터 저장 및 수집 역할
++ CloudWatch anomaly detection
+  - 머신 러닝을 기반으로 메트릭 데이터의 이상 징후를 감지해 경고를 발생시키는 서비스
+
+# AWS Audit Manager
+- 역할: AWS 사용 환경의 위험 평가 및 규정 준수 감사를 지속적으로 자동화하고, 감사 보고서 제출에 필요한 증거 데이터를 자동으로 수집/관리해주는 서비스
+- 핵심 키워드: Continuously audit, Assess risk and compliance, Evidence collection
+
+# Amazon FSx 시리즈
+1. FSx for Window
+   - 지문 패턴: Windows 환경에서 SMB 프로토콜 기반으로 동작하는 파일 스토리지는?
+2. FSx for Lustre
+   - 지문 패턴: 빅데이터 분석, 머신 러닝, 고성능 컴퓨팅을 위한 초고속 리눅스 파일 시스템은?
+   - 팁: S3 버킷과 직접 연결하여 데이터를 빠르게 읽고 쓰면서 연산 처리를 수행하는데 최적화되어 있음
++ EFS도 파일스토리지임. 그러나 리눅스 기반이라 windows용 프로토콜인 SMB를 인식하지 못함(NFS만 지원함)
