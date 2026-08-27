@@ -486,12 +486,12 @@ IAM User나 Role에 직접 붙이는 아이덴티티 정책(Identity-based Polic
   - 개발자가 연산 작업을 제출하면, Batch가 알아서 필요한 만큼의 EC2 인스턴스나 Spot 인스턴스를 띄워 연산(Compute)을 수행하고 작업이 끝나면 인스턴스를 자동으로 종료함
 - 시험 키워드: Batch computing, Run hundreds of thousands of batch jobs, Dynamically provisions compute resources
 
-# CLF-C02 필수 Compute 서비스 4개
+# CLF-C02 필수 Compute 서비스
 - AWS에서 'Compute'카테고리는 가상 서버, 컨테이너, 서버리스 코드 등 사용자의 어플리케이션/연산 코드를 실행해주는 서비스들을 모두 포함함
 1. Amazon EC2: 가장 기본적인 가상 서버(IaaS)
 2. AWS Lambda: 서버 관리 없이 코드만 실행하는 서버리스
 3. 컨테이너 기반 컴퓨팅: Amazon ECS, Amazon EKS, AWS Fargate 
-4. AWS Elastic Beanstalk: 코드를 올리면 EC2/ALB 인프라를 자동 구축해 주는 웹 앱 배포 도구(PaaS)
+4. AWS Elastic Beanstalk: 코드를 올리면 EC2/ALB 등을 자동 구축해 주는 웹 앱 배포 도구(PaaS)
 5. AWS Batch: 대규모 일괄 처리 '연산' 작업을 위한 자동 컴퓨팅 스케줄러
 
 # Trusted Advisor의 5대 핵심 점검 영역
@@ -841,3 +841,65 @@ Service Limits (서비스 제한):
   - ElastiCache: 단순 캐시 용도로 메모리가 꺼지면 데이터가 휘발될 수 있음
   - MemoroyDB: 메모리 기반으로 마이크로초 수준의 읽기/쓰기 속도를 제공하면서도, 3개 AZ로 영구 저장해주기 때문에 메인 데이터베이스로 직접 사용할 수도 있음
   
+# AWS VPC Flow Logs
+- VPC 내 네트워크 인터페이스를 오고 가는 IP 트래픽을 모니터링/기록하는 서비스
+- VPC Flow Logs vs CloudTrail
+  1. VPC Flow Logs
+     - 기록 대상: VPC 내 네트워크 인터페이스를 오고 가는 IP 트래픽
+     - 네트워크 수준의 인바운드/아웃바운드 IP 흐름을 캡처하는 전용 기능
+  2. CloudTrail
+     - 기록 대상: 누가, 언제, 어떤 AWS API를 호출했는지
+     - 네트워크를 오고 가는 실제 IP 트래픽 데이터는 기록하지 못함
+- 핵심 키워드
+  - IP traffic (인바운드/아웃바운드 IP 트래픽)
+  - Network Interface(ENI) / Subnet / VPC
+  - Accept / Reject (보안 그룹이나 NACL에서 트래픽이 허용되었는지 거부되었는지 문제 해결 용도)
+
+ # AWS Amplify
+ - 역할: 웹 및 모바일 앱을 빠르게 개발/배포할 수 있도록 인증, 백엔드 연결, 프론트엔드 호스팅 등을 하나로 제공하는 개발 플랫폼 프레임워크
+ - mobile and web applications 개발 지칭 시 가장 대표적으로 등장하는 서비스
+ - 모바일/웹 앱 신속 개발 및 호스팅
+
+# AWS AppSync - 출제 가능성 낮음
+- 역할: GraphQL API를 활용하여 여러 데이터 소스의 데이터를 쉽게 연결하고 동기화해주는 관리형 서비스
+- real-time updates(GraphQL Subscription 기반 실시간 데이터 업데이트) 및 offline functionalities(네트워크 중단 시 로컬 캐시를 사용하다 재연결 시 자동 동기화)가 핵심 키워드
+- GraphQL 기반 실시간 데이터 동기화
+
+# AWS Systems Manager -> 운영 자동화 + 통합 사용자 인터페이스/대시보드
+- AWS 환경 뿐만 아니라 온프레미스 및 타사 클라우드 서버까지 하나의 대시보드에서 일괄 관리 및 자동화할 수 있도록 지원하는 통합 운영 관리 서비스
+- 핵심 기능
+  1. Session Manager
+     - 웹 콘솔만을 통해 EC2 인스턴스에 안전하게 원격 접속하는 기능
+     - 시험 포인트: '키 페어 관리 없이 안전한 인스턴스 접속', '22번 포트 차단'
+  2. Parameter Store
+     - 암호, DB 연결 문자열, 라이센스 코드 등의 설정 데이터를 중앙에서 안전하게 저장하고 관리하는 서비스
+     - 특징: AWS KMS와 연동되어 암호화가 지원되며, 소스코드 안에 비밀번호를 하드코딩하지 않고 불러와 사용할 수 있게 해줌
+  3. *Automation(자동화)*
+     - 미리 정의된 Runbook 스크립트를 이용해 반복적인 IT 운영 작업(EC2 백업, AMI 생성 등)을 자동화하는 기능
+  4. Patch Manager & Maintenance Windows
+     - OS 및 어플리케이션의 보안 패치를 자동화하고, 정해진 점검 시간에만 패치가 수행되도록 스케줄링하는 기능
+-> 시험에는 '운영 자동화'와 Session Manager를 통한 안전한 접속'이 주로 등장
+
+# AWS Cognito
+- 웹 및 모바일 어플리케이션에 회원가입, 로그인, 접근 제어 기능을 손쉽게 붙일 수 있게 해주는 서버리스 자격 증명 관리 서비스
+- 2가지 핵심 구성 요소
+  1. User Pools (사용자 풀) - 인증 담당(너 누구니?/신원 검증)
+     - 역할: 사용자 로그인/회원가입 디렉터리 관리
+     - 기능:
+       1. 이메일, 아이디/비밀번호 기반 로그인 처리
+       2. 소셜 로그인 연동(google, facebook, apple 등) 및 SAML/OIDC 지원
+       3. MFA 및 비밀번호 재설정 기능 자동 제공
+      - 인증 성공 시 어플리케이션에 JWT 토큰을 발급해 줌
+  2. Identity Pools (자격 증명 풀) - 인가 담당(너 뭐 할 수 있니?/임시 접근 권한 부여)
+     - 역할: 사용자가 AWS 리소스에 직접 접근할 수 있는 임시 권한 부여
+     - 기능: User Pools나 소셜 로그인을 거친 사용자에서 임시 AWS IAM 자격 증명을 발급
+     - 앱 사용자가 백엔드 서버를 거치지 않고 S3에 직접 사진을 업로드하는 등의 작업이 가능해짐
+  - IAM과의 구분
+  -> AWS 계정 내 직원/개발자 권한 관리는 IAM, 웹/모바일 앱의 일반 고객 로그인 관리는 Cognito
+
+- 주요 키워드
+  - Web and Mobile App Sign-Up / Sign-In (웹 및 모바일 앱 회원가입/로그인)
+  - Social Identity Providers (구글, 페이스북 등 소셜 로그인 연동)
+  - User Pools & Identity Pools
+  - Temporary AWS Credentials for app users (앱 사용자용 임시 AWS 자격 증명)
+ 
