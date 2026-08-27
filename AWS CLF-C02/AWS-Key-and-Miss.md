@@ -989,3 +989,29 @@ Service Limits (서비스 제한):
    : IAM, Route 53, CloudFront, AWS WAF, AWS Organizations, AWS Shield, AWS Global Accelerator
 2. 리전 서비스
    : EC2, VPC, RDS, EBS, S3(S3는 네임페이스는 글로벌(전세계에 같은 이름이 2개 있으면 안됨)이지만 버킷 생성 위치는 리전 단위)
+
+# penetration testing(모의 침투 테스트) Policy
+- AWS는 지정된 기본 핵심 서비스에 대해서는 AWS의 사전 승인 없이 고객이 자유롭게 모의 침투 테스트를 진행할 수 있도록 허용하는 중
+- 사전 승인을 없앤 이유: 고객의 책임 영역
+  - EC2 내부의 OS나 웹 어플리케이션의 보안 취약점을 점검하는 것은 어차피 고객의 책임
+  - 따라서 AWS는 고객이 자기 자산을 테스트하는 것을 굳이 일일이 승인해주지 않고 자율에 맡기기로 정책 변경
+- 단, 절대로 해서는 안되는 금지 행위
+  1. Dos / DDoS 공격 시뮬레이션 (트래픽 과도 유발)
+  2. Port / Protocol / Request Flooding (포트/요청 폭주 공격)
+  3. DNS Zone Walking (Route 53 관련)
+  -> 위험도가 높거나 금지된 테스트를 꼭 진행해야 한다면 예외적으로 AWS Support를 통해 사전 협의 및 요청을 거쳐야 함
+
+# Amazon Appstream 2.0
+- 개념: 단일 어플리케이션 가상화 스트리밍 서비스
+- 제공 방식: 특정 어플리케이션 1개만 웹 브라우저로 스트리밍
+- 상태 유지: 앱 사용이 끝나면 세션과 상태가 초기화됨(Non-persistent)
+
+# Site-to-Site VPN vs Client VPN
+1. Site-to-Site VPN
+   - 네트워크와 네트워크(거점 대 거점)을 연결하는 방식
+   - 온프레미스 데이터센터/사무실의 IPsec라우터와 AWS VPC를 1:1로 묶을 때 사용
+   - 특징: 사물실에 출근한 직원들은 PC에 별도의 VPN 프로그램을 켜지 않아도 AWS 자원에 바로 접속할 수 있음
+2. Client VPN
+   - 개인 사용자와 네트워크를 연결하는 방식
+   - 재택근무자나 출장자가 소프트웨어를 실행해 개별적으로 VPC에 접속할 때 사용
+   - 특징: 장소에 상관없이 인터넷만 연결되어 있으면 안전하게 VPC 내부 리소스에 접속 가능
