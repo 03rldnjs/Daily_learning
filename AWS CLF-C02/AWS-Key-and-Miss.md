@@ -187,7 +187,6 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   3. Install custom plugins or database engines (커스텀 플러그인 / 엔진 설치)
      - 관리형 DB 서비스가 제공하는 기본 설정 범위를 벗어나 직접 환경을 개조해야 할 때
 
-
 # Amazon S3 + CloudFront
 - Amazon S3(객체 스토리지 - 원본 저장소)
   - 대용량 비디오, 이미지, 문서 같은 정적 객체를 가장 저렴하고 안전하게 보관할 수 있는 글로벌 스토리지
@@ -257,7 +256,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   - AWS Shield(standard 기준 Layer 3/4 보호)
     - 볼륨형 대규모 DDoS 공격 차단 전용 서비스 (Shield Advanced 사용 시 WAF 기능이 일부 포함되어 Layer 7에 대한 보호도 가능해짐)
    
-# Amazon API Gateway
+# Amazon API Gateway - serverless service
 - 개발자가 종류와 규모에 상관없이 API를 손쉽게 생성, 게시, 유지 관리, 모니터링 및 보안 처리할 수 있게 해주는 완전 관리형 API 프론트엔드 서비스
 - 클라이언트(모바일 앱, 웹 브라우저 등)와 백엔드 서비스(AWS Lambda, EC2, DynamoDB 등) 사이에서 교통정리를 해주는 단일 진입점 역할을 함
 - 핵심 기능
@@ -515,7 +514,7 @@ Service Limits (서비스 제한):
 (ex. 80%에 도달하면 경고를 띄워 한도 증가 요청을 하라고 알려줌)
 
 # Amazon ElastiCache
-- 일반 DB가 서재 책상에 책을 보관하는 것이라면, ElastiCache는 책상 위에 자주 읽는 책을 꺼내두는 것(RAM 메모리 저장)과 같음. Disk 기반의 DB보다 검색 속도가 월등히 빠름
+- 일반 DB가 서재 책상에 책을 보관하는 것이라면, ElastiCache는 책상 위에 자주 읽는 책을 꺼내두는 것(RAM 메모리 저장)과 같음. Disk 기반의 DB보다 검색 속도가 월등히 빠름(단, 특정 리전 내부 단에서 작동 -> 글로벌 네트워크 지연 시간 단축 불가)
 - 지원 엔진: Redis 및 Memcached
 - 주요 사용 목적:
   1. 데이터베이스 부하 감소: 자주 조회되는 Query 결과를 메모리에 저장하여 데이터베이스의 부담을 완화
@@ -1053,3 +1052,54 @@ Service Limits (서비스 제한):
    - 지문 패턴: 빅데이터 분석, 머신 러닝, 고성능 컴퓨팅을 위한 초고속 리눅스 파일 시스템은?
    - 팁: S3 버킷과 직접 연결하여 데이터를 빠르게 읽고 쓰면서 연산 처리를 수행하는데 최적화되어 있음
 + EFS도 파일스토리지임. 그러나 리눅스 기반이라 windows용 프로토콜인 SMB를 인식하지 못함(NFS만 지원함)
+
+# ELB 자체 Auto Scaling vs EC2 Auto Scaling
+- ELB Auto Scaling
+  - 대상: ELB 본체
+  - 역할: 대규모 트래픽이 몰려올 때 로드밸런서 자체의 대역폭/용량을 자동 확장
+  - 사용자 설정: AWS가 알아서 완전 관리
+- EC2 Auto Scaling
+  - 대상: 로드밸런서 뒤에 있는 EC2 인스턴스(서버 개수)
+  - 역할: 트래픽 변화에 맞춰 EC2 서버 개수를 늘리거나 줄임
+  - 사용자 설정: 스케일링 정책을 사용자가 직접 설정
+-> ELB는 Auto Scaling 기능도 내장하고 있으므로 Elasticity(탄력성)도 만족시킴
+-> ELB의 핵심 가치: <High Availability(고가용성) & Elasticity(탄력성)>
++ ELB의 고가용성은 리전 전체의 재해에 대해서는 적용 불가(ELB는 리전 한정적인 서비스이므로)
++ 리전 전체의 재해에 대응하려면 multi region에 배포해야만 가능
+
+# AWS Route 53 health checks
+- 역할: Route 53 내부 자체 기능으로, 웹 서버/엔드포인트에 주기적으로 HTTP/HTTPS/TCP 요청을 보내 정상 작동 여부(상태 및 응답 속도)를 모니터링
+- 핵심 연동(DNS 장애 조치): Route 53 Health Check 결과 죽어있는 서버가 발견되면, DNS 라우팅 대상에서 해당 서버를 자동으로 제외하고 정상 서버에만 연결해주는 결정적인 역할을 수행함
+
+# CAPEX & OPEX
+- CAPEX(Capital Expenditures, 자본 지출)
+  - 의미: 서버, 데이터센터 건물, 네트워크 장비 등을 처음에 대규모 선불 비용을 주고 직접 구매하는 방식
+  - 특징: 데이터센터를 짓고 물리적 서버를 사서 설치해야하므로 초기 비용이 매우 비싸고 고정 비용이 큼(온프레미스 / 프라이빗 클라우드 방식)
+- OPEX(Operational Expenditures, 운영 지출)
+  - 의미: 인프라를 직접 소유하지 않고, 사용한 만큼(Pay-as-you-go)만 지속적인 운영비로 내는 방식
+  - 특징: 초기 선불 비용이 거의 없거나 매우 적으며, 사용량에 맞춰 비용이 변동됨(public cloud 방식)
+ 
++ 시험에 그대로 등장할 수 있는 주요 재무/비즈니스 약어
+  - CAPEX (Capital Expenditures / 자본 지출)
+    - 물리적 데이터센터, 서버 장비 등을 사기 위해 지불하는 대규모 초기 선불 비용
+  - OPEX (Operational Expenditures / 운영 지출)
+    - 사용한 만큼만 지불하는 지속적인 운영 및 사용 비용(Pay-as-you-go)
+  - TCO(Total Cost of Ownership / 총 소유 비용)
+    - 온프레미스에서 클라우드로 이관할 때 전체 비용(서버, 전력, 건물 임대료, 관리 인력 등)을 비교 분석하는 지표
+  - ROI(Return on Investment / 투자 수익률)
+    - 클라우드 전환을 통해 얻는 경제적 이득 비용
+   
+# 전 세계 사용자 / 글로벌 지연 시간 감소 & S3
+1. 패턴 A(S3 + CloudFront)
+   - 키워드: Static content, web application, Global users, Lower latency
+   - 원리: S3를 원본으로 두고 CloudFront가 전 세계 Edge Location에 정적 파일을 캐싱해서 뿌려주는 구조
+2. 패턴 B(S3 Transfer Acceleration 단독/활용)
+   - 키워드: S3 Bucket, Upload/Download, Long distance, Globally distributed users
+   - 원리: 캐싱이 아니라, 먼 거리에서 S3 버킷으로 대용량 파일을 directly 업로드/다운로드할 때 Edge Location + AWS 전용 고속 백본 망을 타게 만드는 옵션 기능
++ 헷갈릴 수 있는 서비스 구별 공식
+  - S3TA(S3 Transfer Acceleration)
+    -> S3, Bucket, Upload/Download
+  - AWS Global Accelerator
+    -> Static IP, Non-HTTP(TCP/UDP), ALB/NLB/EC2, Multi-Region Failovr
+  - Amazon CloudFront
+    -> Caching, CDN, Static/Dynamic Web Content
