@@ -51,16 +51,16 @@ AWS에서 제공하는 클라우드형 대규모 빅데이터 처리 도구
 Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터 프레임워크를 클릭 몇 번으로 쉽게 구성해서 PB(페타바이트) 급 데이터를 분산 처리할 수 있게 해줌
 
 - 출제 포인트
-  Big Data Processing / Analytics
-  Apache Spark, Hadoop, Presto, Hive (오픈소스 프레임워크 제품명이 지문에 대놓고 등장)
-  Petabyte-scale (페타바이트 규모의 대용량 데이터)
-  EC2 Cluster (여러 대의 EC2를 노드로 묶어 분산 처리)
+  - Big Data Processing / Analytics
+  - Apache Spark, Hadoop, Presto, Hive (오픈소스 프레임워크 제품명이 지문에 대놓고 등장)
+  - Petabyte-scale (페타바이트 규모의 대용량 데이터)
+  - EC2 Cluster (여러 대의 EC2를 노드로 묶어 분산 처리)
 
 - 유사 서비스 비교 (EMR vs Athena vs Redshift)
-  Amazon EMR: 오픈소스 프레임워크 기반 빅데이터 분산 처리
-  Amazon Athena: S3에 저장된 데이터를 SQL 문법으로 서버리스 분석
-  (데이터베이스나 스토리지가 아니라, S3에 저장된 데이터를 직접 조회하는 서버리스 대화형 쿼리 서비스)
-  Amazon Redshift: 페타바이트 급 데이터 웨어하우스, 데이터 분석도 제공
+  - Amazon EMR: 오픈소스 프레임워크 기반 빅데이터 분산 처리
+  - Amazon Athena: S3에 저장된 데이터를 SQL 문법으로 서버리스 분석
+    (데이터베이스나 스토리지가 아니라, S3에 저장된 데이터를 직접 조회하는 서버리스 대화형 쿼리 서비스)
+  - Amazon Redshift: 페타바이트급 데이터 웨어하우스, 데이터 분석도 제공
 
 ---
 
@@ -175,8 +175,8 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
 - 합친 의미: AWS에서 관리형 서비스로 공식 지원하지 않는 외부 업체의 오래되거나 특수한 데이터베이스
 
 - Legacy Third-party Database를 운영할 수 있는 AWS 서비스 = EC2 인스턴스
-  AWS RDS가 지원하지 않는 마이너하거나 오래된 레거시 DB는 AWS가 자동으로 설치해주거나 관리해 줄 수 없음
-  따라서 사용자가 직접 빈 가상 서버(EC2)를 하나 임대한 뒤, OS 위에 해당 레거시 DB 설치 파일을 직접 올려서 운영하는 방법밖에 없음
+  - AWS RDS가 지원하지 않는 마이너하거나 오래된 레거시 DB는 AWS가 자동으로 설치해주거나 관리해 줄 수 없음
+  - 따라서 사용자가 직접 빈 가상 서버(EC2)를 하나 임대한 뒤, OS 위에 해당 레거시 DB 설치 파일을 직접 올려서 운영하는 방법밖에 없음
 
 - Amazon EC2의 3대 키워드
   1. Legacy / Custom / Unsupported Software (특수/오래된/미지원 소프트웨어)
@@ -227,8 +227,8 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
 
 - 헷갈리는 선지
   1. Account password policies (= IAM password polices)
-     - 그냥 Account라고 언급하면, 고객이 소유한 AWS 계정 내의 사용자 비밀번호 정책임
-     - 이는 클라우드 '자체'에 대한 관리/보안이라고 볼 수 없음 -> 따라서 고객의 책임
+     - 그냥 Account라고 언급하면, 고객이 소유한 AWS 계정 내의 사용자 비밀번호 정책(IAM password policy)임
+     - 이는 클라우드 '자체'에 대한 관리/보안이라고 볼 수 없음 + 원래 IAM 관리는 고객의 책임 -> 따라서 고객의 책임
   2. Patching of storage systems
      - 스토리지 '시스템'을 패치하고 업데이트하는 것은 클라우드 '자체'에 대한 관리/보안임 -> 따라서 AWS의 책임
      - 주의: 만약 지문이 Patching of EC2 OS / Guest OS -> 이는 클라우드 내부에 대한 관리/보안이므로 고객의 책임
