@@ -302,7 +302,7 @@ Apache Spark, Hadoop, Presto, Hive 같은 대표적인 오픈소스 빅데이터
   - IAM Role을 IAM Group에 부여/연결(Attach) -> 기술적으로 불가능
   - IAM Policy(정책)을 IAM Group이나 IAM User에게 연결 -> 이건 가능
   - IAM Role을 EC2, Lambda 등 서비스나 사용자에게 위임하는 것 -> 이것도 가능
-
+  - 하나의 인스턴스에는 단 하나의 IAM Role만 연결(Attach)가능/IAM User는 여러 개의 IAM Group에 동시에 소속 가능
 + IAM 주요 함정 패턴
   1. EC2에서 S3에 접근할 때 Access Key를 저장/하드코딩한다(X)
      - Access Key를 저장하거나 하드코딩하는 행위는 심각한 보안상의 문제를 초래할 수 있음
@@ -1103,3 +1103,68 @@ Service Limits (서비스 제한):
     -> Static IP, Non-HTTP(TCP/UDP), ALB/NLB/EC2, Multi-Region Failovr
   - Amazon CloudFront
     -> Caching, CDN, Static/Dynamic Web Content
+
+# 백업 동작 원리 / 기능
+- Point-in-time recovery (PITR)
+  - 매칭 서비스: RDS, DynamoDB, Aurora
+  - 개념 및 특징: 원하는 특정 시점으로 DB를 복원하는 기능
+- Snapshot backup (스냅샷 백업)
+  - 매칭 서비스: EBS, RDS, Redshift, ElastiCache
+  - 개념 및 특징: 특정 순간의 전체 데이터 상태를 사진 찍듯 정적으로 저장하는 방식
+  - RDS의 경우 사용자가 수동으로 찍거나 매일 일정한 시간에 자동으로 생성되는 백업 파일 형식
+    -> 원하는 특정 시점에 복구할 수 있는게 아니라 규칙적 자동 복구 혹은 수동 캡
+- Incremental backup (증분 백업)
+  - 매칭 서비스: EBS Snapshot, Backup, S3 Glacier
+  - 개념 및 특징: 첫 백업 이후 변경되거나 추가된 데이터 블록만 골라서 저장하는 방식
+- Full backup (전체 백업)
+  - 매칭 서비스: AWS Backup, 온프레미스 -> AWS 이관(AWS Storage Gateway, AWS DataSync)
+  - 개념 및 특징: 기존 변경 사항과 상관없이 전체 데이터를 매번 처음부터 끝까지 통째로 백업하는 방식
+
+  # RDS의 백업 방식(2가지)
+  1. Point-in-Time Recovery (PITR)
+    - 핵심 목적: 데이터를 날리기 직전의 상태로 돌아가고 싶을 때(원하는 특정 시점으로)
+    - 특징
+      - 일일 전체 스냅샷 + 실시간 트랜잭션 로그를 조합
+      - 최소 5분 전부터 백업 보존 기간 내의 원하는 임의의 시각을 찍어서 복원 가능
+      - 예: 오늘 오후 2시 13분 45초에 실수로 파일 drop -> 오후 2시 13분 40초 상태로 복구 요청
+  2. DB Snapshot Backup (스냅샷 백업)
+    - 핵심 목적: 특정 상태를 영구 보관하거나, 정해진 정적 시점으로 복원하고 싶을 때
+    - 특징
+      - 자동 스냅샷: AWS가 정해진 유지 관리 시간에 매일 1회 자동으로 찍어주는 백업(보존 기간 지나면 자동 삭제)
+      - 수동 스냅샷: 대규모 서비스 업데이트 전이나 계정 이관 전 등, 사용자가 원할 때 직접 버튼을 눌러 생성하는 백업(사용자가 직접 삭제할 때까지 영구 보관)
+      - 예: 시스템 대규모 업데이트 전에 현재 상태를 수동 스냅샷으로 찍어두고, 문제가 생기면 그 스냅샷 시점으로 전환
+     
+-> PITR: 분/초 단위의 핀포인트 시점 복구(트랜잭션 로그 활용, 실수 복구 용)
+-> Snapshot: 특정 정적 순간의 백업 파일(매일 자동 저장 or 필요할 때 수동 영구 저장용)
+
+# AWS Support Plan 핵심 비교표(중요)
+1. Basic plan 
+   - 대상/용도: 모든 계정 기본 포함
+   - 연락 채널: 고객 서비스 및 포럼(기술 지원 불가)
+   - 엔지니어 지원: 없음
+   - Trusted Advisor: 핵심 보안/한도 체크(7가지 Core)
+   - 최소 응답 시간: 없음
+2. Developer plan
+   - 대상/용도: 테스트, 실험용
+   - 연락 채널: 이메일 전용(영업시간 내)
+   - 엔지니어 지원: Cloud Support Associate(담당자 1인)
+   - Trusted Advisor: 핵심 보안/한도 체크(Basic plan과 동일)
+   - 최소 응답 시간: 12시간 미만(시스템 손상 시)
+3. Business plan
+   - 대상/용도: 프로덕션 워크로드
+   - 연락 채널: 24/7 전화, 채팅, 이메일
+   - 엔지니어 지원: Cloud Support Engineers(24/7 전담 지원)
+   - Trusted Advisor: 전체 오픈
+   - 최소 응답 시간: 1시간 이내(프로덕션/운영 장애 시)
+4. Enterprise plan
+   - 대상/용도: 비즈니스 크리티컬
+   - 연락 채널: 24/7 전화, 채팅, 이메일
+   - 엔지니어 지원: TAM(Technical Account Manager/기술 관련 지원) + Concierge(계정 및 요금 지원)
+   - Trusted Advisor: 전체 오픈
+   - 최소 응답 시간: 15분 이내(비즈니스 크리티컬 장애 시)
++ Open a case / Create a support case = 기술 지원 문의 작성
+  -> 애초에 Basic plan은 기술 지원 자체를 지원하지 않으므로 case open 자체가 제한됨
+  
+- Case 오픈 불가 (0개) ➔ Basic
+- Case 무제한 오픈 (이메일 전용, 최저가) ➔ Developer
+- Case 무제한 오픈 (24/7 전화 & 실시간 채팅) ➔ Business
