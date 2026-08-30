@@ -1342,3 +1342,14 @@ Subnet = 구/동 안에 들어선 특정 아파트 단자(AZ 계층)
 4. Platform (플랫폼): "아키텍처 설계, 현대화, CI/CD"
 5. Security (보안): "데이터 보호, Access 관리, 위협 탐지"
 6. Operations (운영): "일상 운영, 패치 관리, 성능 모니터링, 장애 대처"
+
+# AWS QuickSight
+- 클라우드 기반의 엔터프라이즈급 비즈니스 인텔리전스 및 데이터 시각화 서비스
+- 다양한 데이터 원천으로부터 데이터를 수집해 대시보드로 시각화하고, 인사이트를 빠르게 도출할 수 있도록 도와줌
+- AWS 내부 서비스뿐만 아니라 외부 데이터베이스 및 SaaS 어플리케이션과도 쉽게 연결 가능
+- 핵심 키워드:
+  - BI(Business Intellignece)
+  - Data Visualization
+  - Dashboards & Reports
+  - SPICE
+  - Pay-per-session pricing
