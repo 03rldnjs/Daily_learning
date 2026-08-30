@@ -1138,6 +1138,7 @@ Service Limits (서비스 제한):
 -> Snapshot: 특정 정적 순간의 백업 파일(매일 자동 저장 or 필요할 때 수동 영구 저장용)
 
 # AWS Support Plan 핵심 비교표(중요)
++ Customer Service(고객 서비스)는 모든 플랜에서 24/7(연중 무휴)로 무료 접근 가능
 1. Basic plan 
    - 대상/용도: 모든 계정 기본 포함
    - 연락 채널: 고객 서비스 및 포럼(기술 지원 불가)
@@ -1290,3 +1291,28 @@ Subnet = 구/동 안에 들어선 특정 아파트 단자(AZ 계층)
    1. AWS Backup: 여러 AWS 서비스의 정기 백업 및 보존 정책을 중앙에서 자동 관리
    2. AWS DRS(Elastic Disaster Recovery): 온프레미스/클라우드 서버 전체를 실시간 복제하다가 재해 시 빠른 장애 조치로 다운타임 최소화
    3. EBS / RDS Snapshots: 특정 서비스 단독으로 포인터 시점 복사본을 만드는 개별 서비스 단위의 기능
+
+# AWS AWS Shared Responsibility Model 중 shared control 영역
+1. Patch Management (패치 관리)
+   - AWS는 호스트/인프라 수준의 패치를 담당하고, 고객은 EC2 OS 및 어플리케이션 수준의 패치 담당
+     (단순 OS Patching이라고 명시되면 고객의 책임을 의미함)
+2. Configuration Management (구성 관리)
+   - AWS는 하드웨어 및 호스트 인프라 구성을 관리하고, 고객의 자신이 띄운 서비스/네트워크/보안그룹 구성을 관리
+3. Awareness and Training
+   - AWS는 AWS 임직원 교육, 고객은 고객사 임직원 교육을 각각 수행
+
+# Amazon S3 Glacier Flexible Retrieval의 3가지 데이터 조회 옵션
+- Expedited -> 1 ~ 5분 소요 / 가장 빠른 대신 가장 비용이 높음
+- Standard -> 3 ~ 5시간 소요 / 기본 옵션, 적절한 소요 시간과 비용
+- Bulk -> 5 ~ 12시간 / 가장 느림, 비용이 가장 저렴(대규모 데이터 일괄 처리용)
+
+# Amazon Macie
+- 기계 학습과 패턴 매칭을 사용해 S3 데이터 내에 민감한 데이터(PII, 주민등록번호, 신용카드 번호, 자격 증명 등)가 포함되어 있는지 탐지 및 분류하고, 유출 위험이 있는지 감지하는 데이터 보안 서비스
+- AWS에서 개인 식별 번호(PII) 탐지/유출 방지 역할을 맡고 있는 서비스는 Macie가 유일함. 따라서 지문에 S3에 관한 언급이 없더라도 PII와 Data leaks라는 키워드만 제시해도 Macie가 정답
+
+# AWS Resource Groups
+- 하나 이상의 태그를 공유하는 여러 AWS 리소스를 하나의 그룹으로 묶어서 관리할 수 있게 해주는 기술/서비스
+- 주요 용도
+  1. 여러 리소스의 상태와 메트릭을 한 눈에 통합 모니터링
+  2. 그룹 단위로 일괄 업데이트 및 패치 작업 수행
+  3. 프로젝트별, 부서별, 환경별 자원 그룹화
