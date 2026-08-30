@@ -1264,3 +1264,29 @@ Subnet = 구/동 안에 들어선 특정 아파트 단자(AZ 계층)
   - 데이터 등
 
 -> Resource Access Manager = 중앙 계정에 리소스를 1개만 띄워놓고, 다른 계정들이 내 집처럼 자유롭고 안전하게 나눠 쓰도록 공유해 주는 도구
+
+# AWS Elastic Disaster Recovery (AWS DRS)
+- 온프레미스 서버나 다른 클라우드, 또는 AWS의 다른 리전에 있는 어플리케이션 및 인프라를 AWS 환경으로 실시간 지속 복제하여 재해 발생 시 빠르게 복구할 수 있게 해주는 재해 복구 전용 서비스
+- 장점
+  - 비용 효율적 운영 가능: 평소에는 데이터를 저렴한 스토리지(EBS)에 실시간으로 복제만 해두고, 고비용의 EC2 연산 리소스는 최소한으로만 유지하거나 띄우지 않음. 그러다가 실제 재해가 발생했을 때만 몇 분 만에 full-scale EC2 인스턴스를 즉시 띄워서 복구하므로 비용 낭비를 최소화하여 비용 효율적으로 운영이 가능함
+  - 복구 목표 시간/시점 최소화: 복구 목표 시간과 복구 목표 시점을 밀리초~분 수준으로 최소화할 수 있음
+
+# AWS Backup - 중요
+- AWS 리소스 전체의 백업 작업을 일일이 개별 서비스에서 설정할 필요 없이, 한 곳에서 정책을 통해 자동화하고 중앙 관리할 수 있게 해주는 완전 관리형 백업 서비스
+- 핵심 기능 및 장점
+  1. 중앙 집계형 백업 관리: AWS Backup 단 하나의 콘솔에서 회사 전체의 백업 정책을 통해 통합 제어 가능
+  2. 정책 기반 자동화: 백업 주기, 보존 기간 등을 정의한 Backup Plan을 작성하고, 대상을 지정하면 자동으로 백업이 실행됨
+  3. 교차 리전 및 교차 계정 백업: 재해 복구 및 보안 강화를 위해 백업 데이터를 다른 리전이나 다른 AWS 계정으로 자동 복제 가능
+  4. 컴플라이언스 및 랜섬웨어 방지: Vault Lock 기능을 설정하면 백업 데이터의 변조 및 예기치 않은 삭제를 차단하여 랜섬웨어 공격이나 내부자의 고의 삭제로부터 데이터를 안전하게 보호함
+- 지원 AWS 리소스
+  - storage: EBS, EFS, S3
+  - Database: RDS, DynamoDB, Aurora, DocumentDB, Neptune
+  - Compute/Hybrid: EC2, AWS Storage Gateway
+- 핵심 키워드
+  1. Centralize and automate backups -> 여러 AWS 서비스의 백업을 중앙에서 통합 관리 및 자동화
+  2. Policy-based backup solution -> 정책 기반 백업 솔루션
+  3. Cross-account / Cross-region backup -> 규정 준수나 DB을 위해 타 계정/타 리전으로 백업을 복제
+ - AWS Backup vs AWS DRS(Elastic Disaster Recovery) vs EBS / RDS Snapshots
+   1. AWS Backup: 여러 AWS 서비스의 정기 백업 및 보존 정책을 중앙에서 자동 관리
+   2. AWS DRS(Elastic Disaster Recovery): 온프레미스/클라우드 서버 전체를 실시간 복제하다가 재해 시 빠른 장애 조치로 다운타임 최소화
+   3. EBS / RDS Snapshots: 특정 서비스 단독으로 포인터 시점 복사본을 만드는 개별 서비스 단위의 기능
