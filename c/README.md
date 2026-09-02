@@ -81,6 +81,17 @@ This folder is an archive that collect the codes that I write and informations t
 ---
 
 8. [AutoScaling_simulator.c](./AutoScaling_simulator.c)
+   - 구조체와 동적 메모리 할당/재할당(malloc/realloc)을 활용하여 CPU 평균 사용량 임계치에 따라 인스턴스의 개수를 scale in/out하는 시뮬레이터(An Auto Scaling simulator, which can managing server instance(Scale in/out) via structs and malloc/realloc based on CPU usages and thresholds)
+   - 최대/최소 인스턴스 개수를 지정하여 인스턴스의 적정 개수를 유지하는 알고리즘 추가(add an algorithm that maintains an appropriate number of instances by specifying the maximum/minimum number of instances)
+   - malloc/realloc 실패 시 NULL을 체크하는 예외 처리('temp' 포인터 패턴)와 프로그램 종료 시 'free()'를 통한 메모리 누수 방지 구현(Exception handling that checks for NULL on malloc/realloc failures (using the 'temp' pointer pattern), and implementing memory leak prevention through 'free()' at program termination)
+
+   주요 학습 내용
+   - C언어 메모리 동적 관리: Heap 영역 메모리를 직접 할당하고 해제하여 가변 배열의 확장/축소 원리 습득
+   - 안전한 포인터 핸들링: 'realloc'실패 시 발생할 수 있는 기존 메모리 주소 유실을 방지하기 위해 'temp' 포인터에 임시 할당하는 주소 검증 방식 학습
+   - 클라우드 개념의 코드화: AWS CLF-C02를 학습하면서 알게 된 Auto Sclaing 개념(Scale in/out)을 C언어의 조건문과 메모리 할당 알고리즘으로 약식 구현
+
+---
+
 To be continued...
 
 // advanced version(powered by Gemini)
