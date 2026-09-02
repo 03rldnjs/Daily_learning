@@ -80,6 +80,7 @@ This folder is an archive that collect the codes that I write and informations t
 
 ---
 
+8. [AutoScaling_simulator.c](./AutoScaling_simulator.c)
 To be continued...
 
 // advanced version(powered by Gemini)
@@ -228,6 +229,30 @@ A solution for the PCCP Level 1 coding test question, featuring string-to-time c
 - **철저한 예외 상황 시뮬레이션**: 10초 이동 후의 시점이 오프닝 구간에 걸치는 경우, 동영상 시작/종료 지점을 이탈하는 경우 등 발생 가능한 모든 엣지 케이스(Edge Case)를 고려한 방어적 흐름 설계.
 - **구조적 모듈화 프로그래밍**: 코딩테스트 환경에서도 스파게티 코드를 지양하고, 함수 원형 선언과 기능별 분리를 통해 가독성과 구조적 완성도를 높임.
 - **객관적 실력 점검 및 피드백**: 실제 공인 코딩테스트(PCCP) 기출문제를 제한된 조건 속에서 해결해 보며, 현재 나의 구현 능력을 객관적으로 파악하고 향후 학습 방향성을 설정함.
+
+---
+
+### 8. C언어로 구현한 AWS EC2 Auto Scaling 시뮬레이터 (`auto_scaling_sim.c`)
+구조체와 동적 메모리 재할당(`realloc`)을 활용하여 CPU 평균 사용량 임계치에 따라 EC2 인스턴스를 가변적으로 확장/축소(Scale Out/In)하는 시뮬레이터입니다.  
+An AWS EC2 Auto Scaling simulator in C, dynamically managing server instances (Scale Out/In) via structs and `realloc` based on CPU thresholds.
+
+#### ✨ 주요 기능 (Key Features)
+- **동적 인스턴스 관리**: `malloc` 및 `realloc`을 사용하여 인스턴스 개수 변동에 따라 메모리 크기를 실시간으로 유연하게 재조정합니다.
+- **Auto Scaling Engine**:
+  - `Scale Out`: 평균 CPU 사용량이 70% 이상일 때 인스턴스를 새로 동적 할당하여 확장합니다 (최대 `MAX_CAPACITY` 제한).
+  - `Scale In`: 평균 CPU 사용량이 30% 이하일 때 가장 최근 인스턴스를 축소하여 메모리를 해제합니다 (최소 `MIN_CAPACITY` 제한).
+- **방어적 메모리 관리**: `malloc`/`realloc` 실패 시 `NULL`을 체크하는 예외 처리(`temp` 포인터 패턴)와 프로그램 종료 시 `free()`를 통한 메모리 누수 방지를 적용했습니다.
+
+#### 🛠 활용 기술 (Used Skills)
+- **Data Structures**: `typedef struct`를 활용한 EC2 인스턴스(ID, CPU 사용량) 사용자 정의 자료형 설계
+- **Dynamic Memory Allocation**: `malloc`, `realloc`, `free`를 활용한 가변 배열 메커니즘
+- **Defensive Programming**: 메모리 할당 실패 검증, 입력 버퍼/범위 검증(`MIN_CAPACITY` ~ `MAX_CAPACITY`)
+- **Cloud Architecture**: AWS EC2 Auto Scaling 서비스의 임계치(Threshold) 기반 수평적 스케일링 로직 구현
+
+#### 💡 주요 학습 내용 (Key Learning Contents)
+- **C언어 메모리 동적 관리**: 힙(Heap) 영역 메모리를 직접 할당하고 해제하는 전체 라이프사이클을 이해하고, `realloc`을 통한 가변 배열의 확장/축소 원리를 습득함.
+- **안전한 포인터 핸들링**: `realloc` 실패 시 발생할 수 있는 기존 메모리 주소 유실(Memory Leak)을 방지하기 위해 `temp` 포인터에 임시 할당하는 주소 검증 방식을 체득함.
+- **클라우드 개념의 코드화**: AWS에서 학습한 Auto Scaling 개념(Scale Out/In, Target Tracking Scaling)을 C언어 조건문과 메모리 할당 알고리즘으로 직접 구현하며 이론을 실체화함.
 
 ---
 
