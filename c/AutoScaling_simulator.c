@@ -139,6 +139,8 @@ int main() {
 	printf("최종 평균 CPU 사용량: %.2f%%\n", get_average_cpu(servers, count));
 
 	free(servers);
-
+	// malloc을 통해 할당받은 공간을 반납함
+	// return the space which is allocated by malloc function
+	
 	return 0;
 }
