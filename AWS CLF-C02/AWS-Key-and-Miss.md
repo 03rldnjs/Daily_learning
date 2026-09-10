@@ -505,11 +505,11 @@ IAM User나 Role에 직접 붙이는 아이덴티티 정책(Identity-based Polic
 5. AWS Batch: 대규모 일괄 처리 '연산' 작업을 위한 자동 컴퓨팅 스케줄러
 
 # Trusted Advisor의 5대 핵심 점검 영역
-Cost Optimization (비용 최적화): 사용률이 낮은 EC2 인스턴스 탐지
-Performance (성능): EBS 성능 병목 탐지
-Security (보안): S3 버킷의 공공 열람 권한, MFA 미설정 탐지
-Fault Tolerance (결함 허용): Multi-AZ 미적용, 백업 부재 탐지
-Service Limits (서비스 제한):
+- Cost Optimization (비용 최적화): 사용률이 낮은 EC2 인스턴스 탐지
+- Performance (성능): EBS 성능 병목 탐지
+- Security (보안): S3 버킷의 공공 열람 권한, MFA 미설정 탐지
+- Fault Tolerance (결함 허용): Multi-AZ 미적용, 백업 부재 탐지
+- Service Limits (서비스 제한):
 현재 사용 중인 리소스가 AWS 기본 제한 한도(Limit)의 80% 이상에 도달했는지 실시간 모니터링해 줌 
 (ex. 80%에 도달하면 경고를 띄워 한도 증가 요청을 하라고 알려줌)
 
