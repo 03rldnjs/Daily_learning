@@ -42,7 +42,7 @@ Anthropic의 **MCP(Model Context Protocol)** 표준을 활용하여, Claude Desk
 
 ### 2. Claude Desktop 연동 설정 (`claude_desktop_config.json`)
 Claude Desktop의 설정 파일에 아래와 같이 등록합니다.
-*(윈도우 경로: `%APPDATA%\Claude\claude_desktop_config.json`)*
+*(윈도우 경로: `%APPDATA%\Claude\claude_desktop_config.json`-> 해당 경로는 경우에 따라 달라질 수 있음(폴더 이름이 Claude 자체가 아니라 Claude로 시작하는 이름을 가진 폴더일 가능성 존재)*
 
 ```json
 {
