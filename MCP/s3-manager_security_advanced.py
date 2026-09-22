@@ -14,7 +14,7 @@ LOG_PATH = os.path.join(BASE_DIR, "s3_mcp_access.log")
 # 허용할 버킷 화이트리스트 (None이면 제한 없음, 지정 시 해당 버킷만 접근 허용)
 # 예: ALLOWED_BUCKETS = ["my-safe-bucket-2026", "mcp-test-bucket"]
 # ---------------------------------------------------------------------
-ALLOWED_BUCKETS = None  
+ALLOWED_BUCKETS = ["your_bucket_name"]  
 
 def sanitize_text(input_str: str) -> str:
     """
