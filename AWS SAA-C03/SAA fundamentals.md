@@ -75,4 +75,62 @@
     - 문제 상황: 로드밸런서 하나에 a.com, b.com 등 여러 도메인의 HTTPS 요청을 모두 처리해야 함.
     - 정답 키워드: ALB + SNI(Server Name Indication) 지원 및 ACM (AWS Certificate Manager) 연동
    
+# AWS Identity and Access Management(IAM)
+- IAM이란?
+  - AWS 리소스에 대한 인증(Authentication) 및 인가(Authorization)를 중앙에서 관리하는 서비스
+- IAM의 핵심 특징 3가지
+  1. 글로벌 서비스(Global Service): 리전에 종속되지 않고 전 세계 모든 리전에서 동일하게 적용
+  2. 최소 권한의 원칙(Least Privilege): 기본적으로 모든 요청은 거부(Deny)되어 있음. 필요한 권한만 최소한으로 부여하는 것이 AWS 보안의 기본
+  3. 무료 서비스: IAM 사용 자체는 추가 비용이 전혀 들지 않음
+- IAM의 4가지 핵심 구성 요소
+  - Root User: 계정 생성 시 만들어지는 최고 관리자
+    - 절대적 권한을 가진 계정으로 일상적 사용 절대 지양
+    - MFA 설정 후 일상적 작업을 위한 IAM User/Role 생성 권장
+  - IAM User: 실제 사람이나 애플리케이션 1명
+    - Root User을 통해 최소한의 권한을 부여하여 특정 업무를 위해 생성한 User
+    - 콘솔 접근용 비밀번호 또는 CLI/SDK 접근용 Access Key/Secrets Access Key 보유
+  - IAM Group: IAM User들의 집합
+    - 그룹에 Policy를 Attach하고, Group에 User을 추가하여 동일한 권한을 여러 User에 한 번에 부여 가능
+    - 그룹 자체가 로그인하거나 인증받을 수는 없고, 그룹을 레이어링(그룹 안에 그룹)할 수 없음
+    - 한 User가 여러 Group에 포함되는 것은 가능
+  - IAM Role: 사람이 아닌 AWS 서비스나 임시 사용자가 맡는 탈
+    - 장기 자격 증명(비밀번호/Access Key)가 없음. 임시 보안 자격 증명(STS) 사용
+- IAM Policy와 동작 원리
+  - Policy는 JSON 형식 문서로 작성되며, "누가 무엇을 할 수 있는지" 정의함
+  - 명시적 거부가 항상 명시적 허용을 압도함
+    - 기본 상태: Implicit Deny(암묵적 거부)
+    - Allow 정책이 있음 -> Allow
+    - Allow와 Deny가 동시에 존재 -> Deny
+  - ex)
+  - {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",          // Allow(허용) 또는 Deny(거부)
+      "Action": "s3:GetObject",     // 수행할 작업
+      "Resource": "arn:aws:s3:::my-bucket/*" // 대상 리소스
+    }
+  ]
+}
+
+- SAA-C03 유형 정리
+  유형 1. EC2 인스턴스가 S3 버킷에 접근해야 하는 상황
+  - 오답 패턴: EC2 내부 코드에 Access Key / Secret Key를 직접 하드코딩하거나 파일로 저장
+  - 정답 키워드: EC2에 IAM Role(역할)을 할당함
+    - 이유: IAM Role을 사용하면 AWS STS가 자동으로 임시 자격 증명을 갱신해주므로 키 유출 위험이 없어짐
+  유형 2. 다른 AWS 계정(Cross-Account)의 리소스에 접근할 때
+  - 상황: A계정의 EC2가 B계정의 S3 버킷에 접근하거나 작업을 수행해야 함
+  - 정답 키워드: Cross-Account IAM Role 생성 및 스위치
+    - B계정에서 A계정을 신뢰하는 IAM Role을 만들고, A계정 사용자가 이 Role을 맡아 작업함.
+  유형 3. 계정 생성 후 초기 보안 설정(Root 계정 관리)
+  - 상황: AWS 계정을 새로 생성했을 때 가장 먼저 해야 하는 보안 조치는?
+  - 정답 키워드
+    1. Root 계정에 MFA 즉시 설정
+    2. Root계정 Access Key 생성 X / 삭제
+    3. 일상 작업을 위한 별도 IAM User / Role 생성 및 최소 권한 부여
+  유형 4. IAM User의 CLI/SDK 접근을 위한 자격 증명
+  - 상황: 개발자가 웹 콘솔이 아닌 Terminal(CLI)에서 AWS 명령어를 실행하려고 함
+  - 정답 키워드: Access Key ID & Secret Access Key 발급
+    - 비밀번호는 웹 콘솔 접속용, Access Key는 CLI/API 호출용
+   
   
