@@ -132,5 +132,39 @@
   - 상황: 개발자가 웹 콘솔이 아닌 Terminal(CLI)에서 AWS 명령어를 실행하려고 함
   - 정답 키워드: Access Key ID & Secret Access Key 발급
     - 비밀번호는 웹 콘솔 접속용, Access Key는 CLI/API 호출용
-   
+
++ IAM Permissions Boundary
+1) Permissions Boundary(권한 경계)란?
+   - IAM 사용자나 역할에 일반적인 정책을 아무리 많이 부여하더라도, 권한 경계가 그어놓은 한계선을 넘어서는 권한을 행사할 수 없도록 막는 역할을 하는 경계
+   - Permissions Boundary자체는 권한을 부여하는 기능이 아니라 오직 개체가 가질 수 있는 **권한의 상한선**만 결정함
+
+2) 실제 작동 방식
+   - 사용자의 최종 실행 권한은 IAM 정책과 Permissoins Boundary의 교집합으로 결정됨.
+   - 즉, 사용자의 IAM Policy에 모든 권한이 붙어있어도, Permissions Boundary가 S3(예시)로 한정되어있다면 해당 사용자는 S3에만 접근할 수 있음
+  
+3) 사용 이유
+   - 가장 대표적인 목적은 권한 상승(Privilege Escalation) 방지 및 권한 위임
+   - 시나리오: 회사의 중앙 보안팀이 개발자 팀에게 스스로 필요한 IAM Role과 User를 직접 생성할 수 있는 권한을 위임해주기를 원함
+   - 위험 요소: 개발자가 마음대로 IAM Role을 만들 수 있게 하면, AdministratorAccess 권한을 가진 최고 관리자 역할을 새로 만들어 스스로 부여할 위험이 있음(권한 상승/Privilege Escalation)
+   - 해결책: 개발자에게 IAM User/Role 생성 권한을 주되, 새로 만드는 모든 User/Role에는 반드시 지정된 Permissions Boundary를 결합해야만 생성이 가능하도록 조건을 걸어둠
+  
+4) 시험 혼동 가능 요소
+- Permissions Boundaries vs SCP vs Resource-based Policy
+- Permissions Boundaries
+  - 적용 대상: 단일 IAM User/Role
+  - 목적: 특정 사용자/역할의 권한 상한선 지정 및 권한 상승 방지
+  - Root 계정 영향: 영향 없음
+- SCP(Service Control Policy)
+  - 적용 대상: AWS Organizations의 계정/OU 전체
+  - 목적: 계정 전체에서 특정 AWS 서비스 사용 자체를 금지
+  - Root 계정 영향: Root계정을 포함한 계정 내 모든 사용자에게 영향
+- Resouce-based Policy
+  - 적용 대상: S3, SQS 등 특정 리소스 자체
+  - 목적: 리소스에 접근할 수 있는 외부/내부 주체 지정
+ 
+- 간단 요약
+  - Permissions Boundary는 권한을 직접 주는 게 아니라, IAM User/Role이 넘지 못할 최대 권한의 상한선을 설정하는 기능
+  - 개발자에게 IAM Role 생성 권한을 안전하게 위임(권한 상승 방지)할 때 사용
+
+# AWS EC2(Elastic Compute Cloud)
   
