@@ -279,7 +279,29 @@
      - 핵심 특징: OS 커널 우회: 데이터를 전달할 때 운영체제 커널을 거치지 않고, 애플리케이션이 네트워킹 하드웨어와 직접 통신함. 이를 통해 극도로 낮은 지연 시간을 구현
      - OS-bypass 특성 때문에 Linux 인스턴스에서만 지원됨
      - 동일한 subnet/placement group/VPC내의 instance-to-instance 연결에서만 작동(인터넷이나 Cross-VPC 트래픽 미지원)
-    
+
++ Jumbo Frame
+  - 네트워크에서 한 번에 실어나를 수 있는 데이터 패킷의 최대 크기를 크게 늘려서, 네트워크 처리 효율을 높이는 기술
+  - MTU(Maximum Transmission Unit)
+    - 네트워크를 통해 전송할 수 있는 단일 프레임/패킷의 최대 크기를 의미
+    - 표준 Ethernet MTU: 1500Bytes
+    - Jumbo Frames MTU: 9001Bytes(AWS 기준)
+      
+  - 왜 사용할까?
+    - 15000byte 크기의 데이터를 보낸다고 가정
+    - 표준 프레임 사용: 데이터를 10개로 쪼개서 보내야 함. 패킷 10개마다 각각 네트워크 헤더(주소, 제어 정보 등)가 붙고, CPU가 패킷을 10번 처리해야해서 프로세서 과부하(Overhead)가 발생함
+    - Jumbo Frame 사용: 데이터를 단 2개로 나누어 크게 덩어리로 보냄. 헤더 오버헤드가 대폭 줄어들고 CPU 연산 부담이 감소하여 전송 속도가 비약적으로 증가함
+
+  - AWS EC2에서의 Jumbo Frame 사용 조건
+    - Jumbo Frame이 지원되는 경우
+      - 동일한 VPC 내부의 EC2 인스턴스 간 통신
+      - VPC 피어링으로 연결된 VPC 간 통신
+      - AWS Direct Connect를 통한 온프레미스 <-> AWS 전용선 통신
+    - 표준 Frame으로 제한되는 경우
+      - 인터넷을 통해 외부로 나가는 트래픽
+      - VPN 연결(Site-to-Site VPN 등)
+      - AWS Transit Gateway를 거치는 일부 트래픽
+  
 - SAA-C03 유형 정리
   유형 1. 인스턴스 고장 시 IP 주소와 네트워크 설정을 다른 서버로 빠르게 넘겨야 한다
     -> ENI
@@ -289,3 +311,63 @@
   유형 3. HPC(고성능 연산), MPI(Message Passing Interface) 워크로드 또는 대규모 AI/ML 모델 학습을 위해 인스턴스 간 초저지연 통신이 필요하다
     -> EFA
     - EC2 Placement Group의 Cluster 배치 그룹과 EFA를 조합하는 아키텍처 문제가 단골 출제됨
+  유형 4. VPC 내부 인스턴스 간 대규모 데이터 복사/전송 시 성능 최적화
+    - 상황: 동일 VPC 내의 EC2 인스턴스들 간에 수 TB급의 데이터베이스 동기화나 백업 작업을 수행할 때 네트워크 Throughput을 올리고 CPU 오버헤드를 줄여야 함
+    -> EC2 인스턴스의 MTU를 Jumbo Frame(9001Byte)으로 설정
+  유형 5. Cluster Placement Group + Jumbo Frames 조합
+    - 상황: 고성능 연산 워크로드에서 인스턴스 간 최상의 네트워크 성능이 필요함
+    - 정답 조합: Cluster Placement Group내에 인스턴스를 배치하고, Jumbo Frame 및 ENA/EFA를 활성화함
+
+- Public, Private and Elastic IP addresses
+  - Public IP
+    - 인스턴스 stop 시 release 됨 -> 인스턴스를 다시 시작했을 때 다른 IP주소로 변경됨
+    - Public Subnet에서 사용됨
+    - 비용 발생
+    - 인스턴스의 private IP와 연동됨
+    - 인스턴스 간 이동 불가
+  - Private IP
+    - 인스턴스가 stop 상태여도 IP 주소는 유지됨
+    - Public Subnet과 Private Subnet 모두에서 사용됨
+  - Elastic IP
+    - 정적 Public IP
+    - 별도의 비용 발생
+    - 인스턴스의 private IP와 연동됨
+    - 인스턴스/ENA 간 이동 가능
+
+- Public Subnet vs Private Subnet
+ - Public Subnet
+   - 라우팅 테이블에 0.0.0.0/0 -> IGW 설정이 있음
+   - 외부 인터넷에서 직접 접근이 가능함
+ - Private Subnet
+   - 인터넷 게이트웨이로 통하는 직통 경로가 없음
+   - Public IP가 부여되지 않거나 외부에서 직업 인바운드 접근이 불가능함
+
+- Bastion Host란?
+  - 개념 및 필요성
+    - 프라이빗 서브넷에 위치한 서버는 외부 인터넷에서 직접 SSH/RDP 접속을 할 수 없음. 그렇다고 관리를 위해 DB 서버에 퍼블릭 IP를 붙이면 보안에 치명적임
+    - 이때 외부 관리자가 프라이빗 서브넷 내부 서버로 안전하게 접속하기 위해 중간 길목 역할을 수행하는 전용 EC2 인스턴스를 Bastion Host라고 함 -> 즉 퍼블릭 환경과 프라이빗 서브넷을 연결해주는 징검다리 역할!
+  - Bastion Host 구축 및 보안 설정 모범 사례
+    1. 위치: 반드시 Public Subnet에 배치해야 함(Public IP 보유)
+    2. Security Group 최소화:
+       - Bastion Host 보안 그룹: Inbound SSH(22) 또는 RDP(3389)를 관리자의 특정 IP 대역만 허용(0.0.0.0/0 전체 허용 금지)
+       - Private EC2 보안 그룹: Inbound SSH(22)를 오직 Bastion Host의 Security Group ID만 허용
+  - 현대적 대안: AWS Systems Manager(SSM) Session Manager
+    - 최근 시험과 실무에서는 Bastion Host 대신 AWS Systems Manager(SSM) Session Manager를 사용하는 아키텍처가 대세로 떠오르는 중
+    - Bastion Host의 단점: Bastion Host 인스턴스를 유지 관리해야 하고, Port 22(SSH)를 열어둬야 하므로 관리 부담 및 보안 리스크 존재
+    - SSM Session Manager의 장점:
+      - Bastion Host가 필요 없음
+      - Port 22(SSH)를 열 필요가 없음(보안 그룹 인바운드 규칙 0개로 설정 가능)
+      - 퍼블릭 IP 없이도 AWS IAM 권한 및 SSM Agent를 통해 웹 콘솔/CLI에서 Private 인스턴스로 즉시 터미널 접속 가능
+
+- SAA-C03 유형 분석
+  유형 1. 프라이빗 서브넷의 EC2 인스턴스에 대한 안전한 SSH 접속 아키텍처
+    - 상황: 외부 관리자가 프라이빗 서브넷의 인스턴스에 유지보수 목적으로 안전하게 접속해야 함
+    - 정답 키워드: Public Subnet에 Bastion Host를 배치하고, 관리자 IP에 대해서만 SSH(22) 포트를 허용함
+  유형 2. Bastion Host 관리 부담 및 SSH 포트 개방 없이 접속하는 가장 안전한 방법
+    - 상황: 관리자가 인바운드 SSH 포트(22)를 열지 않고, Bastion Host를 관리하는 운영 부담을 없애면서 프라이빗 EC2에 접속하고 싶음
+    - 정답 키워드: AWS Systems Manager Session Manager 활용(인바운드 포트가 전혀 필요없음)
+  유형 3. 보안 그룹 체이닝 조건
+    - 상황: Bastion Host를 통해서만 프라이빗 인스턴스에 SSH 접속이 가능하도록 보안 그룹을 설정하는 방벙
+    - 정답 설정: 프라이빗 EC2 보안 그룹의 Inbound 규칙에 IP 주소가 아닌 Bastion Host의 Security Group ID를 소스로 등록함
+ 
+  
