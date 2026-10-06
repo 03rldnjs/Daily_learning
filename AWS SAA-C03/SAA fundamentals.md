@@ -262,3 +262,30 @@
   - SAA-C03 문제 패턴
     - 상황: 실수로 EC2 인스턴스를 삭제하더라도 루트 EBS 볼륨 안의 중요한 데이터가 함께 삭제되지 않도록 보장하기를 원함
     - 정답: 루트 볼륨의 DeleteOnTermination 속성을 False로 설정 
+
+# ENI, ENA and EFA
+- ENI, ENA, EFA 비교
+  1. ENI(Elastic Network Interface) - 기본 가상 랜카드 / 모든 인스턴스에서 사용 가능
+     - 개념: VPC 내부에서 EC2 인스턴스에 연결되는 기본적인 가상 네트워크 인터페이스
+     - 구성 요소: 주요 Private IP, 보조 Private IP, 퍼블릭 IP(또는 Elastic IP), MAC 주소, 보안 그룹 등
+     - 핵심 특징: EC2 인스턴스 간에 Attach/Detach 할 수 있음
+     - 듀얼 홈드 서버 구성: 하나의 EC2에 2개의 ENI를 붙여 서로 다른 용도로 네트워크 트래픽을 물리적/논리적으로 분리 가능
+  2. ENA(Elastic Network Adaptor) - 고성능 일반 네트워크 / 일부 인스턴스에서만 사용 가능
+     - 개념: 높은 네트워크 대역폭과 높은 초당 패킷 처리량, 낮은 지연 시간을 제공하는 향상된 네트워크 어댑터
+     - 성능: 인스턴스 유형에 따라 최대 200Gbps까지의 대폭 향상된 네트워크 대역폭 제공
+     - 핵심 특징: 운영체제 커널 수준에서 네트워크 처리 최적화, 일반적인 웹 애플리케이션, 대규모 데이터베이스, 높은 네트워크 I/O가 필요한 일반적인 워크로드에서 사용
+  3. EFA(Elastic Fabric Adaptor) - 초저지연/HPC(High-Performance Computing) 전용 네트워크 / 일부 인스턴스에서만 사용 가능
+     - 개념: HPC(고성능 연산) 및 머신러닝(ML) 학습을 위해 만들어진 특수 목적용 어댑터
+     - 핵심 특징: OS 커널 우회: 데이터를 전달할 때 운영체제 커널을 거치지 않고, 애플리케이션이 네트워킹 하드웨어와 직접 통신함. 이를 통해 극도로 낮은 지연 시간을 구현
+     - OS-bypass 특성 때문에 Linux 인스턴스에서만 지원됨
+     - 동일한 subnet/placement group/VPC내의 instance-to-instance 연결에서만 작동(인터넷이나 Cross-VPC 트래픽 미지원)
+    
+- SAA-C03 유형 정리
+  유형 1. 인스턴스 고장 시 IP 주소와 네트워크 설정을 다른 서버로 빠르게 넘겨야 한다
+    -> ENI
+    - 원리: 장애 발생 시 A 인스턴스에 붙어있던 ENI를 분리해서 B 인스턴스에 즉시 재연결하면 IP 및 보안 그룹 설정이 그대로 이동함
+  유형 2. EC2 인스턴스의 네트워크 성능을 높이고 패킷 지연을 줄여 대규모 웹/DB 트래픽을 처리하려고 한다
+    -> ENA
+  유형 3. HPC(고성능 연산), MPI(Message Passing Interface) 워크로드 또는 대규모 AI/ML 모델 학습을 위해 인스턴스 간 초저지연 통신이 필요하다
+    -> EFA
+    - EC2 Placement Group의 Cluster 배치 그룹과 EFA를 조합하는 아키텍처 문제가 단골 출제됨
