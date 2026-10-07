@@ -369,5 +369,11 @@
   유형 3. 보안 그룹 체이닝 조건
     - 상황: Bastion Host를 통해서만 프라이빗 인스턴스에 SSH 접속이 가능하도록 보안 그룹을 설정하는 방벙
     - 정답 설정: 프라이빗 EC2 보안 그룹의 Inbound 규칙에 IP 주소가 아닌 Bastion Host의 Security Group ID를 소스로 등록함
- 
-  
+
+# NAT(Network Address Translation) Gateway
+- Network Address Translation이 정확히 무슨 뜻인가?
+  - Private EC2의 IP는 퍼블릭 환경인 인터넷에서 그대로 사용할 수 없음. 따라서 NAT Gateway가 중간에서 Public 환경에서 사용할 수 있는 IP로 주소를 변환함
+  - 그래서 인터넷에서는 NAT Gateway의 Public IP에서 온 요청처럼 보임
+  - 인터넷에서 응답이 돌아오면 NAT Gateway가 다시 Private IP로 변환하여 EC2로 전달함
+  - 이 과정이 바로 Network Address Translation
+  - NAT Gateway는 기본적으로 private Subnet의 리소스가 인터넷으로 **나가는 것(Outbound)**을 위한 것.
