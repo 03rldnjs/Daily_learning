@@ -345,7 +345,7 @@
 - Bastion Host란?
   - 개념 및 필요성
     - 프라이빗 서브넷에 위치한 서버는 외부 인터넷에서 직접 SSH/RDP 접속을 할 수 없음. 그렇다고 관리를 위해 DB 서버에 퍼블릭 IP를 붙이면 보안에 치명적임
-    - 이때 외부 관리자가 프라이빗 서브넷 내부 서버로 안전하게 접속하기 위해 중간 길목 역할을 수행하는 전용 EC2 인스턴스를 Bastion Host라고 함 -> 즉 퍼블릭 환경과 프라이빗 서브넷을 연결해주는 징검다리 역할!
+    - 이때 외부 관리자가 프라이빗 서브넷 내부 서버로 안전하게 접속하기 위해 중간 길목 역할을 수행하는 전용 EC2 인스턴스를 Bastion Host라고 함 -> 즉 외부 관리자가 Private Subnet의 서버에 접속하기 위한 중간 진입점 역할(단, 인터넷에서 Private Subnet 전체로의 접근을 허용하는 것이 아니라, Bastion Host를 거쳐서 허용된 Private 서버에만 관리자가 접근하는 구조)
   - Bastion Host 구축 및 보안 설정 모범 사례
     1. 위치: 반드시 Public Subnet에 배치해야 함(Public IP 보유)
     2. Security Group 최소화:
@@ -376,4 +376,30 @@
   - 그래서 인터넷에서는 NAT Gateway의 Public IP에서 온 요청처럼 보임
   - 인터넷에서 응답이 돌아오면 NAT Gateway가 다시 Private IP로 변환하여 EC2로 전달함
   - 이 과정이 바로 Network Address Translation
-  - NAT Gateway는 기본적으로 private Subnet의 리소스가 인터넷으로 **나가는 것(Outbound)**을 위한 것.
+
+- NAT Gateway가 왜 필요한가?
+  - Private Subnet의 EC2가 인터넷에서 직접 접근받을 수 없게 만들면서도, EC2가 인터넷 환경에 나가서 패키지를 다운로드하거나 외부 API를 호출하는 것은 허용하고 싶은 상황
+  - NAT가 Private Subnet -> Internet 방향의 outbound통신을 가능하게 해줌
+  - 또한 Internet -> Private EC2의 연결을 인터넷에서 선제적으로 진행하는 것은 허용하지 않음
+ 
+- NAT Gateway vs NAT instance
+  - NAT Gateway(AWS 관리형 서비스)
+    - AWS가 관리해주는 NAT 서비스
+    - AWS에게 NAT 기능을 맡김
+  - NAT instance (EC2 인스턴스의 일종 - 사용자 관리)
+    - EC2를 NAT 장비로 사용
+    - 내가 EC2를 하나 만들어 NAT의 역할을 부여함
+  - AWS 공식 문서에서도 NAT Gateway는 AWS가 제공하는 관리형 NAT 장치, NAT instance는 EC2에서 직접 생성하는 NAT 장치로 설명함. AWS는 일반적으로 NAT Gateway 사용을 권장함
+ 
+  - 
+ 
+- NAT instance의 작동 방식
+  - Public Subnet에 EC2를 하나 배치
+  - Private EC2의 Route Table: 0.0.0.0/0 -> NAT instance
+  - NAT instance의 Route Table: 0.0.0.0/0 -> Internet Gateway
+  - NAT Instance 자체는 인터넷에 접근할 수 있어야하므로 Public Subnet에 있어야하고 Public IP 또는 Elastic IP가 필요
+ 
+- NAT Gateway와 NAT instance의 중요 포인트
+  - NAT Gateway와 instanace가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 Internet으로의 연결하는 직접적인 요소는 Internet Gateway이고, NAT Gateway는 인스턴스가 인터넷에 연결할 수 있도록 Internet Gateway로 연결시켜주는 역할)
+  - 
+
