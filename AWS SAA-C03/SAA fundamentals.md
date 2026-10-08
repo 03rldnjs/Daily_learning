@@ -372,7 +372,7 @@
 
 # NAT(Network Address Translation) Gateway
 - Network Address Translation이 정확히 무슨 뜻인가?
-  - Private EC2의 IP는 퍼블릭 환경인 인터넷에서 그대로 사용할 수 없음. 따라서 NAT Gateway가 중간에서 Public 환경에서 사용할 수 있는 IP로 주소를 변환함
+  - Private IP를 사용하는 인스턴스의 트래픽을 NAT Gateway가 Public IP(or Elastic IP)를 사용해 인터넷으로 나갈 수 있도록 주소를 변환함
   - 그래서 인터넷에서는 NAT Gateway의 Public IP에서 온 요청처럼 보임
   - 인터넷에서 응답이 돌아오면 NAT Gateway가 다시 Private IP로 변환하여 EC2로 전달함
   - 이 과정이 바로 Network Address Translation
@@ -381,7 +381,11 @@
   - Private Subnet의 EC2가 인터넷에서 직접 접근받을 수 없게 만들면서도, EC2가 인터넷 환경에 나가서 패키지를 다운로드하거나 외부 API를 호출하는 것은 허용하고 싶은 상황
   - NAT가 Private Subnet -> Internet 방향의 outbound통신을 가능하게 해줌
   - 또한 Internet -> Private EC2의 연결을 인터넷에서 선제적으로 진행하는 것은 허용하지 않음
- 
+
+- 고가용성 확보와 AZ 장애에 대비한 NAT Gateway 아키텍처
+  - 하나의 NAT Gateway를 여러 AZ에서 공유하다가 NAT Gateway가 있는 AZ에 장애가 발생하면 다른 AZ의 리소스들도 인터넷 액세스를 잃을 수 있음
+  - 따라서 고가용성과 장애 대비를 원한다면 각각의 AZ에 하나씩 NAT Gateway를 배치하여 하나의 AZ에 장애가 발생했을 때 다른 AZ의 인터넷 액세스에 영향이 없도록 하는 것이 고가용성을 확보하는 아키텍처임(단, 비용적인 측면에서는 더 비쌀수 밖에 없음. 따라서 위의 상황이 아니고, 비용을 최소한으로 사용하기를 원하는 경우에는 하나의 AZ에 NAT Gateway를 배치한 후 공유하는 것이 정답에 가까울수도 있)
+
 - NAT Gateway vs NAT instance
   - NAT Gateway(AWS 관리형 서비스)
     - AWS가 관리해주는 NAT 서비스
@@ -390,16 +394,101 @@
     - EC2를 NAT 장비로 사용
     - 내가 EC2를 하나 만들어 NAT의 역할을 부여함
   - AWS 공식 문서에서도 NAT Gateway는 AWS가 제공하는 관리형 NAT 장치, NAT instance는 EC2에서 직접 생성하는 NAT 장치로 설명함. AWS는 일반적으로 NAT Gateway 사용을 권장함
- 
-  - 
+   - 비교
+   -  |                 | NAT Gateway     | NAT Instance        |
+      | --------------- | --------------- | ------------------- |
+      | 형태             | AWS 관리형 서비스 | EC2 Instance        |
+      | 관리             | **AWS가 관리**   | **사용자가 관리**         |
+      | 확장성           | 높음             | EC2 Instance 크기에 의존 |
+      | 가용성           |여러 AZ에 배치 가능 | 직접 구성 필요            |
+      | Security Group  | ❌ 연결 불가     | ✅ 사용 가능             |
+      | Port Forwarding | ❌              | ✅ 가능                |
+      | Bastion Host    | ❌              | ✅ 가능                |
+      | 유지보수          | 거의 없음        | OS 패치 등 직접 관리       |
+      | 일반적인 권장     | **NAT Gateway** | 특수한 경우              |
+
  
 - NAT instance의 작동 방식
   - Public Subnet에 EC2를 하나 배치
   - Private EC2의 Route Table: 0.0.0.0/0 -> NAT instance
   - NAT instance의 Route Table: 0.0.0.0/0 -> Internet Gateway
   - NAT Instance 자체는 인터넷에 접근할 수 있어야하므로 Public Subnet에 있어야하고 Public IP 또는 Elastic IP가 필요
- 
-- NAT Gateway와 NAT instance의 중요 포인트
-  - NAT Gateway와 instanace가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 Internet으로의 연결하는 직접적인 요소는 Internet Gateway이고, NAT Gateway는 인스턴스가 인터넷에 연결할 수 있도록 Internet Gateway로 연결시켜주는 역할)
-  - 
 
+- 왜 NAT instance를 사용하는가?
+  - EC2의 특성상 여러 관리 책임을 사용자가 가지게 됨.
+  - 이는 운영 부담을 늘리지만, 그만큼 사용자가 제어할 수 있는 영역도 많아지게 됨.
+  - 따라서 특정 네트워크 트래픽을 세밀하게 제어하길 원하거나 사용자 지정 구성, Bastion Host역할 동시 수행 등 을 원하는 경우 NAT instance를 사용하는 것이 더 유리할 수 있음(단, EC2에 NAT와 Bastion Host를 같이 사용하는 것이 일반적인 구조인 것은 아님)
+
+- NAT Gateway와 NAT instance의 중요 포인트
+  - NAT Gateway와 instance가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 Internet으로 연결하는 직접적인 요소는 Internet Gateway이고, NAT Gateway는 Private IP를 사용하는 리소스가 Internet으로 나갈 수 있도록 NAT를 수행하는 장치)
+  - NAT Gateway와 NAT instance모두 기본적으로 Public Subnet에 배치(단순히 이름이 Public인 것이 아니라, Route Table에 Internet Gateway로 향하는 경로가 존재하는 Subnet)
+
+- NAT Gateway vs VPC Endpoint
+  - 한 줄로 요약하자면, 프라이빗 서브넷을 인터넷에 연결하려면 NAT Gateway, 다른 AWS 서비스 및 PrivateLink 기반 서비스에 연결하려면 VPC Endpoint(without internet)
+  - NAT Gateway: Private Subnet -> 인터넷
+  - VPC Endpoint: Private Subnet -> AWS 서비스
+  - 상황: Private Subnet에 있는 EC2가 인터넷에 있는 GitHub에서 파일을 다운로드해야한다 -> NAT Gateway
+  - 상황: Private Subnet에 있는 EC2가 S3에 파일을 업로드해야 한다 -> VPC Endpoint
+
+- 왜 VPC Endpoint를 사용하는가?
+  - 가장 중요한 이유는 **인터넷을 거칠 필요가 없기 때문**
+  - 만약 Private EC2가 S3에 접근한다고 할 때, NAT Gateway를 사용하면 NAT Gateway 비용과 데이터 처리 비용 등이 발생할 수 있음(단, 항상 VPC Endpoint가 더 저렴한 것은 아님, 상황에 따라 비용은 역전될 수 있음) 
+  - 반면에 VPC Endpoint를 활용하면 AWS 서비스로 VPC 내부에서 직접 연결할 수 있음
+
++ VPC Endpoint와 NAT Gateway는 역할이 다른만큼 양립가능한 두 서비스임. 즉, 인터넷 접근과 동시에 S3등의 AWS 서비스에 접근해야하는 경우 두 방식을 모두 사용할 수 있음. 
+
+- VPC Endpoint의 종류
+  1. Gateway Endpoint
+     - S3, DynamoDB로의 접근을 원한다면 Gateway Endpoint
+     - Route Table에 S3/DyanmoDB로의 경로를 추가
+  2. Interface Endpoint
+     - AWS PrivateLink를 기반으로 함. 대부분의 AWS 서비스/PrivateLink 지원 서비스로의 접근을 원한다면 Interface Endpoint
+     - ENI를 생성함(시험에서 Endpoint가 ENI를 생성한다는 표현이 나오면 Interface Endpoint 떠올리기)
+    
+- SAA-C03 유형 정리
+  상황 1. Private subnet의 EC2 인스턴스가 인터넷에서 소프트웨어 업데이트를 다운로드해야한다.
+  - 정답: NAT Gateway -> 목적지가 **인터넷**이면 NAT Gateway
+
+  상황 2. Private subnet의 EC2 인스턴스가 S3에 저장된 데이터를 가져와야 한다. 인터넷을 통하지 않는 연결이 필요하다.
+  - 정답: VPC Endpoint(특히 Gateway Endpoint) -> 인터넷을 거치지 않아야하고, S3로의 접근이라면 VPC Endpoint 중에서도 Gateway Endpoint
+ 
+  상황 3. 애플리케이션은 인터넷 접근이 필요하지 않으며 S3와 DynamoDB에만 접근하면 된다. 비용을 최소화해야 한다.
+  - 정답: VPC Endpoint 중 Gateway Endpoint -> S3와 DynamoDB에 대한 명시적 언급 + 인터넷 접근 불필요
+
+- NAT instance와 Bastion Host의 차이점
+  - 두 서비스 모두 EC2 인스턴스를 활용하며, 사용자가 대부분의 관리 책임을 가진다는 공통점이 있
+  - NAT instance는 Private Subnet에 있는 EC2로부터 인터넷으로 향하는 Outbound 통신을 가능하게 하는 역할이고, Bastion Host는 외부의 관리자가 Private EC2에 관리 목적으로 접근(Inbound)할 수 있는 진입점 역할을 함.
+
+- 최종 핵심 암기
+- NAT Gateway
+→ AWS 관리형 NAT
+→ Private → Internet
+
+- NAT Instance
+→ EC2 기반 NAT
+→ Private → Internet
+
+- VPC Gateway Endpoint
+→ Private → S3 / DynamoDB
+
+- VPC Interface Endpoint
+→ Private → AWS Service / PrivateLink
+
+- Bastion Host
+→ Administrator → Private EC2
+
+- Internet Gateway
+→ VPC ↔ Internet
+
+- Route Table 연결(Route Table은 목적지에 따라 다음에 어디로 보낼지를 결정하는 길 안내표)
+                      Route Table
+                         │
+             ┌───────────┼───────────┐
+             ↓           ↓           ↓
+        Internet      S3/DynamoDB   AWS Service
+             ↓           ↓           ↓
+        NAT Gateway   Gateway EP   Interface EP
+             ↓
+      Internet Gateway
+             ↓
+         Internet
