@@ -492,3 +492,108 @@
       Internet Gateway
              ↓
          Internet
+
++ Private NAT Gateway
+  - NAT Gateway는 default로 Public Subnet에 위치하지만, Private Subnet에 배치되는 경우도 있음
+  - Private NAT Gateway가 가지는 차이점
+    1. private Subnet에 배치
+    2. 인터넷으로 직접 나가는데 사용하디 않음
+    3. 다른 VPC나 온프레미스 네트워크 등으로 나가는 트래픽의 IP를 변환하는 데 사용
+    4. 주로 Transit Gateway 또는 Virtual Private Gateway를 통한 연결과 함께 사용
+    - 즉, 인터넷 연결용이 아닌, 사설 네트워크 간 통신에서 주소를 변환하는 용도
+  - Private NAT Gateway가 왜 필요한가?
+    - 서로 다른 VPC나 사내 네트워크 간 통신에 주로 사용됨. 특히 네트워크 IP 주소가 겹치거나, 상대방에게 내부 EC2의 실제 IP를 노출하고 싶지 않을 경우 유용함.
+  - 주소 변환 및 연결 방법
+    - VPC -> Private NAT Gateway(출발지 IP를 NAT Gateway의 사설 IP로 변환) -> Transit Gateway or VPN 연결 -> 사내 네트워크 연결
+
+- 요약
+  - Public NAT Gateway: Private EC2 -> 인터넷
+  - Private NAt Gateway: Private EC2 -> VPC, 타 사설 네트워크
+  - Internet Gateway: VPC와 인터넷 사이의 연결 통로
+  - VPC Endpoint: VPC에서 지원되는 AWS 서비스로 사설 연결
+
+- EC2 instance Lifecycle
+1. Pending
+  - 인스턴스 시작 준비 단계(Pending 이후 Running 상태로 전환됨)
+2. Running 
+  - EC2 인스턴스가 실행 중인 단계
+  - EC2 컴퓨팅 사용에 대한 요금이 발생함
+3. Stopping
+  - EC2 인스턴스 중지 처리 중인 단계
+  - 만약 최대 절전 모드(Hibernation)를 사용 중인 경우 이 상태에서도 인스턴스 요금이 발생함
+4. Stopped
+  - EC2 인스턴스 중지 완료 단계
+  - 다시 시작할 수 있고 EC2에 대한 요금은 부과되지 않지만, EBS에 대한 요금은 부과됨
+5. Shutting-down
+  - EC2 인스턴스 종료 처리 중인 단계
+  - 인스턴스 사용 요금 청구가 중단됨
+6. Terminated
+  - EC2 인스턴스가 영구적으로 종료된 상태
+  - 영구 종료이기에 다시 시작할 수 없고, default 상태인 경우 EC2에 붙어있던 EBS도 함께 삭제됨
+
+- 주요 동작 구분
+  1. Stop / Start - 중지 후 다시 시작
+     - 컴퓨터를 껐다 다시 켜는 것과 비슷함
+     - 일반적으로 EBS 데이터는 유지되지만, RAM 내용과 Instance Store 데이터는 유지되지 않음
+     - 다시 시작한 경우 Elastic IP를 할당하지 않았다며 Public IP 주소가 바뀔 수 있음
+  2. Reboot - 재부팅
+     - 운영체제를 다시 부팅하는 동작
+     - 보통 같은 호스트에서 재부팅하며, Private IP와 Public IP, Instance Store 데이터가 유지됨
+     - 인스턴스 사용 요금도 계속 발생함
+  3. Terminate - 종료
+     - 인스턴스 자체를 폐기하는 동작
+     - 다시 시작할 수 없으며, EBS 루트 볼륨은 기본적으로 삭제되지만 설정에 따라 유지되도록 할 수도 있음
+- Rebooting과 최대 절전 모드(Hibernation mode)
+  - Rebooting - 재부팅 중
+    - EC2를 재부팅하면 잠시 재부팅 상태를 거쳐 다시 running 상태로 돌아옴
+    - 재부팅은 중지 후 시작과 다름
+    - 재부팅만으로 퍼블릭 IP가 바뀌거나 인스턴스 스토어 데이터가 사라지지 않음
+    - 또한 인스턴스에 대한 요금도 계속 부과됨
+  - Hibernation - 최대 절전 모드
+    - 최대 절전 모드는 일반적인 Stop과 달리 RAM에 있던 내용을 EBS 루트 볼륨에 저장한 뒤 중지하는 기능
+    - 일반 Stop: RAM 내용이 사라짐
+    - Hibernate: RAM 내용을 저장하고, 다시 시작할 때 복원
+    - 두 경우 모두 stopped 상태에서는 일반적인 EC2 인스턴스 사용 요금이 발생하지 않지만, EBS 저장에 대한 요금은 발생함
+   
+  - SAA-C03 유형 정리
+    - EC2를 잠시 꺼서 컴퓨팅 비용을 줄이고 싶다 -> Stop
+    - EC2를 재부팅하되 IP와 Instance Store 데이터를 유지하고 싶다 -> Reboot
+    - 실행 중인 작업의 메모리 상태를 보존하고 싶다 -> Hibernation
+    - EC2를 더 이상 사용하지 않는다 -> Terminate
+    - 중지된 EC2의 EBS 데이터는 유지하면서 컴퓨팅 비용을 줄리고 싶다 -> Stop
+    - EC2를 종료했는데 EBS 루트 볼륨은 삭제하고 싶지 않다 -> DeleteOnTermination 옵션 확인
+   
+- AWS Nitro System
+  - AWS가 EC2의 성능, 보안, 가상화 및 하드웨어 자원 관리를 지원하기 위해 만든 하드웨어/소프트웨어 시스템
+  - 네트워크와 스토리지 같은 I/O 처리를 Nitro 전용 하드웨어에 분리하고, Nitro Hypervisor를 통해 가상 머신을 격리함
+  - 일반적인 가상화 환경은 물리 서버의 CPU와 메모리를 여러 가상 머신이 나누어 사용하고, 가상화 계층은 각 가상 머신의 자원을 관리하고 서로 격리함
+  - Nitro System은 이 과정에서 일부 기능을 전용 하드웨어로 분리하여 호스트 CPU의 부담과 가상화 오버헤드를 줄이도록 설계됨
+
+- Nitro EC2 instance의 특징
+  1. 전용 하드웨어로 오프로드 -> 네트워크/스토리지 등의 일부 작업을 CPU에서 분리
+  2. 가상화 오버헤드 감소 -> CPU 자원을 애플리케이션에 더 효율적으로 활용 가능
+  3. 성능 및 자원 효율 향상 -> 높은 성능과 일관된 성능을 제공하는데 기여
+  4. Bare metal 지원: 가상화 계층 없이 서버 하드웨어에 직접 접근해야 하는 워크로드도 지원
+     - Bare metal 인스턴스는 일반적인 가상화 인스턴스와 달리 고객 워크로드가 물리 서버 하드웨어에 직접 접근할 수 있도록 제공되는 인스턴스 유형
+
+- Nitro Enclaves
+  - EC2 인스턴스의 CPU와 메모리 일부를 분리해 만드는 매우 강하게 격리된 실행 환경
+  - 일반 EC2 환경에서 접근할 수 있는 민감한 데이터를 별도의 격리된 환경에서 처리하도록 설계
+
+- Nitro Enclaves가 왜 필요한가?
+  - 예를 들어 금융 서비스가 고객의 개인정보와 암호화 키를 처리한다고 가정
+  - 일반 EC2에서 애플리케이션을 실행하면 EC2의 관리자 권한을 가진 사용자나 프로세스가 민감한 데이터에 접근할 위험을 고려해야 함
+  - 이때 Nitro Enclaves를 사용하면 Enclaves 내부에 있는 데이터에 대한 보안성을 크게 향상시킬 수 있음
+
+- Nitro Enclaves의 핵심 특징
+  1. 강한 격리: Parent EC2의 OS관리자도 Enclave 내부 메모리에 직접 접근할 수 없음
+  2. 별도 실행 환경: 자체 커널과 격리된 CPU,메모리를 사용
+  3. 외부 네트워크 없음: Enclave 자체는 인터넷이나 VPC 네트워크에 직접 연결되지 않음
+  4. 영구 스토리지 없음: Enclave 내부에 영구 저장소를 직접 제공하지 않음
+  5. SSH 접근 불가: 일반 EC2처럼 SSH로 직접 접속할 수 없음
+  6. Attestation(증명,검증) 지원: 실행 중인 Enclave의 신원과 코드 측정값을 검증할 수 있음
+  7. KMS 통합: 검증된 Enclave에만 특정 키 사용을 허용하도록 정책을 구성할 수 있음
+  + Attestation이란?
+    - 지금 키를 요청하는 실행 환경이 내가 신뢰하는 Enclave가 맞는지 확인하는 과정
+    - 예를 들어 AWS KMS 키 정책을 구성해 특정 측정값과 일치하는 Enclave만 키를 사용하도록 제한할 수 있음
+    - 따라서 단순히 EC2가 KMS를 호출할 수 있다는 것만으로 민감한 키 사용 권한을 부여하는 것보다 세밀한 보안 통제가 가능함
