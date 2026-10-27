@@ -233,7 +233,7 @@
      - 단점: 해당 랙에 물리적 장애 발생 시 배치 그룹 내 모든 인스턴스가 한 번에 영향을 받음(장애 위험이 큼)
      - 주요 use-case: HPC(고성능 연산/High Performence Compute), 빅데이터 수집, 인스턴스 간 초고속 통신이 필수인 워크로드
   2. Spread
-     - 배치 방식: 인스턴스들을 서로 다른 물리적 하드웨어에 엄격하게 하니씩 따로 떨어뜨려 배치
+     - 배치 방식: 인스턴스들을 서로 다른 물리적 하드웨어에 엄격하게 하나씩 따로 떨어뜨려 배치
      - 장점: 하드웨어 장애 시 다른 인스턴스에 영향을 주지 않으므로 물리적 장애 격리(Fault Tolerance) 및 고가용성이 극대화됨
      - 제약 사항: AZ 당 최대 7개 인스턴스까지만 배치 가능
      - 주요 use-case: 소수의 핵심 중요 인스턴스(메인 DB, 도메인 컨트롤러 등 절대로 물리 하드웨어 문제로 같이 죽으면 안되는 서버들)
@@ -384,7 +384,7 @@
 
 - 고가용성 확보와 AZ 장애에 대비한 NAT Gateway 아키텍처
   - 하나의 NAT Gateway를 여러 AZ에서 공유하다가 NAT Gateway가 있는 AZ에 장애가 발생하면 다른 AZ의 리소스들도 인터넷 액세스를 잃을 수 있음
-  - 따라서 고가용성과 장애 대비를 원한다면 각각의 AZ에 하나씩 NAT Gateway를 배치하여 하나의 AZ에 장애가 발생했을 때 다른 AZ의 인터넷 액세스에 영향이 없도록 하는 것이 고가용성을 확보하는 아키텍처임(단, 비용적인 측면에서는 더 비쌀수 밖에 없음. 따라서 위의 상황이 아니고, 비용을 최소한으로 사용하기를 원하는 경우에는 하나의 AZ에 NAT Gateway를 배치한 후 공유하는 것이 정답에 가까울수도 있)
+  - 따라서 고가용성과 장애 대비를 원한다면 각각의 AZ에 하나씩 NAT Gateway를 배치하여 하나의 AZ에 장애가 발생했을 때 다른 AZ의 인터넷 액세스에 영향이 없도록 하는 것이 고가용성을 확보하는 아키텍처임(단, 비용적인 측면에서는 더 비쌀수 밖에 없음. 따라서 위의 상황이 아니고, 비용을 최소한으로 사용하기를 원하는 경우에는 하나의 AZ에 NAT Gateway를 배치한 후 공유하는 것이 정답에 가까울수도 있음)
 
 - NAT Gateway vs NAT instance
   - NAT Gateway(AWS 관리형 서비스)
@@ -416,15 +416,15 @@
 
 - 왜 NAT instance를 사용하는가?
   - EC2의 특성상 여러 관리 책임을 사용자가 가지게 됨.
-  - 이는 운영 부담을 늘리지만, 그만큼 사용자가 제어할 수 있는 영역도 많아지게 됨.
+  - 이는 운영 부담을 늘리지만, **그만큼 사용자가 제어할 수 있는 영역도 많아지게 됨**.
   - 따라서 특정 네트워크 트래픽을 세밀하게 제어하길 원하거나 사용자 지정 구성, Bastion Host역할 동시 수행 등 을 원하는 경우 NAT instance를 사용하는 것이 더 유리할 수 있음(단, EC2에 NAT와 Bastion Host를 같이 사용하는 것이 일반적인 구조인 것은 아님)
 
 - NAT Gateway와 NAT instance의 중요 포인트
-  - NAT Gateway와 instance가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 Internet으로 연결하는 직접적인 요소는 Internet Gateway이고, NAT Gateway는 Private IP를 사용하는 리소스가 Internet으로 나갈 수 있도록 NAT를 수행하는 장치)
+  - NAT Gateway와 instance가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 **Internet으로 연결하는 직접적인 요소는 Internet Gateway**이고, NAT Gateway는 Private IP를 사용하는 리소스가 Internet으로 나갈 수 있도록 NAT를 수행하는 장치)
   - NAT Gateway와 NAT instance모두 기본적으로 Public Subnet에 배치(단순히 이름이 Public인 것이 아니라, Route Table에 Internet Gateway로 향하는 경로가 존재하는 Subnet)
 
 - NAT Gateway vs VPC Endpoint
-  - 한 줄로 요약하자면, 프라이빗 서브넷을 인터넷에 연결하려면 NAT Gateway, 다른 AWS 서비스 및 PrivateLink 기반 서비스에 연결하려면 VPC Endpoint(without internet)
+  - 한 줄로 요약하자면, **프라이빗 서브넷을 인터넷에 연결하려면 NAT Gateway**, **다른 AWS 서비스 및 PrivateLink 기반 서비스에 연결하려면 VPC Endpoint(without internet)**
   - NAT Gateway: Private Subnet -> 인터넷
   - VPC Endpoint: Private Subnet -> AWS 서비스
   - 상황: Private Subnet에 있는 EC2가 인터넷에 있는 GitHub에서 파일을 다운로드해야한다 -> NAT Gateway
@@ -439,11 +439,11 @@
 
 - VPC Endpoint의 종류
   1. Gateway Endpoint
-     - S3, DynamoDB로의 접근을 원한다면 Gateway Endpoint
+     - **S3, DynamoDB**로의 접근을 원한다면 Gateway Endpoint
      - Route Table에 S3/DyanmoDB로의 경로를 추가
   2. Interface Endpoint
      - AWS PrivateLink를 기반으로 함. 대부분의 AWS 서비스/PrivateLink 지원 서비스로의 접근을 원한다면 Interface Endpoint
-     - ENI를 생성함(시험에서 Endpoint가 ENI를 생성한다는 표현이 나오면 Interface Endpoint 떠올리기)
+     - **ENI를 생성**함(시험에서 Endpoint가 ENI를 생성한다는 표현이 나오면 Interface Endpoint 떠올리기)
     
 - SAA-C03 유형 정리
   상황 1. Private subnet의 EC2 인스턴스가 인터넷에서 소프트웨어 업데이트를 다운로드해야한다.
@@ -597,3 +597,41 @@
     - 지금 키를 요청하는 실행 환경이 내가 신뢰하는 Enclave가 맞는지 확인하는 과정
     - 예를 들어 AWS KMS 키 정책을 구성해 특정 측정값과 일치하는 Enclave만 키를 사용하도록 제한할 수 있음
     - 따라서 단순히 EC2가 KMS를 호출할 수 있다는 것만으로 민감한 키 사용 권한을 부여하는 것보다 세밀한 보안 통제가 가능함
+
+- EC2 Pricing Options
+  - On-Demand: 장기 약정 없이 사용한 만큼 지불 -> 유연성, 약정 없음
+  - Savings Plans: 사용량 약정으로 할인 -> 시간당 달러 기준 약정
+  - RI(Reserved Instances): 일정한 인스턴스 구성의 장기 사용에 할인 -> 1년 or 3년 약정
+  - Spot Instance: AWS의 여유 용량을 저렴하게 사용 -> 중단될 수 있음
+  - Dedicated Hosts: 전용 물리 서버 사용 -> 소켓/코어 기반 라이선스, 전용 호스트
+  - Dedicated Instances: 다른 고객과 물리 하드웨어를 공유하지 않는 인스턴스 -> 하드웨어 격리
+  - On-Demand Capacity Reservations: 특정 AZ의 EC2 용량 확보 -> 필요할 때 인스턴스를 시작할 수 있도록 용량 확보
+  - Capacity Blocks for ML: GPU 가속 인스턴스를 특정 기간에 예약 -> ML 학습, GPU 용량, 예약 시간대
+ 
+- Savings Plans - 장기 사용 약정으로 할인
+  - 1년 또는 3년 동안 시간당 일정 금액의 컴퓨팅 사용량을 약정하고, 해당 약정에 해당하는 사용량에 할인 요금을 적용받는 방식
+  - ex. 시간 당 1달러의 사용량 약정, 매 시간 적용되는 약정 사용량, 인스턴스 한 대를 예약한다는 의미 아님
+    - 약정 범위에 해당하는 사용량 -> Savings Plans 할인 요금 적용
+    - 약정 범위 초과 사용량 -> 일반적으로 On-Demand 요금 적용
+    - 약정한 사용량을 충분히 사용하지 못한 시간 -> 사용하지 않은 약정분도 비용이 발생할 수 있음 
+  -> 실제 사용량이 장기간 안정적인 경우에는 유리하지만, 앞으로의 사용량을 예측하지 못한 채 지나치게 큰 약정을 하면 비용 절감 효과가 미미함
+
+- Savings Plans의 두 가지 주요 유형
+  - Compute Savings Plans(높은 유연성)
+    - EC2 인스턴스 패밀리, 크기, 리전, 운영체제 등이 달라져도 폭넓게 적용 가능, EC2뿐 아니라 AWS Fargate와 AWS Lambda의 적격 사용량에도 적용
+      - ex. c7i에서 m7i로 변경
+      - ex. 서울 리전에서 다른 리전으로 워크로드 이전
+      - ex. EC2에서 Fargate로 워크로드 이전
+     위 예시의 변화에도 적격 사용량에 대한 할인 혜택 유지 가능
+  - EC2 Instance Savings Plans
+    - 선택한 리전과 인스턴스 패밀리에 약정하는 대신 더 높은 할인율을 받을 수 있는 유형
+    - 인스턴스 크기, 운영체제, 테넌시를 바꾸더라도 약정 조건을 충족하면 할인 혜택 유지 가능
+      - ex. 서울 리전의 m7i 패밀리에 약정
+      - m7i.large에서 m7i.2xlarge로 크기 변경
+      - 해당 패밀리 안에서 운영체제 변경
+    ->  단, 다른 인스턴스 패밀리로 바꾸거나 다른 리전으로 이동하면 해당 사용량은 이 약정의 적용 범위를 벗어날 수 있음
+
+- Savings Plans와 RI의 관계
+  - 둘 다 장기 약정을 통해 할인 혜택을 받을 수 있지만, 약정 방식의 차이가 있음
+  - Savings Plans: 시간당 금액 기준으로 사용량 약정
+  - RI: 특정 인스턴스 구성 또는 패밀리와 리전 등의 조건에 따라 할인 혜택을 받음. 유형에 따라 조건과 유연성이 달라짐
