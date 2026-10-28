@@ -773,4 +773,79 @@
        
       - Avaliability와 Durability의 차이
         - Availability: 데이터에 접근할 수 있는가?
-        - Durability: 데이터가 손실되지 않고 보존되는가? 
+          - 필요한 시점에 데이터나 서비스를 사용할 수 있는 정도
+          - 만약 중요한 파일이 S3에 저장되어 있는데, S3에 장애가 발생해 해당 파일을 일시적으로 읽을 수 없다면, 파일 자체가 삭제되지 않았더라도 그 시점의 가용성은 낮아진 것
+        - Durability: 데이터가 손실되지 않고 보존되는가?
+          - 저장된 데이터가 손실되지 않고 보존되는 정도
+          - 파일을 저장한 뒤 서비스에 일시적인 접근 장애가 발생했더라도 파일이 그대로 보존되어 있다면 내구성은 유지된 것
+         
+
+- AWS ELB(Elastic Load Balancer)
+  - 들어오는 트래픽을 여러 대상에 분산하여 애플리케이션의 가용성, 확장성, 안정성을 높이는 AWS 서비스
+  - 많은 수의 트래픽이 몰려올 때, ELB가 없다면 특정 서버에 요청이 집중될 수 있음
+  - ELB를 통해 여러 서버로 요청을 분산할 수 있고 특정 서버가 비정상 상태인 경우 ELB는 해당 서버를 정상 대상으로 취급하지 않고 트래픽을 다른 정상 대상으로 보낼 수 있음
+ 
+  - ELB와 함께 알아야 할 개념
+    - Target Group: 트래픽을 전달할 대상과 상태 확인 설정을 관리
+    - Health Check: 대상이 정상적으로 요청을 처리할 수 있는지 확인
+    - EC2 Auto Scaling: 필요에 따라 **EC2 인스턴스 수**를 조정
+    - Amazon CloudWatch: 지표와 경보를 통해 모니터링 및 자동화 지원
+    -> ELB와 Auto Scaling은 상호 보완적. ELB가 트래픽을 분배하고, Auto Scaling이 서버 수를 조절하면 트래픽 증가에 대응하는 확장 가능한 구조 형성 가능
+
+  - ALB, NLB, GWLB
+    - ALB(Application Load Balancer / Layer 7 / 응용 계층)
+      - HTTP 요청의 경로, 도메인, 헤더 등 애플리케이션 내용을 분석해 라우팅
+    - NLB(Network Load Balancer / Layer 4 / 전송 계층)
+      - TCP, UDP, TLS 등의 연결과 네트워크 정보를 바탕으로 트래픽 전달
+    - GWLB(Gateway Load Balancer / Layer 3&4 / IP 패킷)
+      - 네트워크 트래픽을 방화벽이나 침입 탐지/방지 장비 같은 가상 네트워크 어플라이언스로 전달하고 분산
+    - 즉, ALB와 NLB는 주로 애플리케이션 트래픽을 대상 서버에 분배하고, GWLB는 네트워크 트래픽을 보안/네트워크 장비에 투명하게 전달하는데 집중
+   
+  - Application Load Balancer(ALB)
+    - 핵심 기능: 컨텐츠 기반 라우팅
+    - ex. 사용자 -> ALB, 하나의 도메인으로 접속
+    - 요청 내용에 따른 라우팅 규칙:
+      1. 이미지 서비스 - Target Group A
+      2. 주문 서비스 - Target Group B
+      3. API 서비스 - Target Group C
+      4. 그 외 요청 - Default Action
+    - ALB는 다음과 같은 조건 활용 가능
+      - Path-based routing: URL 경로에 따라 분배 ex. /api/*, /images/*
+      - Host-based routing: 도메인 이름에 따라 분배 ex. shop.example.com, api.example.com
+      - HTTP 헤더/메서드/쿼리 문자열 기반 라우팅: 요청 헤더, HTTP 메서드, 쿼리 문자열 등의 조건을 활용
+      - Source IP 기반 규칙: 요청 출발지 IP를 조건으로 사용 가능
+
+      - Listener, Listener Rule, Target Group
+        - Listener: 어떤 프로토콜과 포트로 요청을 받을지 정의
+        - Listener Rule: 요청을 어디로 보낼지 결정하는 조건과 동작
+        - Target Group: 요청을 전달할 대상과 상태 확인 설정 관리
+      - 요청 흐름 요약
+        - Client -> Listener -> Listener Rule -> Target Group -> 대상 서버
+       
+      - ALB 용례
+        - 일반적인 웹사이트나 웹 API
+        - HTTP 요청을 URL 경로에 따라 **서로 다른 서비스로 전달**
+        - 여러 도메인을 하나의 로드 밸런서로 처리
+        - 마이크로서비스 또는 컨테이너 기반 웹 애플리케이션
+        - HTTP 수준의 라우팅 및 기능이 필요한 경우
+      - ALB Key Words
+        - path-based routing, host-based routing, HTTP header, HTTP/HTTPS, Layer 7
+  - Network Load Balancer(NLB)
+    - HTTP 요청의 URL 내용을 분석하는 대신 네트워크 연결과 프로토콜 정보를 바탕으로 트래픽을 분산
+    - 핵심 특징
+      1. 높은 처리량과 낮은 지연 시간: 대량의 연결과 높은 성능이 필요한 워크로드에 적합 ex. 게임 서버, 실시간 통신, TCP 기반 서비스
+      2. 가용 영역별 고정 IP 주소: NLB는 가용 영역별로 고정 IP를 제공할 수 있으며, 필요하면 각 가용역영에 Elastic IP를 연결할수도 있음
+      3. 클라이언트 원본 IP 보존: 구성에 따라 클라이언트의 원본 IP를 백엔드 대상에서 확인할 수 있도록 지원
+      4. TCP, UDP, TLS 처리
+         - TCP 기반의 자체 프로토콜 서버
+         - UDP 기반 서비스
+         - TLS 연결을 NLB에서 종료하는 구성
+         - TCP Listener를 통해 TLS 트래픽을 암호화 상태로 전달하는 구성
+      - NLB Key Words
+        - Static IP, TCP/UDP, Low latency
+  - GateWay Load Balancer(GWLB)
+    - 단순히 웹 서버나 애플리케이션 서버에 요청을 분산하는 것이 아니라, 방화벽이나 침입 탐지/방지 시스템 같은 가상 장비를 트래픽 경로에 배치하고 확장하는 데 사용
+    - GWLB가 필요한 이유
+      - 일반적인 구조에서 방화벽을 여러 대 운영해야 대량의 트래픽 처리가 원활함. 그러나 방화벽을 여러 대 운영할 경우 어떤 트래픽을 어느 장비로 보낼지, 동일한 통신 흐름이 같은 장비를 거치도록 어떻게 관리할지 등의 문제가 생김 -> 이런 문제를 해결해주는게 바로 GWLB
+      - 여러 가상 어플라이언스에 트래픽을 분산하며, 동일한 흐름의 패킷을 일관되게 같은 대상으로 전달함.
+  
