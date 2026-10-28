@@ -746,3 +746,31 @@
     4. Instance Refresh
        - Launch Template나 AMI를 업데이트한 뒤 ASG의 기존 인스턴스를 순차적으로 교체할 때 사용하는 기능.
        - 어플리케이션 버전이나 운영체제 이미지를 업데이트하면서 한꺼번에 모든 인스턴스를 교체하는 위험을 줄리는 데 유용
+
+  - High Availability(고가용성), Fault Tolerance(내결함성), Durability(내구성)
+    - High Availability: 장애가 발생하더라도 서비스를 계속 이용할 수 있도록 설계하는 것
+    - Fault Tolerance: 구성 요소에 장애가 발생해도 서비스 중단이나 기능 저하를 최소화하며 계속 동작하도록 설계하는 것. 엄밀한 의미에서는 장애가 발생해도 서비스가 중단되지 않는 수준을 의미함
+    - Availability: 서비스나 데이터에 필요할 때 접근하고 사용할 수 있는 정도
+    - Durability: 저장한 데이터가 손실되지 않고 보존될 가능성 또는 데이터 보존의 신뢰성
+   
+    - High Availability와 Fault Tolerance의 차이
+      - High Availability: 장애를 견디고 빠르게 복구
+        - 장애 가능성을 완전히 제거하기보다는, 장애가 발생해도 서비스를 이용할 수 있는 상태를 유지하거나 빠르게 복구하도록 설계하는 데 초점
+        - Multi-AZ를 통해 고가용성을 높일 수 있음. 단, 장애 감지, 트래픽 전환, 인스턴스 교체 등의 과정에서 일시적인 중단이나 지연이 발생할 수 있음
+       
+      - Fault Tolerance: 장애가 발생해도 계속 동작
+        - 구성 요소가 고장나더라도 서비스가 중단되지 않도록 하는데 초점
+        - 요청을 처리하는 구성 요소 하나가 실패해도 다른 구성 요소가 즉시 처리를 이어받고, 사용자 입장에서 서비스 중단이 발생하지 않도록 설계
+        - Multi-AZ를 구성했다고 Fault Tolerance가 보장되는 것은 아님. 장애 전환이 얼마나 빠른지, 데이터가 일관되게 유지되는지, 의존 서비스도 정상인지에 따라 결과가 달라짐
+       
+      - 판단 기준
+        - High Availability: 장애 발생 후 자동 복구, 서비스 중단 최소화, 다른 AZ로 전환 강조
+        - Fault Tolerance: 구성 요소 하나가 고장 나더라도 서비스가 중단되지 않아야 함 강조
+       
+      - RTO / RPO
+        - RTO(Recovery Time Objective): 장애 발생 후 서비스를 복구하기까지 허용되는 목표 시간
+        - RPO(Recovery Point Objective): 장애 발생 시 허용할 수 있는 데이터 손실의 시간 범위
+       
+      - Avaliability와 Durability의 차이
+        - Availability: 데이터에 접근할 수 있는가?
+        - Durability: 데이터가 손실되지 않고 보존되는가? 
