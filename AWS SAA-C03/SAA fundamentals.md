@@ -882,5 +882,26 @@
         1. X-Forwarded-Proto: 클라이언트가 ALB에 연결할 때 사용한 프로토콜 ex. https
         2. X-Forwarded-Port: 클라이언트가 ALB에 연결할 때 사용한 포트 ex. 443
     
-  
-  
+- Scaling Policy
+  - Dynamic Scaling
+    1. **Target Tracking Scaling** - 대상 추적 조정
+       - 목표 지표를 설정하면 ASG가 해당 목표에 가까워지도록 인스턴스 수를 자동 조절
+       - ex. 평균 CPU 사용률을 약 50%로 유지하거나, 대상 당 요청 수를 일정 수준으로 유지
+       - 모든 조정 단계를 직접 정의하지 않아도 되어 편리함(ex. 70%를 넘으면 1대 추가, 90%를 넘으면 3대 추가 -> 이처럼 하나하나 지정해주지 않아도 Auto Scaling이 CloudWatch 경보를 관리하고 필요한 조정을 수행함)
+    2. Step Scaling - 단계별 조정
+       - 지표가 임계값을 얼마나 초과했는지에 따라 서로 다른 규모로 조정
+       - ex. CPU가 기준을 조금 초과하면 1대 추가, 훨씬 많이 초과하면 3대 추가
+    3. Simple Scaling - 단순 조정
+       - CloudWatch 경보가 발생하면 미리 지정한 하나의 조정 작업을 실행
+       - ex. CPU가 임계값을 초과하면 2대 추가, 이후에는 쿨다운 기간동안 추가 조정 제한
+       - Step Scaling보다 조정 규칙이 단순하며, AWS는 일반적으로 Target Tracking 또는 Step Scaling을 권장함
+  - Scheduled Scaling - 예약 조정
+       - 미리 정한 날짜와 시간에 ASG의 용량을 조정
+       - ex. 매일 오전 8시 전에 인스턴스 수를 늘리고, 야간에는 줄임
+       - 실시간 지표가 아니라 시간을 기준으로 동작
+  - Predictive Scaling - 예측 조정
+       - 과거의 부하 패턴을 분석해 앞으로 필요할 용량을 예측하고 미리 준비
+       - ex. 평일 오전마다 트래픽이 급증하는 서비스에서 수요가 늘기 전에 인스턴스를 준비
+       - 실제 부하가 높아진 뒤 반응하는 것만이 아니라, 예상되는 부하에 선제적으로 대응
+   
+  - Auto Scaling Types와 Scaling Policies는 서로 완전히 독립적인 개념이 아니라, Auto Scaling을 서로 다른 관점에서 분류한 것. 그래서 서로 이름이 겹치는 부분이 존재하며 이는 동일한 이름의 다른 요소가 아니라 서로 같은 것임
