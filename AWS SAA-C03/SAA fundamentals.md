@@ -641,7 +641,7 @@
 - Scaling Out & Scaling Up
   - Stateless vs Stateful
     - Stateless = 무상태: 각 요청을 처리할 때 서버 자체에 저장된 이전 요청의 상태에 의존하지 않음
-      - 요청마다 필요한 정보를 함께 전달하거나 외부 저장소에서 조회
+      - 요청마다 필요한 정보를 함께 전달하거나 **외부 저장소에서 조회**
       - 어떤 서버가 요청을 처리하더라도 동일한 처리가 가능하도록 설계
       - 서버 추가/제거가 상대적으로 쉬움
     - Stateful = 상태 유지: 서버가 이전 요청에서 생성된 상태 정보를 보관하고, 이후 요청에서 이를 활용
@@ -905,3 +905,91 @@
        - 실제 부하가 높아진 뒤 반응하는 것만이 아니라, 예상되는 부하에 선제적으로 대응
    
   - Auto Scaling Types와 Scaling Policies는 서로 완전히 독립적인 개념이 아니라, Auto Scaling을 서로 다른 관점에서 분류한 것. 그래서 서로 이름이 겹치는 부분이 존재하며 이는 동일한 이름의 다른 요소가 아니라 서로 같은 것임
+ 
+  - Cross-Zone Load Balancing(교차 영역 로드 밸런싱)
+    - 로드 밸런서가 특정 AZ에 들어온 트래픽을 다른 AZ에 있는 대상 인스턴스에도 분산할 수 있도록 하는 기능
+    - AZ별로 인스턴스 수가 다르더라도 전체 인스턴스에 트래픽을 고르게 분산할 수 있는 특징을 지님
+    - Cross-Zone Load Balancing은 인스턴스의 수를 조정하는 것이 아니라, 기존 인스턴스들을 AZ 경계와 상관없이 활용할 수 있도록 해주는 기능
+    1. Cross-Zone Load Balancing이 없는 경우
+       - AZ - A와 AZ - B 존재, AZ - A에는 2개의 인스턴스, AZ - B에는 1개의 인스턴스 존재
+       - AZ - A와 AZ - B로 트래픽이 절반씩 들어온다고 가정 시 AZ - A에 존재하는 인스턴스는 각각 25%의 트래픽을 받지만, AZ - B에 존재하는 1개의 인스턴스는 50%의 트래픽을 받음 -> 결과적으로 AZ - B에 있는 인스턴스가 다른 인스턴스보다 상대적으로 많은 부하를 받게 됨
+    2. Cross-Zone Load Balacing이 활성화된 경우
+       - 각 AZ의 로드 밸런서 노드가 다른 AZ에 있는 대상 인스턴스에도 트래픽을 전달할 수 있음
+       - 즉, 아까와 같은 상황에서 AZ - B에 몰렸던 트래픽을 AZ - A에 존재하는 인스턴스로 전달하여 특정 AZ의 인스턴스에 부하가 집중되는 현상을 줄일 수 있음
+  - Cross-Zone Load Balancing의 활성화 여부
+    - ALB: Default 활성화 -> 기본으로 AZ 간 트래픽 분산 수행
+    - NLB: Default 비활성화 -> 수동으로 활성화하면 AZ간 트래픽 분산이 가능하지만, **교차 AZ 데이터 전송 비용이 발생할 수 있음**
+  - 예상 시험 지문: 한 기업은 두 개의 AZ에 EC2 인스턴스를 배포했습니다. AZ-A에는 4대, AZ-B에는 2대의 인스턴스가 존재합니다. 기업은 특정 AZ에 트래픽이 집중되는 현상을 방지하고 모든 AZ의 인스턴스를 활용하고자 합니다. 어떤 기능을 사용해야 할까요? -> Cross-Zone Load Balancing
+    - GWLB: Default 비활성화 -> 필요에 따라 활성화 가능
+    
+- Session State(세션 상태) & Session Stickiness(세션 고정)
+  - Session State: 사용자가 웹 서비스와 상호작용하는 동안 유지해야 하는 사용자별 정보 -> 기억해야 할 정보
+  - Session Stickiness: 동일한 사용자의 요청을 **동일한 서버로 계속 전달**하는 기능 -> 같은 서버에 계속 연결하는 방법
+
+  - Session State란?
+    - ex. 온라인 쇼핑몰
+    - 사용자가 다음과 같은 행동을 했다고 가정
+      1. 쇼핑몰에 로그인
+      2. 상품 A를 장바구니에 담음
+      3. 상품 B를 장바구니에 담음
+      4. 결제 페이지로 이동
+    - 이 과정에서 서버는 사용자의 로그인 정보와 장바구니 정보를 유지해야 함
+    - 이러한 사용자별 정보를 Session State라고 함
+  - Session State와 Load Balancing의 관계
+    - Session State가 서버 내부에 저장된 경우
+    - 두 대의 EC2 인스턴스가 ALB 뒤에서 작동한다고 가정
+    - 사용자의 첫 번째 요청이 EC2 1로 전달되면 EC2 1은 로그인 정보와 장바구니 정보를 저장
+    - 그런데 다음 요청이 EC2 2로 전달되면 EC2 2에는 사용자의 세션 정보가 없기 때문에 문제가 발생할 수 있음
+    - 이 문제를 해결할 수 있는 방법 중 하나가 바로 Sticky Session임
+  - Session Stickiness란?
+    - **Session Stickiness(세션 고정)**는 특정 사용자의 요청을 동일한 서버로 지속적으로 전달하는 기능
+    - AWS ALB에서는 이를 Sticky Session 또는 Session Affinity라고 부름
+    - ALB의 Sticky Session은 쿠키를 기반으로 작동
+      - 작동 과정
+        1. 최초 요청 - 브라우저가 ALB에 HTTP 요청을 보냄. 이때는 쿠키가 없는 상태
+        2. ALB가 인스턴스 선택 - ALB가 EC2 1을 선택하여 요청 전달
+        3. ALB가 쿠키 발급 - EC2 1의 응답을 브라우저에 전달하면서 ALB가 생성한 쿠키를 응답에 포함
+        4. 브라우저가 쿠키 저장 - 부라우저는 응답에 포함된 쿠키를 저장
+        5. 이후 요청에 쿠키 포함 - 브라우저가 다음 요청을 보낼 때 저장된 쿠키를 함께 전송
+        6. ALB가 기존 인스턴스로 전달 - ALB는 쿠키를 확인하여 이전에 선택했던 EC2 1로 요청 전달
+      - 즉, ALB가 사용자를 식별하는 데 쿠키를 활용하여 동일한 서버로 요청을 전달하는 것 
+
+  - ALB의 Sticky Session 유형
+    - Duration-based: ALB가 생성한 쿠키의 유효기간을 설정
+    - Application-based: 애플리케이션이 생성한 쿠키를 기반으로 세션 고정
+    - 시험에서는 ALB Sticky Session - Cookie 기반으로 동일한 대상에 요청을 전달한다는 기능에 집중하면 됨
+  - Sticky Session의 한계
+    - Sticky Session으로 Session State 문제가 완전히 해결되는 것은 아님
+    - 만약 사용자 A의 정보가 EC2 1에 모두 저장되어 있었는데, EC2 1에 장애가 발생한다면?
+    - 사용자 A는 다른 인스턴스로 연결될 수 있지만, 기존 세션 정보가 타 인스턴스로 자동으로 이전되는 것은 아님
+    - 따라서 Sticky Session은 세션 정보를 복제하거나 공유할 수 없고, 단순히 동일한 서버로 요청을 전달하는 기능
+  - External Session Storage(외부 세션 저장소)
+    - Sticky Session이 가지는 한계를 해결하기 위해 사용하는 방법
+    - Sticky Session보다 더 권장되는 아키텍처
+    - 세션 정보를 개별 EC2 인스턴스 내부에 저장하는 대신, 여러 인스턴스가 접근할 수 있는 별도의 저장소에 보관하는 방법(AWS의 경우 Amazon ElastiCache를 활용하여 구현 가능)
+    - ex.
+      1. 사용자 A의 요청이 EC2 1에 전달
+      2. EC2 1은 로그인 정보와 장바구니 정보를 Elasticache에 저장
+      3. 다음 요청이 EC2 2에 전달되더라도 Elasticache에서 동일한 세션 정보를 조회
+      4. 따라서 사용자는 서버가 바뀌어도 로그인 상태와 장바구니 정보 유지 가능
+    - 단, External Session Storage를 활용한다고 해서 모든 장애 문제가 해결되는 것은 아님
+    - External Session Stroage를 구현하기 위해 ElastiCache를 사용하여, ElastiCache가 중요한 구성 요소가 되므로, ElastiCache 자체의 가용성도 확보해야 함
+      1. Primaty와 Replica 구성(Automatic Failover - 자동 장애 조치)
+         - 작동 과정
+           1. AZ-A의 Primary가 세션 데이터 저장
+           2. 해당 데이터가 AZ-B의 Replica로 복제
+           3. AZ-A의 Primary에 장애 발생
+           4. AWS가 Replica를 새로운 Primary로 승격
+           5. 애플리케이션은 새로운 Primary를 통해 세션 데이터를 조회하고 저장
+          - 단, 복제는 일반적으로 비동기 복제(Async)이므로 장애 직전의 일부 데이터가 복제되지 못할 가능성이 있음. 또한 장애 조치 중에는 일시적인 연결 중단이 발생할 수 있음
+        
+- ALB, Auto Scaling, External Session Storage(by ElastiCache) 전체 아키텍처
+  - 전체 요청 흐름
+    1. 사용자가 ALB에 요청
+    2. ALB가 여러 EC2 인스턴스 중 하나로 요청을 전달
+    3. EC2는 ElastiCache에서 사용자의 세션 정보를 조회
+    4. 세션 정보가 존재하면 로그인 상태와 사용자 정보 확인
+    5. 사용자의 요청을 처리하고 필요한 세션 정보를 갱신
+    6. ElastiCache의 Primary 데이터는 다른 AZ의 Replica에도 복제
+   
+- SSL/TLS Termination(SLL/TLS 종료)
