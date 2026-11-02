@@ -115,21 +115,21 @@
 }
 
 - SAA-C03 유형 정리
-  유형 1. EC2 인스턴스가 S3 버킷에 접근해야 하는 상황
+  - 유형 1. EC2 인스턴스가 S3 버킷에 접근해야 하는 상황
   - 오답 패턴: EC2 내부 코드에 Access Key / Secret Key를 직접 하드코딩하거나 파일로 저장
   - 정답 키워드: EC2에 IAM Role(역할)을 할당함
     - 이유: IAM Role을 사용하면 AWS STS가 자동으로 임시 자격 증명을 갱신해주므로 키 유출 위험이 없어짐
-  유형 2. 다른 AWS 계정(Cross-Account)의 리소스에 접근할 때
+  - 유형 2. 다른 AWS 계정(Cross-Account)의 리소스에 접근할 때
   - 상황: A계정의 EC2가 B계정의 S3 버킷에 접근하거나 작업을 수행해야 함
   - 정답 키워드: Cross-Account IAM Role 생성 및 스위치
     - B계정에서 A계정을 신뢰하는 IAM Role을 만들고, A계정 사용자가 이 Role을 맡아 작업함.
-  유형 3. 계정 생성 후 초기 보안 설정(Root 계정 관리)
+  - 유형 3. 계정 생성 후 초기 보안 설정(Root 계정 관리)
   - 상황: AWS 계정을 새로 생성했을 때 가장 먼저 해야 하는 보안 조치는?
   - 정답 키워드
     1. Root 계정에 MFA 즉시 설정
     2. Root계정 Access Key 생성 X / 삭제
     3. 일상 작업을 위한 별도 IAM User / Role 생성 및 최소 권한 부여
-  유형 4. IAM User의 CLI/SDK 접근을 위한 자격 증명
+  - 유형 4. IAM User의 CLI/SDK 접근을 위한 자격 증명
   - 상황: 개발자가 웹 콘솔이 아닌 Terminal(CLI)에서 AWS 명령어를 실행하려고 함
   - 정답 키워드: Access Key ID & Secret Access Key 발급
     - 비밀번호는 웹 콘솔 접속용, Access Key는 CLI/API 호출용
