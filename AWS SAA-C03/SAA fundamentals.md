@@ -993,3 +993,70 @@
     6. ElastiCache의 Primary 데이터는 다른 AZ의 Replica에도 복제
    
 - SSL/TLS Termination(SLL/TLS 종료)
+  - HTTPS 통신
+    - HTTP 통신에 TLS 암호화를 적용한 것
+    - 일반적으로 클라이언트와 서버 사이에서 TLS 연결을 설정하고 데이터를 암호화하여 주고 받음
+  - AWS에서 ALB를 사용하는 경우, EC2(서버)가 직접 TLS 암호화를 처리하지 않고 ALB가 대신 처리하도록 구성할 수 있는데 SSL/TLS Termination이 그것임
+ 
+  - SSL/TLS Termination 작동 과정
+    - SSL/TLS Termination 구조
+      - 브라우저 -> ALB -> 서버(EC2 인스턴스)
+      - ALB(TLS Termination)
+        1. SSL/TLS 인증서로 클라이언트와 TLS 연결
+        2. 암호화된 HTTPS 요청 복호화
+        3. HTTP 요청으로 전달할 수 있도록 처리
+    - 단계별 순서
+      1. 사용자(Client)가 브라우저에서 HTTPS 요청을 보냄
+      2. ALB의 HTTPS Listener가 요청을 받음
+      3. ALB는 등록된 SSL/TLS 인증서를 사용하여 TLS 연결을 설정
+      4. ALB가 암호화된 요청 복호화
+      5. ALB가 HTTP 요청을 EC2 instance로 전달
+      6. EC2는 복호화 작업 없이 애플리케이션 처리에만 집중
+      - SSL/TLS 인증서는 AWS Certificate Manager를 통해 발급하거나 가져올 수 있음
+      - ALB에 HTTPS Listener를 생성하려면 서버 인증서와 TLS 보안 정책이 필요
+  - SSL/TLS Termination을 사용하는 이유
+    1. EC2의 처리 부담 감소
+       - TLS 암호화와 복호화에는 CPU 자원이 사용됨
+       - ALB가 이 작업을 대신하면 EC2는 애플리케이션 로직 처리에 더 집중 가능
+    2. 인증서 관리의 편리성
+       - EC2가 여러 대라면 각각의 EC2에 인증서를 설치하고 관리해야 할 수 있음
+       - 하지만 ALB에서 TLS Termination을 수행하면 인증서를 ALB에 집중하여 관리할 수 있음
+    3. 확장성 및 관리 편의성
+       - Auto Scaling으로 EC2가 추가되거나 교체되더라도 개별 인스턴스에 HTTPS 인증서를 설치할 필요가 없는 구조를 만들 수 있음
+
+- SSL/TLS Termination과 End-to-End Encryption 비교
+  1. SSL/TLS Termination
+     - 클라이언트 -> ALB만 암호화(HTTPS 연결)
+     - ALB와 EC2간의 연결은 암호화되어있지 않음(HTTP 연결)
+     - ALB에서 복호화한 후 EC2에 HTTP로 전달하는 구조
+  2. End-to-End Encryption
+     - ELB에서만 사용되는 특정 기능의 명칭이 아니라 통신의 양 끝단 사이에서 암호화가 유지되는 구조를 설명하는 개념
+     - ALB Case(TLS 재암호화)
+       - 클라이언트 -> ALB -> EC2 모두 암호화(모두 HTTPS 연결)
+       - 클라이언트에서 ALB로 넘어올 때, TLS 복호화 후 다시 암호화하여 EC2에 전달
+       - 이 경우 ALB의 Target Group 프로토콜을 HTTPS로 설정하고, EC2에서도 HTTPS 통신을 처리하도록 구성해야 함
+       - ALB에서 TLS 연결이 한 번 종료되고, EC2와 새로운 TLS 연결을 맺는 구조
+       - 클라이이언트와 EC2 사이에 하나의 TLS 연결이 그대로 유지되는 것은 아님
+     - ELB Case(TLS Pass-through)
+       - 클라이언트 -> NLB(TCP Listener) -> EC2 모두 암호화
+       - 클라이언트로부터 받은 TLS 연결을 복호화/종료하지 않고 동일한 TLS 연결의 암호화 데이터를 EC2에 전달
+       - EC2는 전달받은 TLS 연결을 TLS 복호화 및 처리
+     - End-to-End Encryption은 로드 밸런서와 EC2 간의 연결의 보안을 강화하지만, SSL/TLS Termination의 장점이던 EC2의 처리 부담 감소 효과까지 기대할 수는 없음
+     - 두 구조는 보안성과 성능 사이의 설계 선택으로 특정 구조가 더 낫다고 단정할 수 없음
+- ALB와 NLB에서의 SSL/TLS Termination
+  - 두 로드 밸런서 모두 TLS Termination을 지원하지만 Listener 설정에 차이가 있음
+  - ALB
+    - TLS 종료 Listener: HTTPS
+    - 기본 포트: 443
+    - 인증서: ACM(AWS Certificate Manager) 등
+    - 주요 계층: Layer 7
+    - 암호화 트래픽 전달: HTTPS Target Group 사용 가능
+  - NLB
+    - TLS 종료 Listener: TLS
+    - 기본 포트: 443
+    - 인증서: ACM(AWS Certificate Manager) 등
+    - 주요 계층: Layer 4
+    - 암호화 트래픽 전달: TCP Listener로 TLS Pass-through 가능
+  - NLB 특이 사항
+    - TLS Listener(TLS Termination): NLB가 TLS를 종료하고 복호화
+    - TCP Listener(443)(TLS Pass-through): TLS를 복호화하지 않고 암호화된 트래픽을 EC2로 전달(클라이언트와 EC2가 직접 TLS 연결을 맺음) -> End-to-End Encryption의 대표적 형태로 볼 수 있음
