@@ -1060,3 +1060,4 @@
   - NLB 특이 사항
     - TLS Listener(TLS Termination): NLB가 TLS를 종료하고 복호화
     - TCP Listener(443)(TLS Pass-through): TLS를 복호화하지 않고 암호화된 트래픽을 EC2로 전달(클라이언트와 EC2가 직접 TLS 연결을 맺음) -> End-to-End Encryption의 대표적 형태로 볼 수 있음
+
