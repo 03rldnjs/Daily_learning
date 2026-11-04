@@ -72,4 +72,79 @@
         - 단, **Management Account에는 SCP가 적용되지 않고, AWS 서비스 연결 역할(Service-linked role)은 SCP의 제한을 받지 않음**
     - 4. SCP의 Strategies: Deny List와 Allow List
       - 4-1. Deny List Strategy
+        - 기본 구성에서 자주 사용되는 방식
+        - 기본적으로 AWS 서비스 사용을 허용하면서, 특정 서비스나 작업만 제한하는 방식
+        - ex. 다음과 같은 정책을 설정한다고 가정
+          - EC2 사용 가능
+          - S3 사용 가능
+          - RDS 사용 가능
+          - CloudTrail 비활성화 금지
+            -> 이 경우 CloudTrail을 비활성화하는 작업만 명시적으로 거부하면 됨
+          - 나머지 AWS 서비스와 작업은 SCP에서 별도로 금지하지 않는 한 기존 권한 정책에 따라 사용 여부가 결정됨
+          - Deny List Strategy의 장점
+            - 새로운 AWS 서비스가 추가되어도 별도의 허용 정책을 계속 추가할 필요가 적음
+            - 특정 보안 위반 행위만 제한 가능
+            - 정책 관리가 상대적으로 간단
+           
+      - 4-2. Allow List Strategy
+        - 엄격한 서비스 통제 방식
+        - 명시적으로 허용한 서비스와 작업만 사용할 수 있도록 제한하는 방식
+        - ex. 다음과 같은 정책을 설정한다고 가정
+          - EC2 사용 허용
+          - S3 사용 허용
+          - RDS 사용 허용
+          - 그 외 서비스는 기본적으로 허용하지 않음
+          -> 이 정책 전략을 적용하면 명시적으로 허용한 EC2, S3, RDS만 SCP의 허용 범위에 들어감
+          - 다만 이 정책 하나만 계정에 연결되었다고 해당 서비스들에 대한 접근 권한이 생기는 것은 아니며, Root부터 대상 계정까지 모든 계층에서 해당 서비스에 대한 작업이 허용되어야 권한이 생김
+        - Allow List Strategey의 장단점
+          - 장점
+            - 조직에서 사용할 수 있는 서비스를 엄격하게 통제할 수 있음
+            - 승인되지 않은 AWS 서비스의 사용을 사전에 차단할 수 있음
+            - 규제가 엄격한 기업 환경에 적합
+          - 단점
+            - 새로운 AWS 서비스를 사용하려면 SCP를 수정해야 함
+            - 서비스별로 필요한 작업을 빠짐없이 허용해야 함
+            - 정책 관리가 복잡해질 수 있음
+           
+      + AWS는 기본적으로 FullAWSAccess라는 AWS 관리형 SCP를 Root, OU, 계정에 연결함. 이 정책은 모든 서비스와 작업을 허용하는 정책
+      -> 따라서 기본 설정에서는 Deny List방식으로 SCP를 활용하기 쉬움
+      -> Allow List 전략을 사용하려면 FullAWSAccess를 제거하고 필요한 권한만 허용하는 SCP로 대체해야 함
+
+    - 5. SCP Inheritance: 정책 상속 구조
+      - 상위 계층에 연결된 SCP가 하위 계층에도 적용되는 구조
+      - ex. Root(SCP A): EC2 허용 -> Development OU(SCP B): S3 허용 -> Account A(SCP C): RDS 허용
+      - 위와 같은 경우, Account A는 EC2, S3, RDS에 대한 SCP상의 허용 범위를 가짐
+      - 5-1. Allow의 상속
+        - Allow list 전략에서 특정 작업을 수행하려면 Root부터 해당 계정까지 모든 계층에서 명시적으로 허용되어야 함
+        - 즉, Root와 Account A에서는 S3에 대한 접근 권한이 허용되어있더라도, 중간 단계인 Development OU에서 Allow가 명시되어있지 않다면 Account A는 S3에 대한 접근 권한을 가질 수 없음
+      - 5-2. Deny 상속
+        - 상위 계층 중 어느 한 곳에서라도 특정 작업을 명시적으로 거부하면 하위 계정에서도 해당 작업을 수행할 수 없음
+        - 즉, Root와 Account A에서는 EC2에 대한 접근 권한이 Allow 상태여도, 중간 단계인 Development OU에서 Deny인 경우 Account A는 EC2에 대한 접근 권한이 없음
+      - 5-3. 상속 구조 기본 원칙
+        1. 상위 OU의 SCP는 하위 OU와 계정에 적용됨
+        2. Allow는 대상 계정까지 이어지는 모든 계층에서 허용되어야 함
+        3. Deny는 경로 상 어느 한 계층에서라도 Deny되면 하위 계정의 해당 작업을 차단함
+        - 명시적 Deny는 항상 다른 어떤 것보다 우선권을 가짐
+   - 6. AWS Organizations와 AWS Control Tower
+     - 6-1. AWS Control Tower란?
+       - 여러 AWS 계정을 안전하고 일관된 방식으로 운영할 수 있도록 다중 계정 환경을 자동으로 구성하고 관리하는 서비스
+       - Organizations가 여러 계정을 관리하는 기본적인 틀을 제공한다면, Control Tower는 그 틀을 활용하여 기업에 필요한 보안 및 운영 환경을 자동으로 구축해 줌
+       - Landing Zone: 기업이 AWS를 사용하기 위해 마련하는 기본적인 다중 계정 운영 환경
+       - Control Tower가 지원하는 작업
+         - 다중 계정 환경 자동 구성
+         - 권장 OU 및 계정 구조 생성
+         - 보안 및 감사 환경 구성
+         - AWS CloudTrail 및 AWS Config 등 보안 서비스 통합
+         - Guardrails를 통한 보안 정책 적용
+         - Account Factory를 통한 신규 계정 생성 및 등록
+         - 환경의 설정 이탈(Drift) 감지
+      - 6-2. Guardrails란?
+        - AWS계정들이 기업의 보안 및 운영 규칙을 준수하도록 통제하는 기능
+        - ex.
+          - Preventive Control: 위반 행위 사전 차단(ex. 특정 리전에서 리소스 생성 금지)
+          - Detective Control: 위반 상태 감지(ex. CloudTrail 설정이 비활성화된 계정 탐지)
+          - Proactive Control: 리소스 생성 전 규칙 검증(ex. 규정을 위반하는 CloudFormation 리소스 생성 방지)
+        - Guardtails는 SCP와 동일한 개념이 아님
+        - SCP는 Organizations의 정책 기능 중 하나이고, Guardrails는 Control Tower가 제공하는 보다 포괄적인 통제 체계
+      - 6-3. Organizations와 Control Tower의 차이
         - 
