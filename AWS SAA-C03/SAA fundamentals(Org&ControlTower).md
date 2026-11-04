@@ -147,4 +147,61 @@
         - Guardtails는 SCP와 동일한 개념이 아님
         - SCP는 Organizations의 정책 기능 중 하나이고, Guardrails는 Control Tower가 제공하는 보다 포괄적인 통제 체계
       - 6-3. Organizations와 Control Tower의 차이
-        - 
+        1. Organizations
+           - 핵심 역할: 다중 계정 중앙 관리
+           - 계정 관리: 계정 생성/초대/이동
+           - OU 관리: 직접 구성
+           - 정책 관리: SCP, RCP 등
+           - 보안 관리: 정책 중심의 통제
+           - 설정 자동화: API 등을 통한 자동화
+           - 설정 이탈 감지: 직접 다른 서비스와 조합
+        2. Control Tower
+           - 핵심 역할: 다중 계정 환경 자동 구축 및 통제
+           - 계정 관리: Account Factory로 계정 프로비저닝
+           - OU 관리: 권장 구조를 자동으로 구성하고 관리
+           - 정책 관리: Guardrails를 통해 정책 및 규칙 적용
+           - 보안 관리: 예방/탐지/사전 검증 통제
+           - 설정 자동화: Landing Zone 자동 구성
+           - 설정 이탈 감지: Drift Detection 제공
+        - 즉, Control Tower는 Organizations를 대체하는 서비스가 아니라 Organizations를 기반으로 더 높은 수준의 자동화와 거버넌스 기능을 제공하는 서비스
+
++ IAM Policy vs Permission Boundary vs SCP
+  - 모두 AWS 리소스에 대한 접근 권한을 통제한다는 공통점을 지님. 하지만 통제하는 대상과 목적에서 차이가 있음
+  - 핵심 정리
+    1. IAM Policy: 사용자가 실제로 어떤 작업을 수행할 수 있는지에 대한 권한 부여
+    2. Permission Boundary: IAM 사용자 또는 역할이 가질 수 있는 최대 권한 제한
+    3. SCP: AWS Organizations에 속한 계정에서 가질 수 있는 최대 권한을 조직 차원에서 제한
+  - 간단한 비유
+    1. IAM Policy: 직원에게 실제 업무 권한을 부여하는 것
+    2. Permission Boundary: 직원이 가질 수 있는 업무 권한의 상한선을 정하는 것
+    3. SCP: 회사 전체에서 금지하거나 허용할 수 있는 업무 범위를 정하는 것
+   
+  1. IAM Policy
+     - IAM User, IAM Group, IAM Role 등에 연결하여 AWS 서비스와 리소스에 대한 접근 권한을 부여하거나 제한하는 정책
+     - 실제 권한을 부여하는 역할 수행
+     - 단, IAM Policy에 Allow가 있다고 반드시 접근 권한이 있다고 단정할 수 있는 것은 아님
+     - Permission Boundary, SCP, 명시적 Deny 등 다른 권한 통제 조건도 함께 평가해야 함
+  2. Permission Boundary
+     - IAM User 또는 IAM Role이 가질 수 있는 최대 권한을 설정하는 정책
+     - IAM Policy가 실제 권한을 부여한다면, Permission Boundary는 해당 IAM 주체가 그 권한을 어디까지 가질 수 있는지 제한함
+     - Effective Permissoins = IAM Policy와 Permission Boundary의 교집합
+     - 2-1. 대표적 활용 사례
+       - 관리자: 개발팀의 IAM 사용자 생성을 허용
+       - 개발팀 관리자: 직접 IAM 사용자를 생성하고 권한 부여
+       - 보안팀: 개발팀 관리자가 부여할 수 있는 최대 권한을 제한
+       - 개발팀 관리자가 자신이 생성한 IAM 사용자에게 어떤 IAM Policy를 연결하더라도, 사전에 설정된 Permission Boundary를 초과하는 권한을 사용할 수 없음
+       - Permission Boundary는 다른 사람에게 IAM 권한 관리 업무를 위임하면서도, 권한이 무분별하게 확대되는 것을 방지하는데 유용
+     - 2-2. 시험에서 기억할 표현
+       - Delegate(위임하다) IAM permission management safely
+       - Prevent privilege escalation
+       - Set the maximum permission for IAM users or roles   
+  3. SCP
+     - Permission Boundary와 비슷하게 최대 권한을 제한하지만, 적용 대상이 다름
+       - Permission Boundary: 특정 IAM User 또는 Role
+       - SCP: Organizations에 속한 Member Account의 IAM User, Role 및 Root User
+     - ex. 한 기업이 다음과 같은 계정을 운영한다고 가정
+       - 개발 계정
+       - 운영 계정
+       - 테스트 계정
+       - 기업 보안팀은 모든 계정에서 특정 리전 이외의 AWS 사용을 금지하려고 함
+       - 이때, 각 계정의 IAM 사용자에게 일일이 정책을 설정할 필요 없이, Organizations의 Root 또는 OU에 SCP를 연결하면 간단히 처리 가능
