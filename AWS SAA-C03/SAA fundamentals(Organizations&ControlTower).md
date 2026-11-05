@@ -1,5 +1,5 @@
 # AWS Organizations & Control Tower
-- AWS Organizations
+# AWS Organizations
   - 여러 AWS 계정을 하나의 조직으로 묶어 중앙에서 관리하고, 계정별 권한과 정책을 통제할 수 있도록 해주는 서비스
   - 1. AWS Orgaizations의 구성과 역할
       - 1-1. Oragizations를 사용하는 이유
@@ -12,7 +12,10 @@
         - Organizations를 사용하면 계정을 여러 개 생성하고, 목적에 따라 그룹화한 뒤 중앙에서 관리할 수 있음
       - 1-2. Organizations의 계층 구조
           - Management Account(조직 생성 및 중앙 관리)
-          - Root(조직의 최상위 컨테이너)
+          - Root(조직의 최상위 컨테이너 - K8s나 Docker같은 컨테이너가 아니라 단순히 여러 구성 요소를 담아두고 관리하는 논리적 최상위 공간 혹은 집합체를 의미)
+            - Management Account는 조직을 관리하는 AWS 계정이고, Root는 조직 내 모든 OU와 계정을 포함하는 최상위 컨테이너임
+            - Management Account는 SCP의 영향을 받지 않지만, Root에는 SCP를 연결하여 권한을 제한할 수 있음
+            - Management Account도 Root라는 컨테이너에 포함되지만, SCP가 적용되지 않음
           - Development OU / Production OU(목적에 따라 AWS 계정을 그룹화하는 단위)
           - Account A, Account B / Account C, Account D(실제 AWS 리소스를 생성하고 운영하는 계정)
             - OU 안에 다른 OU를 생성할 수 있음
@@ -205,3 +208,20 @@
        - 테스트 계정
        - 기업 보안팀은 모든 계정에서 특정 리전 이외의 AWS 사용을 금지하려고 함
        - 이때, 각 계정의 IAM 사용자에게 일일이 정책을 설정할 필요 없이, Organizations의 Root 또는 OU에 SCP를 연결하면 간단히 처리 가능
+
+# AWS Control Tower
+1. Landing Zone
+   - Control Tower가 구축하는 기본 환경
+   - 조직이 AWS를 안전하고 일관된 방식으로 사용하기 위해 미리 구성해 놓은 멀티 계정 기반 환경
+   - 단순히 AWS 계정을 여러 개 모아놓은 것이 아니라, 계정 구조, 보안, 접근 권한, 로그 수집, 감사 체계까지 담당하는 관리 환경
+   - Control Tower에서 Landing Zone을 설정하면 AWS Organizations를 기반으로 여러 AWS 서비스가 연동됨
+   - Landing Zone의 주요 구성 요소
+     - AWS Organizations: 계정 및 OU의 계층적 관리
+     - AWS IAM Identity Center: 사용자와 그룹의 중앙 집중식 계정 접근 관리
+     - AWS CloudTrail: AWS 계정에서 발생한 API 활동 기록
+     - AWS Config: AWS 리소스 구성 및 변경 사항 추적
+     - AWS Control Tower Controls: 조직의 보안 및 운영 규칙 적용
+     - AWS Account Factory: 표준화된 신규 AWS 계정 생성
+2. Shared Accounts: 세 가지 핵심 계정
+   1. Management Account
+      - AWS Control Tower를 설정하고 조직 전체를 관리하는 중심 계정
