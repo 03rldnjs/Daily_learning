@@ -57,7 +57,7 @@
             - AttachPolicy로 개발팀에 적합한 SCP를 연결
         + Organizations API는 여러 AWS 계정의 생성, 초대, 이동, 정책 연결 등을 자동화하는 수단이지, EC2나 S3 등의 서비스 자체를 생성하는 기능은 아님
        
-    - 3. SCP(Service Control Policy)
+  - 3. SCP(Service Control Policy)
       - 3-1. SCP란?
         - AWS Organizations에서 제공하는 정책으로, 조직에 속한 계정의 IAM 사용자와 IAM 역할이 사용할 수 있는 최대 권한의 범위를 제한함
         - 즉, 기업의 중앙 관리자가 각 계정의 상한선을 설정하는 것
@@ -225,3 +225,64 @@
 2. Shared Accounts: 세 가지 핵심 계정
    1. Management Account
       - AWS Control Tower를 설정하고 조직 전체를 관리하는 중심 계정
+      - 주요 역할
+        - AWS Organizations 관리
+        - AWS 계정 및 OU 관리
+        - Account Factory를 통한 신규 계정 생성
+        - Control Tower Controls 설정 및 관리
+        - 조직 전체의 통합 결제 관리
+      - 주의 사항
+        - Management Account는 조직의 관리 권한이 집중된 계정이므로 일반적인 서비스 운영이나 프로덕션 워크로드를 실행하는 용도로 사용하는 것은 권장되지 않음(Root 계정을 일상 운영에 사용하지 않는 것을 권장하는 것과 같은 맥락)
+        - 별도의 Member Account를 만들어 사용하는 것이 좋음
+    2. **Log** archive Account
+       - 조직 내 여러 AWS 계정에서 발생하는 **로그**를 **중앙에서 수집하고 보관**하는 계정
+       -  ex. 다음과 같은 계정들이 있다고 가정
+         - 개발 계정 A
+         - 개발 계정 B
+         - 운영 계정 C
+         - 보안 계정 D
+       - 각 계정에서 발생한 CloudTrail 및 AWS Config 로그를 중앙의 Log archive account에 모아 저장함
+       - 이 계정의 핵심 목적은 로그의 중앙 집중식 보관과 감사 증거 확보
+       - ex. 운영 계정에서 누군가 S3 버킷 정책을 변경하거나, EC2 인스턴스를 삭제했다면 CloudTrail 로그를 통해 누가, 언제, 어떤 API 작업을 수행했는지 조사할 수 있음
+       - 중요한 점은 로그를 수집하는 계정과 실제 워크로드를 운영하는 계정을 분리한다는 것
+    3. Audit Account - Audit: 감사, 검사
+       - 조직 전체의 AWS 계정을 대상으로 보안 상태와 규정 준수 여부를 확인하는 계정
+       - Log archive Account와 혼동할 수 있는데, Log archive는 로그를 저장하는 역할이고 Audit Account는 조직 전체를 감사하고 점검하는 역할임
+       - ex. 보안팀이 다음과 같은 작업을 수행한다고 가정
+         - 개발 계정의 S3 버킷이 외부에 공개되어 있는지 확인
+         - 운영 계정의 EC2 인스턴스가 암호화되지 않음 EBS를 사용하고 있는지 확인
+         - 여러 계정의 보안 설정이 회사 정책을 준수하는지 확인
+         - 보안 위반 사항에 대한 대응 작업 수행
+        - Audit Account는 이러한 보안 감사 및 자동화된 점검을 위한 접근 지점을 제공함
+        - 특히, 조직 내 다른 계정에 접근할 수 있도록 구성된 Cross-account roles를 활용함
+          - 감사팀의 점검 및 보안 도구가 다른 계정의 리소스를 확인할 수 있도록 지원
+3. Controls(Guardrails)
+   - AWS 조직 내 계정들이 특정 보안 및 운영 규칙을 준수하도록 통제하는 기능
+   - 최신 공식 AWS 문서에서는 Guardrails라는 기존 명칭 대신 Controls라는 용어를 사용하는 중
+   - Controls의 3가지 유형
+     1. Preventive Controls(예방적 통제)
+        - 정책에 위배되는 작업이 실행되지 못하도록 사전에 차단
+        - ex. 회사에서 모든 개발 계정의 특정 리전 사용을 금지했다고 가정
+          -> 개발자가 금지된 리전에서 EC2 인스턴스를 생성하려고 할 때, Preventive Control이 적용되어 있다면 해당 작업 자체가 거부됨
+        - 주요 구현 방식
+          - SCP(Service control Policy)
+          - RCP(Resource Control Policy)
+          - Declarative Policies
+        - SAA에서는 Preventive Control = SCP라고 떠올리면 좋음(단, 모든 예방적 통제가 SCP만으로 구현되는 것은 아님)
+     2. Detective Controls(탐지적 통제)
+        - 리소스가 이미 생성되었거나 설정된 이후에 보안 정책을 위반하는 상태인지 확인
+        - ex. 회사에서 S3 버킷을 외부에 공개하는 것을 금지했다고 가정
+          -> 개발자가 실수로 S3 버킷을 외부에 공개하도록 설정했다면, Detective Control은 해당 설정을 탐지하고 규정 준수 위반 상태로 보고함
+        - 단, Detective Controls는 위반 사항을 발견하는 것이지, 위반 작업을 차단하거나 자동으로 수정하는 역할을 수행하는 것은 아님
+        - 주요 구현 방식
+          - AWS Config Rules
+          - AWS Config가 리소스 설정을 평가하고, 정책 위반 여부를 Control Tower에서 확인할 수 있도록 함
+     3. Proactive Controls (선제적 통제)
+        - 리소스가 실제로 생성되지 전에 정책 준수 여불르 검사
+        - ex. 회사에서 모든 EC2 인스턴스에 특정 보안 설정을 적용하도록 규정했다고 가정
+          -> 개발자가 CloudFormation 템플릿을 통해 EC2 인스턴스를 생성하려고 할 때, 템플릿이 해당 규칙을 위반하면 배포가 차단될 수 있음
+        - 주요 구현 방식
+          -AWS CloudFormation Hooks
+        - 단, Proactive Control은 CloudFormation을 통해 배포되는 리소스를 대상으로만 검사를 진행함. 모든 수동 작업이나 모든 배포 도구를 자동으로 검사하는 것은 아님
+    
+           
