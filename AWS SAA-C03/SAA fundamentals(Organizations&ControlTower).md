@@ -295,7 +295,7 @@
           -AWS CloudFormation Hooks
         - 단, Proactive Control은 CloudFormation을 통해 배포되는 리소스를 대상으로만 검사를 진행함. 모든 수동 작업이나 모든 배포 도구를 자동으로 검사하는 것은 아님
     + Control의 중요도
-      1. Mandatory: 필수 통제. Landing Zone의 구성 및 버전에 따라 적용
+      1. Mandatory: 필수 통제, Landing Zone의 구성 및 버전에 따라 적용
       2. Strongly Recommended: AWS가 강하게 권장하는 통제
       3. Elective: 조직의 필요에 따라 선택적으로 적용하는 통제
       - Control의 중요도는 Preventive/Detective/Proactive와 전혀 다른 분류임
@@ -313,3 +313,4 @@
       - -> 이때 Account Factory를 사용하면 정해진 계정 생성 템플릿과 설정을 기반으로 새로운 계정을 프로비저닝할 수 있음
         - Management Account가 Account Factory에 계정 생성을 요청하면, Account Factory가 표준 템플릿 및 설정을 적용하여 새로운 Member Account를 생성함
         - Account Factory는 계정 생성 과정의 표준화와 자동화를 담당하며, 신규 계정이 조직의 거버넌스 체계에 편입되도록 도와줌
+        
