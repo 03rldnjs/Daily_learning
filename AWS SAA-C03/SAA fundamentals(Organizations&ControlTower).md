@@ -222,6 +222,16 @@
      - AWS Config: AWS 리소스 구성 및 변경 사항 추적
      - AWS Control Tower Controls: 조직의 보안 및 운영 규칙 적용
      - AWS Account Factory: 표준화된 신규 AWS 계정 생성
+       - Account Factory와 Organizations API의 차이점
+         - 두 기능 모두 AWS 계정을 생성한다는 공통점이 있음
+         - 그러나 Organizations API는 계정 생성과 조직 관리에 초점을 두고, Account Factory는 조직에서 바로 사용할 수 있도록 표준화된 계정 환경을 만드는 데 초점을 둠
+           - AWS Organizations API: 계정 자체를 생성하는 기능
+             - 이 API를 호출하면 새 AWS Member Account가 생성되고, 자동으로 해당 Organization에 가입됨
+             - 단, Control Tower의 Landing Zone 설정까지 자동으로 완료되는 것은 아님
+            - Control Tower Account Factory: 표준화된 계정 환경 구축
+              - Account Factory도 내부적으로 Organizations의 Create Account API를 활용함
+              - 그러나 Account Factory는 여기서 끝나지 않고 해당 계정에 필요한 여러 기본 설정을 적용함.
+              - 즉, 수동적인 추가 설정 없이 조직에서 바로 사용할 수 있도록 표준화된 계정을 생성함
 2. Shared Accounts: 세 가지 핵심 계정
    1. Management Account
       - AWS Control Tower를 설정하고 조직 전체를 관리하는 중심 계정
@@ -284,5 +294,22 @@
         - 주요 구현 방식
           -AWS CloudFormation Hooks
         - 단, Proactive Control은 CloudFormation을 통해 배포되는 리소스를 대상으로만 검사를 진행함. 모든 수동 작업이나 모든 배포 도구를 자동으로 검사하는 것은 아님
-    
-           
+    + Control의 중요도
+      1. Mandatory: 필수 통제. Landing Zone의 구성 및 버전에 따라 적용
+      2. Strongly Recommended: AWS가 강하게 권장하는 통제
+      3. Elective: 조직의 필요에 따라 선택적으로 적용하는 통제
+      - Control의 중요도는 Preventive/Detective/Proactive와 전혀 다른 분류임
+4. Account Factory
+   - 조직에서 사용할 새로운 AWS 계정을 미리 정의된 표준 설정에 따라 생성하는 기능
+   - ex. 기업에 새로운 개발팀이 생겼다고 가정
+     - 일반적으로는 관리자가 AWS 계정을 생성하고 다음과 같은 작업을 수행해야 함
+       - 계정 생성
+       - 조직에 계정 등록
+       - 보안 정책 적용
+       - 접근 권한 설정
+       - 로그 수집 설정
+       - 네트워크 환경 구성
+      - 이러한 작업을 매번 수동으로 수행하면 관리 부담이 증가함
+      - -> 이때 Account Factory를 사용하면 정해진 계정 생성 템플릿과 설정을 기반으로 새로운 계정을 프로비저닝할 수 있음
+        - Management Account가 Account Factory에 계정 생성을 요청하면, Account Factory가 표준 템플릿 및 설정을 적용하여 새로운 Member Account를 생성함
+        - Account Factory는 계정 생성 과정의 표준화와 자동화를 담당하며, 신규 계정이 조직의 거버넌스 체계에 편입되도록 도와줌
