@@ -112,4 +112,104 @@
              - 특정 위치의 통신 사업자 네트워크에서 들어오는 트래픽 허용
              - 통신 사업자 네트워크로 나가는 트래픽 전달
              - 인터넷으로 나가는 아웃바운드 트래픽 전달
-           - Wavelength와 통신 사업자 간 네트워크 연결
+           - Wavelength와 통신 사업자 간 네트워크 연결이 가장 큰 역할임
+
+5. Amazon CloudFront
+   - CloudFront는 CDN(Content Delivery Network) 서비스로, 전 세계에 분산된 Edge Location을 이용해 사용자에게 콘텐츠를 빠르고 효율적으로 전달함
+   - ex. 학국, 미국, 독일에 사용자가 있는 글로벌 쇼핑몰을 운영한다고 가정
+     - 쇼핑몰의 이미지와 동영상이 미국의 AWS Region에 있는 S3 버킷에 저장되어 있다면, 한국 사용자가 이미지를 요청할 때 미국까지 데이터를 요청해 가져오느라 지연 시간이 발생하게 됨
+     - 이때 CloudFront를 사용하면 사용자가 **자주 요청하는 콘텐츠**를 가까운 Edge Location에 미리 캐싱하여 빠르게 전달할 수 있음
+   - CloudFront의 핵심 구성 요소
+     1. Origin
+        - CloudFront가 사용자에게 전달할 원본 콘텐츠를 가져오는 서버 또는 저장소
+        - 대표적 Origin
+          - Amazon S3 Bucket
+          - Amazon EC2에서 실행되는 웹 서버
+          - ALB
+          - MediaPackage
+          - 외부 HTTP 서버
+     2. Distribution
+        - CloudFront의 콘텐츠 배포 설정 단위
+        - CloudFront를 통해 어떤 콘텐츠를 어디서 가져와 어떻게 사용자에게 전달할 것인지 정의하는 설정
+        - Distribution 생성 시 설정 사항
+          - Origin 서버
+          - Cache Behavior
+          - Viewer Protocol Policy
+          - Cache Policy
+          - HTTPS 인증서
+          - 접근 제어 설정
+        - CloudFront의 Distribution은 글로벌 서비스로, 특정 리전에 종속되는 일반적 리소스와 다름
+     3. Edge Location
+        - CloudFront가 사용자에게 콘텐츠를 전달하기 위해 사용하는 전 세계의 분산된 네트워크 거점
+        - 사용자가 CloudFront Distribution에 접속하면 DNS가 해당 요청을 적절한 Edge Location으로 연결
+        - 무조건 물리적 거리가 가까운 Edge Location으로 연결되는 것은 아니며, 일반적으로 지연 시간 등을 고려해 적절한 Edge Location이 선택됨
+     4. Regional Edge Cache
+        - Edge Location과 Origin 사이에 위치하는 중간 캐시 계층
+        - ex. 특정 이미지가 한국의 Edge Location에서 한동안 요청되지 않아 캐시에서 제거됨
+          - 다시 같은 이미지가 요청된 경우, Regional Edge Cache에 해당 콘텐츠가 남아 있다면 Origin까지 가지 않고 Regional Edge Cache에서 콘텐츠를 가져올 수 있음
+        - Regional Edge Cache는 일반적인 Edge Location보다 더 큰 캐시 용량을 가지며, 인기 콘텐츠가 아닌 콘텐츠도 매번 Origin에 접근하지 않고 제공될 수 있도록 도움
+
+   - CloudFront의 콘텐츠 전달 과정
+     - ex. 상황 가정
+       - Origin: 미국 리전의 S3 Bucket
+       - 사용자: 대한민국
+       - Edge Location: 한국의 CloudFront 거점
+       - 동작 순서
+         1. 사용자가 콘텐츠 요청
+         2. DNS가 적절한 CloudFront Edge Location으로 요청 연결
+         3. Edge Location이 캐시에 요청한 콘텐츠가 있는지 확인
+         4. 콘텐츠가 있다면(Cache Hit) 바로 사용자에게 전달
+         5. 콘텐츠가 없다면(Cache Miss) Regional Edge Cache를 확인하고, 거기에도 없다면 Origin에 요청
+         6. **가져온 콘텐츠를 캐시에 저장**하고 사용자에게 전달
+       - Regional Edge Cache는 모든 콘텐츠 요청에 반드시 거쳐야 하는 것은 아님, 캐시 계층의 실제 동작은 콘텐츠와 배포 설정에 따라 달라짐
+
+   - TTL과 Cache Policy
+     - TTL(Time To Live): 콘텐츠를 캐시에 보관할 시간
+       - 웹사이트의 로고 이미지가 자주 변동되지 않는다면 오랜 시간 캐싱해도 됨
+       - 반면 실시간 가격 정보처럼 자주 변경되는 데이터는 짧은 시간만 캐싱하거나 캐싱하지 않는 것이 적절
+     - CloudFront Cache Policy
+       - 세가지 TTL 설정
+         1. Minimum TTL: 캐시할 최소 시간
+         2. Default TTL: Origin이 별도의 캐시 지시자를 제공하지 않을 때 적용되는 기본 시간
+         3. Maximum TTL: 캐시할 수 있는 최대 시간
+       - 중요 주의 사항
+         - Origin이 Cache-Control: no-cache 또는 no-store를 보내더라도 Min TTL이 0보다 크다면 CloudFront는 TTL 동안 캐싱할 수 있음
+         - 즉, 캐싱을 완전히 방지하려면 Cache Policy의 Min TTL을 0으로 설정해야 함
+         - 콘텐츠를 변경했는데, 기존 캐시가 계속 전달되는 상황에서는 Invalidation을 사용할 수 있음
+         - 그러면 CloudFront가 해당 객체를 기존 캐시에서 무효화하여 다음 요청에서 최신 콘텐츠를 가져오도록 할 수 있음
+   - CloudFront의 보안 기능
+     - CloudFront는 콘텐츠에 대한 접근 제어 및 보안 기능도 제공함
+       1. HTTPS
+          - CloudFront는 Viewer와 CloudFront 간 HTTPS 통신을 지원함
+          - 또한 Origin과 CloudFront 사이의 통신도 HTTPS로 설정할 수 있음
+          - 사용자와 CloudFront 간 연결, CloudFront와 Origin 간 연결은 별개의 통신 구간임
+       2.Origin Access Control(OAC)
+          - 사용자가 CloudFront를 거치지 않고 S3의 직접 URL로 접근할 수 있다면 CloudFront에서 설정한 접근 제어를 우회할 수 있는 위험이 존재
+          - 이를 방지하지 위해 OAC를 사용할 수 있음
+          - OAC를 설정하면 지정된 CloudFront Distribution이 S3 객체를 읽도록 권한을 구성할 수 있음
+          - 즉, 사용자가 CloudFront를 통해서만 콘텐츠에 접근할 수 있도록 할 수 있음
+          - 기존 OAI보다 OAC가 더 권장되며, OAC는 SSE-KMS 암호화와 PUT/DELETE 요청 등의 기능도 지원함
+       3. Signed URL과 Signed Cookie
+          - 특정 사용자에게만 콘텐츠를 제공해야 한다면 Signed URL 또는 Signed Cookie를 사용할 수 있음
+          - ex. 유료 동영상 서비스를 운영한다고 가정
+            - Signed URL: **특정 파일 하나**에 대한 접근 권한을 제한할 때 적합(ex. 특정 유료 파일 하나를 다운로드하도록 허용해야하는 경우)
+            - Signed Cookie: **여러 파일**에 대한 접근 권한을 한 번에 제공할 때 적합(ex. 동영상 강의의 여러 영상 파일을 재생해야 하는 경우)
+   - CloudFront와 Global Accelerator의 차이
+     - CloudFront
+       - 핵심 목적: 콘텐츠 전송 가속
+       - 주요 방식: 콘텐츠 **캐싱**
+       - 캐싱: O
+       - 프로토콜: 주로 HTTP/HTTPS(Layer 7, 애플리케이션 레이어)
+       - 주요 기능: Edge Location, CDN
+       - 대표 사례: 이미지, 동영상, 웹 콘텐츠
+     - Global Accerlerator
+       - 핵심 목적: 애플리케이션 네트워크 연결 최적화
+       - 주요 방식: AWS 글로벌 네트워크를 통한 트래픽 라우팅
+       - 캐싱: X
+       - 프로토콜: TCP/UDP (Layer 3/4, 네트워크 레이어)
+       - 주요 기능: 고정 Anycast IP, Endpoint 장애 조치
+       - 대표 사례: 게임 서버, API, 글로벌 애플리케이션
+    - 구분 방법
+      - 전 세계 사용자에게 이미지와 동영상을 빠르게 제공하고 싶다 -> CloudFront
+      - 전 세계 사용자의 TCP/UDP 트래픽을 가장 적절한 AWS 엔드포인트로 전달하고 싶다 -> Global Accelerator
+      - 
