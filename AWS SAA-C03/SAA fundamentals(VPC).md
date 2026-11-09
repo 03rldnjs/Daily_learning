@@ -212,4 +212,25 @@
     - 구분 방법
       - 전 세계 사용자에게 이미지와 동영상을 빠르게 제공하고 싶다 -> CloudFront
       - 전 세계 사용자의 TCP/UDP 트래픽을 가장 적절한 AWS 엔드포인트로 전달하고 싶다 -> Global Accelerator
-      - 
+    - 특히, CloudFront는 콘텐츠를 캐싱하지만, Global Accelerator는 콘텐츠를 캐싱하지 않는다는 차이를 기억해야 함
+
++ Home Region과 Parent Region
+  - Parent Region과 Home Region이 서로 다른 개념은 아님, 그러나 AWS 서비스별로 공식 용어가 다른 것은 사실임
+  - Outposts -> Home Region(Parent Region으로 표현해도 큰 문제는 없음)
+  - Local Zones -> Parent Region
+  - Wavelength -> Parent Region
+
+
+# IP Addressing
+1. IPv4의 구조
+   - 네트워크에서 장치를 식별하고 통신 경로를 지정하기 위해 사용하는 주소 체계
+   - 총 32비트(32 bits)로 구성됨
+   - 일반적으로 다음과 같은 10진수 형식으로 표현됨
+     - 192.168.1.10(.을 기준으로 각각 8bits -> 8 + 8 + 8 + 8 = 32bits)
+     - 각 숫자는 8비트로 구성된 Octet(옥텟)
+     - 8비트로 표현할 수 있는 값음 0~255이믜로 IPv4 주소의 각 숫자는 항상 0~255 범위에 존재함
+     - ex. 192.168.1.10의 2진수 표현
+       - 192 = 11000000
+       - 168 = 10101000
+       - 1 = 00000001
+       - 10 = 00001010
