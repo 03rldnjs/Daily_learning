@@ -101,7 +101,7 @@
          - IoT 및 산업용 모바일 장치
          - AR/VR 서비스
     - Wavelength의 구조
-      - AWS Parent Region <-> Wavelength Zone(통신 사업자 데이터 센터 내부) <-> 5G 스마트폰 및 모바일 기기
+      - AWS Parent Region <-> Wavelength Zone(통신 사업자 데이터 센터 내부 <-> 5G 스마트폰 및 모바일 기기)
       - 중요 구성 요소 2가지
         1. Wavelength Zone
            - 통신 사업자(SKT, KT, U+ 등)의 데이터센터에 배치된 AWS 인프라
@@ -216,7 +216,7 @@
 
 + Home Region과 Parent Region
   - Parent Region과 Home Region이 서로 다른 개념은 아님, 그러나 AWS 서비스별로 공식 용어가 다른 것은 사실임
-  - Outposts -> Home Region(Parent Region으로 표현해도 큰 문제는 없음)
+  - Outposts -> Home Region(Parent Region으로 표현해도 큰 문제 없음)
   - Local Zones -> Parent Region
   - Wavelength -> Parent Region
 
