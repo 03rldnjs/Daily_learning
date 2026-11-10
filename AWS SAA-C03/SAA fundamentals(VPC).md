@@ -333,4 +333,13 @@
      - 특히 AWS에서는 Subnet의 /28이 주소 개수의 하한선임. 즉, /27, /24 등은 가능하지만, /31, /30 등은 불가능함. 참고로 /28은 사용 가능한 주소가 11개뿐임(2의 (32-28)승 - 5)
 
 5. Public Subnet과 Private Subnet의 관계
-   -    
+   - AWS에서는 Subnet의 Public/Private 구분이 IP 주소만으로 결정되지 않음
+   - Public Subnet
+     - 일반적으로 Route Table에 다음 경로가 설정된 Subnet임
+     - Internet Gateway를 통해 인터넷과 통신할 수 있도록 라우팅이 설정된 것
+     - 단, EC2가 실제로 인터넷과 직접 통신하려면 Public IPv4주소 또는 Elastic IP 등도 필요하며, Security Group과 NACL 등의 조건도 충족해야 함
+   - Private Subnet
+     - 일반적으로 Internet Gateway로 향하는 직접적인 기본 경로가 없는 Subnet
+     - 대신 NAT Gateway를 통해 인터넷으로 나가는 경로를 구성할 수 있음(NAT instance도 가능)
+     - NAT Gateway를 활용하면 Private Subnet에 있는 EC2 instance가 인터넷으로 요청을 보낼 수 있지만, 일반적인 NAT Gateway 구성에서는 외부 인터넷이 인스턴스로 접근할 수는 없음
+     - 
