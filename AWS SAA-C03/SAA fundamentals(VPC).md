@@ -342,4 +342,80 @@
      - 일반적으로 Internet Gateway로 향하는 직접적인 기본 경로가 없는 Subnet
      - 대신 NAT Gateway를 통해 인터넷으로 나가는 경로를 구성할 수 있음(NAT instance도 가능)
      - NAT Gateway를 활용하면 Private Subnet에 있는 EC2 instance가 인터넷으로 요청을 보낼 수 있지만, 일반적인 NAT Gateway 구성에서는 외부 인터넷이 인스턴스로 접근할 수는 없음
-     - 
+
+
+# Amazon VPC
+1. Amazon VPC란?
+  - VPC의 개념
+    - AWS 클라우드 내에 논리적으로 격리된 가상 네트워크를 생성할 수 있도록 해주는 서비스
+    - AWS 안에 자신만의 네트워크 공간을 만드는 것
+    - VPC를 생성하면 다음과 같은 네트워크 환경을 구성할 수 있음
+      - IP Address Range(CIDR Block) 지정
+      - Subnet 생성
+      - Route Table을 통한 네트워크 경로 설정
+      - Internet Gateway를 통한 인터넷 연결
+      - NAT Gateway를 통한 아웃바운드 인터넷 연결
+      - Security Group 및 Network ACL을 통한 트래픽 제어
+  - VPC의 주요 특징
+    - Logical Isolation: 다른 VPC와 논리적으로 격리되어있음
+    - Regional Resource: 하나의 AWS Region에 생성
+    - Multi-AZ: 여러 AZ에 걸쳐 Subnet 구성 가능
+    - CIDR Block: VPC가 사용할 IP 주소 범위 지정
+    - Custom Network: Route Table, Gateway, Security Group 등으로 네트워크 구성
+  - VPC는 Region 단위의 리소스이며, Subnet은 AZ 단위의 리소스임
+    - ex. 서울 리전에 VPC를 하나 생성한 다음 서로 다른 AZ에 Subnet을 각각 배치할 수 있음
+2. VPC CIDR Blocks
+  - VPC CIDR Block이란?
+    - 해당 VPC에서 사용할 수 있는 IPv4 주소의 범위를 의미함
+    - ex. 10.0.0.0/16으로 CIDR Block을 설정했다고 가정
+      - Network Portion: 16bits
+      - Host Portion: 16bits
+      - 전체 IPv4 주소 개수 = 2의 16승개 = 65,536개
+      - 주소 범위: 10.0.0.0 ~ 10.0.255.255
+    - AWS VPC의 기본 IPv4 CIDR Block은 /16부터 /28까지 지정할 수 있음
+    - AWS에서 VPC CIDR을 설정할 때 고려사항
+      - RFC 1918 Private IP 범위를 주로 사용함
+      - VPC의 CIDR은 기존 네트워크와 겹치지 않도록 설계하는 것이 좋음
+      - VPC에 여러 IPv4 CIDR Block을 연결할 수도 있음
+      - 추가 CIDR Block을 연결하면 VPC에서 사용할 수 있는 IP 주소 범위를 확장할 수 있음
+    - Primary CIDR과 Secondary CIDR
+      - Primary IPv4 CIDR: VPC 생성 시 지정하는 기본 CIDR(기본 IP 주소 범위)
+      - Secondary IPv4 CIDR: 이후 VPC에 추가로 연결하는 CIDR(추가로 확보한 IP 주소 범위)
+    - VPC CIDR과 Subnet CIDR의 관계
+      - VPC CIDR은 전체 네트워크의 주소 범위이고, Subnet CIDR은 그 범위를 더 작은 네트워크로 나눈 것
+      - ex. 다음과 같은 설계 가능
+        - VPC CIDR: 10.0.0.0/16 -> 65,536개
+        - Public Subnet A: 10.0.1.0/24 -> 256개
+        - Public Subnet B: 10.0.2.0/24 -> 256개
+        - Private Subnet A: 10.0.3.0/24 -> 256개
+        - Private Subnet B: 10.0.4.0/24 -> 256개
+      - 모든 Subnet CIDR은 반드시 VPC CIDR 안에 포함되어야 하고, Subnet CIDR끼리 겹치는 부분이 존재하면 안 됨.
+     
+3. Subnet
+   - VPC 공간을 더 작은 네트워크로 분할한 것
+   - Subnet의 기본 개념
+     - VPC CIDR Block의 일부 주소 범위를 할당받아 생성
+     - ex. VPC CIDR이 10.0.0.0/16이라면 다음과 같이 Subnet을 구성할 수 있음
+       - 10.0.1.0/24
+       - 10.0.2.0/24 등
+     - 하나의 Subnet은 반드시 하나의 AZ에 속함
+     - 따라서 고가용성을 확보하려면 여러 AZ에 Subnet을 분산 배치해야 함
+   - Public Subnet과 Private Subnet
+     1. Public Subnet
+       - Public Subnet은 연결된 Route Table에 Internet Gateway로 향하는 경로가 있는 Subnet임
+       - ex. 경로
+         - 10.0.0.0/16    타겟: local
+         - 0.0.0.0/0      타겟: Internet Gateway
+         - 0.0.0.0/0은 모든 IPv4 주소를 의미하는 기본경로(/0이므로 마스킹된 부분도 없음)
+         - 따라서 외부 인터넷과 통신할 수 있는 네트워크 경로가 만들어짐
+       - 단, Public Subnet에 EC2를 배치했다고 자동으로 인터넷에 접근할 수 있는 것은 아님
+       - EC2에 Public IP가 있어야 하고, Security Group과 NACL 등의 조건도 충족해야 함
+     2. Private Subnet
+       - Internet Gateway로 직접 연결되는 경로가 없는 Subnet
+         - 일반적으로 다음과 같이 구성
+           - ex.
+           - 10.0.0.0/16     타겟: local
+           - 0.0.0.0/0       타겟: NAT Gateway
+         - 이와 같이 구성하면 Private Subnet에서 NAT Gateway를 통해 인터넷으로 요청을 보낼 수 있음.
+         - 하지만 외부 인터넷에서 Private Subnet의 EC2로 직접 새로운 연결을 시작할 수는 없음
+         - 
