@@ -509,7 +509,7 @@
 
 - 요약
   - Public NAT Gateway: Private EC2 -> 인터넷
-  - Private NAt Gateway: Private EC2 -> VPC, 타 사설 네트워크
+  - Private NAT Gateway: Private EC2 -> VPC, 타 사설 네트워크
   - Internet Gateway: VPC와 인터넷 사이의 연결 통로
   - VPC Endpoint: VPC에서 지원되는 AWS 서비스로 사설 연결
 
