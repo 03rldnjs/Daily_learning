@@ -418,4 +418,57 @@
            - 0.0.0.0/0       타겟: NAT Gateway
          - 이와 같이 구성하면 Private Subnet에서 NAT Gateway를 통해 인터넷으로 요청을 보낼 수 있음.
          - 하지만 외부 인터넷에서 Private Subnet의 EC2로 직접 새로운 연결을 시작할 수는 없음
-         - 
+   - Public과 Private Subnet 비교
+     - Public Subnet
+       - Internet Gateway 직접 경로: 있음
+       - 인터넷으로 Outbound 통신: 가능
+       - 인터넷에서 직접 접근: 조건 충족 시 가능
+     - Private Subnet
+       - Internet Gateway 직접 경로: 없음
+       - 인터넷으로 Outbound 통신: NAT Gateway를 통해 가능
+       - 인터넷에서 직접 접근: 일반적으로 불가능
+     + Isolated Subnet: 외부 네트워크로 향하는 경로가 아예 없는 Subnet. VPC 내부 통신만 허용하는 형태로 사용 가능
+     + VPN-only Subnet: 인터넷 게이트웨이 대신 VPN을 통해 온프레미스 네트워크와 통신하도록 구성 가능
+    
+4. AWS Public and Private Services
+  - Public Service Endpoint: AWS 서비스의 공개된 엔드포인트를 통해 접근
+    - ex. Amazon S3, Amazon DynamoDB, Amazon SQS, AWS Systems Manager
+  - Private Connectivity: VPC 내부에서 사설 네트워크 경로를 통해 AWS 서비스에 접근 
+    - VPC Endpoint
+      1. Gateway Endpoint
+         - Amazon S3와 Amazon DynamoDB에서 사용가능
+         - 특징
+           - Route Table에 Endpoint를 대상으로 하는 경로 추가
+           - 별도의 ENI를 생성하지 않음
+           - NAT Gateway나 Internet Gateway를 거치지 않고 서비스에 사설 경로로 접근 가능(즉, 인터넷을 거치지 않고 리소스에 접근 가능)
+           - Gateway Endpoint 자체에는 별도의 시간당 사용 요금이 없음
+      2. Interface Endpoint
+         - 대부분의 AWS 서비스와 AWS Private Link를 활용하는 서비스에서 사용 가능
+           - ex. AWS Systems Manager, Amazon CloudWatch, AWS Secrets Manager, AWS Key Management Service, Amazon SNS
+         - 특징
+           - Subnet에 ENI를 생성
+           - 해당 ENI에 Private IP 할당
+           - Private IP를 통해 AWS 서비스에 접근
+           - 일반적으로 시간당 요금과 데이터 처리 요금이 발생함
+    - Gateway Endpoint vs Interface Endpoint
+      - Gateway Endpoint
+        - 기반 기술: VPC Endpoint
+        - 연결 방식: Route Table
+        - ENI 생성: 없음
+        - 지원 서비스: S3, DynamoDB
+        - 요금: Endpoint 시간당 요금 없음      
+        - NAT Gateway: 불필요
+        - Internet Gateway: 불필요
+      - Interface Endpoint
+        - 기반 기술: AWS Private Link
+        - 연결 방식: ENI 및 Private IP
+        - ENI 생성: 있음
+        - 지원서비스: 다양한 AWS 리소스 및 일부 외부 서비스
+        - 요금: 시간당 및 데이터 처리 요금 발생
+        - NAT Gateway: 불필요
+        - Internet Gateway: 불필요   
+  - 시험에서의 구분방법
+    - S3 또는 DynamoDB에 인터넷 없이 사설 연결 -> Gateway Endpoint
+    - Systems Manager, CloudWatch 등 다양한 AWS 서비스에 사설 연결 -> Interface Endpoint
+    - 다른 AWS 계정의 서비스나 지원되는 SaaS 서비스에 사설 연결 -> AWS Private Link
+    + S3와 DynomoDB도 Interface Endpoint를 지원하는 구성이 있으므로, 두 서비스는 Gateway Endpoint만 사용할 수 있다고 외우면 안됨. 다만 일반적인 비용 효율적인 VPC 접근 문제에서는 Gateway Endpoint를 사용하는 것이 적절함
