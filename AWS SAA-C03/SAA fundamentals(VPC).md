@@ -472,3 +472,20 @@
     - Systems Manager, CloudWatch 등 다양한 AWS 서비스에 사설 연결 -> Interface Endpoint
     - 다른 AWS 계정의 서비스나 지원되는 SaaS 서비스에 사설 연결 -> AWS Private Link
     + S3와 DynomoDB도 Interface Endpoint를 지원하는 구성이 있으므로, 두 서비스는 Gateway Endpoint만 사용할 수 있다고 외우면 안됨. 다만 일반적인 비용 효율적인 VPC 접근 문제에서는 Gateway Endpoint를 사용하는 것이 적절함
+
+5. 최종 용어 정리
+   - VPC: 리전 단위의 논리적으로 격리된 네트워크
+   - VPC CIDR: VPC의 전체 IP 주소 범위
+   - Primary CIDR: VPC 생성 시 지정하는 기본 CIDR
+   - Secondary CIDR: 기존 VPC에 추가하는 주소 범위
+   - Subnet: 하나의 AZ에 속하는 VPC의 IP 주소 범위
+   - Public Subnet: Internet Gateway로 향하는 직접 경로가 있는 Subnet
+   - Private Subnet: Internet Gateway로 향하는 직접 경로가 없는 Subnet
+   - NAT Gateway: Private 리소스의 아웃바운드 인터넷 통신
+   - Gateway Endpoint: S3, DynamoDB에 대한 사설 연결(VPC Endpoint의 하위 범주)
+   - Interface Endpoint: PrivateLink 기반의 사설 연결(VPC Endpoint의 하위 범주)
+   - 기억해야할 것들
+     1. Public Subnet과 Private Subnet의 차이는 Route Table의 설정입니다.(Internet Gateway로의 연결)
+     2. Private Subnet이라고 해서 인터넷 아웃바운드 통신이 불가능한 것은 아님 -> NAT Gateway를 통해 아웃바운드 통신 가능(인터넷에서 선제적으로 Private Subnet으로 접근하는 것은 일반적으로 불가능)
+     3. AWS Public Endpoint를 사용하는 것과 인터넷을 통해 접근하는 것은 반드시 같은 의미가 아님. 즉, Public Endpoint를 사용한다는 사실만으로, 반드시 인터넷을 통해 통신한다는 의미는 아님
+  
