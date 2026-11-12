@@ -375,9 +375,10 @@
     - AWS VPC의 기본 IPv4 CIDR Block은 /16부터 /28까지 지정할 수 있음
     - AWS에서 VPC CIDR을 설정할 때 고려사항
       - RFC 1918 Private IP 범위를 주로 사용함
-      - VPC의 CIDR은 기존 네트워크와 겹치지 않도록 설계하는 것이 좋음
+      - VPC의 CIDR은 기존 네트워크와 겹치지 않도록 설계해야 함
       - VPC에 여러 IPv4 CIDR Block을 연결할 수도 있음
       - 추가 CIDR Block을 연결하면 VPC에서 사용할 수 있는 IP 주소 범위를 확장할 수 있음
+      - 존재하는 CIDR을 수정할 수 없음 -> 따라서 처음 설정할 때 신중해야 함
     - Primary CIDR과 Secondary CIDR
       - Primary IPv4 CIDR: VPC 생성 시 지정하는 기본 CIDR(기본 IP 주소 범위)
       - Secondary IPv4 CIDR: 이후 VPC에 추가로 연결하는 CIDR(추가로 확보한 IP 주소 범위)
@@ -478,7 +479,7 @@
    - VPC CIDR: VPC의 전체 IP 주소 범위
    - Primary CIDR: VPC 생성 시 지정하는 기본 CIDR
    - Secondary CIDR: 기존 VPC에 추가하는 주소 범위
-   - Subnet: 하나의 AZ에 속하는 VPC의 IP 주소 범위
+   - Subnet: 하나의 AZ에 속하는 VPC의 IP 주소 범위(하나의 AZ에 여러 Subnet이 있을 수는 있지만, 하나의 Subnet이 여러 AZ에 걸쳐있을 수는 없다는 의미)
    - Public Subnet: Internet Gateway로 향하는 직접 경로가 있는 Subnet
    - Private Subnet: Internet Gateway로 향하는 직접 경로가 없는 Subnet
    - NAT Gateway: Private 리소스의 아웃바운드 인터넷 통신
