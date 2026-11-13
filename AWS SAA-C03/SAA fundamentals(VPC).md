@@ -490,3 +490,125 @@
      2. Private Subnet이라고 해서 인터넷 아웃바운드 통신이 불가능한 것은 아님 -> NAT Gateway를 통해 아웃바운드 통신 가능(인터넷에서 선제적으로 Private Subnet으로 접근하는 것은 일반적으로 불가능)
      3. AWS Public Endpoint를 사용하는 것과 인터넷을 통해 접근하는 것은 반드시 같은 의미가 아님. 즉, Public Endpoint를 사용한다는 사실만으로, 반드시 인터넷을 통해 통신한다는 의미는 아님
   
+# Security Groups and Network ACLs
+- Security Groups: Stateful
+- Network ACL: Stateless
+  1. Stateful Firewall과 Stateless Firewall
+     1. Stateful Firewall
+        - 통신 연결의 상태를 **추적하는** 방화벽
+        - 내가 먼저 요청한 통신에 대한 응답은 별도의 규칙을 추가하지 않아도 허용하는 방식
+        - ex. EC2 인스턴스가 외부 서버에 HTTPS 요청을 보낸다고 가정
+          - Stateful Firewall에서, EC2가 먼저 요청을 보냈으므로 방화벽은 해당 연결을 기억했다가 이후 외부 서버가 응답을 보내면 별도의 Inbound 규칙이 없어도 응답 트래픽을 허용함
+          - 단, 기존에 허용된 연결에 대한 응답만 자동으로 허용한다는 의미(모든 외부 Inbound 트래픽을 허용하는 것이 아님)
+     2. Stateless Firewall
+        - 통신 연결 상태를 **추적하지 않는** 방화벽
+        - 따라서 Inbound와 Outbound 트래픽을 각각 독립적으로 검사함
+        - Stateful과 달리, 외부 서버에 HTTP 요청을 보내도록 허용했더라도, 돌아오는 응답 트래픽은 별도의 Inbound 규칙으로 혀용해야 함
+        - 즉, 요청과 응답을 하나의 연결로 묶어서 판단하지 않음
+    3. 두 방식 비교
+       - Stateful
+         - 연결 상태 추적: O
+         - Inbound 검사: 수행
+         - Outbound 검사: 미수행
+         - 응답 트래픽: 자동 허용
+         - 대표적 AWS 기능: Security Group
+       - Stateless
+         - 연결 상태 추적: X
+         - Inbound 검사: 수행
+         - Outbound 검사: 수행
+         - 응답 트래픽: 별도 규칙에 따름
+         - 대표적 AWS 기능: Network ACL(NACL)
+  2. Security Group(SG)
+     - EC2와 같은 AWS 리소스의 네트워크 인터페이스에 연결하여 트래픽을 제어하는 Stateful 가상 방화벽
+     - 특정 EC2에 누가 접근할 수 있는지, EC2가 어디로 통신할 수 있는지를 설정하는 보안 장치
+     1. 주요 특징
+        - 적용 범위: 리소스의 네트워크 인터페이스(ENI) 수준(인스턴스 정도/ 개별 리소스에 대한 보호)
+        - 방식: Stateful
+        - 규칙: Allow만 지원, Deny는 지원하지 않음
+        - 규칙 평가: 적용 가능한 모든 규칙을 종합하여 판단
+        - 기본 동작: 명시적으로 허용되지 않은 트래픽은 자동 차단(Allow만 지원 -> Whitelist 방식)
+        + Security Group은 EC2 인스턴스에 연결할 수 있으며, 하나의 EC2에 여러개의 Security Group을 연결하는 것도 가능함
+     2. Inbound Rules와 Outbound Rules
+        - Inbound Rules: 외부에서 해당 리소스로 들어오는 트래픽을 제어
+        - Outbound Rules: 해당 리소스에서 외부로 나가는 트래픽을 제어
+        - 새로 생성한 Security Group은 기본적으로 Inbound 규칙이 없고, Outbound는 모든 트래픽을 허용함. 다만 Default Security Group은 별도의 기본 규칙을 가짐
+  3. 여러 Security Group을 연결하면?
+     - ex. EC2에 다음 두 Security Group을 연결했다고 가정
+       - SG-A: HTTP 80 허용
+       - SG-B: HTTPS 443 허용
+       - 이 경우 해당 EC2는 HTTP와 HTTPS 모두 접근을 허용함
+     - 여러 Security Group의 Allow 규칙은 합산되어 적용됨. 하나의 Security Group에서 허용하지 않은 포트라고 해서 다른 Security Group의 허용 규칙까지 무효화되는 것은 아님
+     + Security Group의 참조
+       - Security Group은 다른 Security Group을 Source 또는 Destination으로 참조할 수 있음
+       - ex. 3-Tier 아키텍처
+       - Internet User -> Web Server(Inbound: HTTP/HTTPS from Internet) -> Application Server(SG-App)(Inbound: SG-Web에서 오는 요청만 허용) -> Database Server(SG-DB)(Inbound: SG-App에서 오는 요청만 허용)
+       - 이렇게 구성하면 Application Server는 Web Server를 통해서만 접근할 수 있고, Database Server는 Application Server를 통해서만 접근할 수 있음
+
+3. Network ACL(NACL)
+   - Subnet에 적용하는 Stateless 네트워크 방화벽
+   - Security Group이 **개별 리소스를 보호**한다면, NACL은 S**ubnet의 경계에서 들어오고 나가는 트래픽을 제어**함
+   1. 주요 특징
+      - 적용 범위: Subnet 수준
+      - 방식: Stateless
+      - 규칙: Allow와 Deny 모두 지원
+      - 규칙 평가: 낮은 번호부터 순차적으로 평가
+      - 기본 동작: 일치하는 규칙이 없으면 일단 차단
+      + 추가 특징
+        - 하나의 Subnet에는 한 번에 하나의 NACL만 연결할 수 있음
+        - 하나의 NACL을 여러 Subnet에 연결할 수 있음
+        - 모든 Subnet은 반드시 하나의 NACL과 연결되어야 함. 별도로 지정하지 않으면 Default NACL이 연결됨
+        - 같은 Subnet 안에 있는 인스턴스 간의 통신은 NACL이 필터링하지 않음(NACL은 서브넷 단위 방화벽이므로 Subnet 내부에서 일어나는 통신에 대한 필터링은 하지 않음)
+   2. Inbound Rules와 Outbound Rules
+      - Rule Number가 존재함. 낮은 번호부터 순서대로 규칙을 검사하며, 트래픽이 처음으로 일치하는 규칙을 적용함
+      - ex.
+      - 100번 규칙: 203.0.1113.10/32 DENY
+      - 110번 규칙: 0.0.0.0/0 ALLOW
+      - 203.0.113.10에서 들어오는 트래픽은 100번 규칙에서 미리 ALLOW됨
+      - NACL은 규칙의 순서가 매우 중요함. 마지막까지 일치하는 규칙이 없으면 기본적으로 차단됨
+   3. Stateless이므로 Ephemeral Port(임시포트)가 중요하다
+      - Stateless Firewall은 요청과 응답을 별도로 검사해야 함.
+      - AWS에서는 이 때문에 Ephemeral Port를 허용해야하는 상황이 발생함
+      - ex. 예시 통신 과정
+        1. Client가 임시 포트 55000을 사용해 EC2의 443번 포트로 요청
+        2. NACL Inbound에서 목적지 포트 443을 허용해야 함
+        3. EC2가 응답을 보냄
+        4. 응답 패킷의 목적지 포트는 Client가 사용했던 55000번 포트
+        5. NACL Outbound에서 해당 임시 포트로 향하는 트래픽을 허용해야 응답이 전달됨
+      - 즉, NACL은 연결 상태를 기억하지 않기 때문에 응답 트래픽도 독립적으로 허용해야 함
+      - 반대로 EC2가 먼저 외부 HTTPS 서버에 요청하는 경우
+        - Outbound: 목적지 포트 443 허용
+        - Inbound: EC2의 임시 포트 범위로 들어오는 응답 허용
+      - AWS 문서에서도 NACL을 제한적으로 설정할 때 임시 포트 범위를 고려하도록 안내함
+      - SAA 문제에서는 일반적으로 1024-65535 범위임
+4. Security Group과 NACL 종합 비교
+   - Security Group
+     - 적용 범위: 리소스/ENI 수준
+     - 방식: Stateful
+     - 허용 규칙: Allow만
+     - 규칙 평가: 모든 규칙 종합 평가
+     - 응답 트래픽: 자동 허용
+     - 적용 대상: 연결된 리소스
+     - 기본 Inbound: 허용 규칙 없음
+     - 기본 Outbound: 모두 허용
+    - Network ACL
+      - 적용 범위: Subnet 수준
+      - 방식: Stateless
+      - 허용 규칙: Allow & Deny
+      - 규칙 평가: Rule Number 기반(낮은 번호부터 순차 평가)
+      - 응답 트래픽: 별도의 규칙의 적용을 받음
+      - 적용 대상: 연결된 Subnet 전체
+      - 기본 Inbound: Default NACL은 모두 허용
+      - 기본 Outbound: Default NACL은 모두 허용
+     
+5. 시험 대비 핵심 포인트
+   - 특정 EC2에만 접근을 허용하고 싶다 -> Security Group
+   - 특정 IP 대역을 명시적으로 차단하고 싶다 -> NACL
+   - 응답 트래픽에 대한 별도 규칙 없이 통신하고 싶다 -> Security Group(Stateful)
+   - 요청과 응답의 규칙을 각각 설정해야 한다 -> NACL(Stateless)
+   - 특정 Subnet 전체에 보안 규칙을 적용하고 싶다 -> NACL
+   - 다른 Security Group을 Source로 지정하고 싶다 -> Security Group
+
+- 꼭 기억해야할 핵심
+  1. Security Group =  Stateful + Allow only + 리소스 수준
+  2. NACL = Stateless + Allow & Deny + Subnet 수준
+  3. NACL은 낮은 Rule Number부터 평가, SG는 종합 평가
