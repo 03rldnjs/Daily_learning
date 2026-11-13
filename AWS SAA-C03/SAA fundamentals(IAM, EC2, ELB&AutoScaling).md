@@ -373,7 +373,7 @@
 
 # NAT(Network Address Translation) Gateway
 - Network Address Translation이 정확히 무슨 뜻인가?
-  - Private IP를 사용하는 인스턴스의 트래픽을 NAT Gateway가 Public IP(or Elastic IP)를 사용해 인터넷으로 나갈 수 있도록 주소를 변환함
+  - Private IP를 사용하는 인스턴스의 트래픽을 NAT Gateway가 Public IP(or Elastic IP(= 고정 Public IP)를 사용해 인터넷으로 나갈 수 있도록 주소를 변환함
   - 그래서 인터넷에서는 NAT Gateway의 Public IP에서 온 요청처럼 보임
   - 인터넷에서 응답이 돌아오면 NAT Gateway가 다시 Private IP로 변환하여 EC2로 전달함
   - 이 과정이 바로 Network Address Translation
