@@ -641,3 +641,25 @@
        - 허가받은 사람이 들어오면 해당 방문의 퇴실도 자연스럽게 가능
        - 개별 사무실에 대한 보호
        - 허용된 출입 중심
+
+# VPC Peering
+- 서로 다른 두 VPC를 연결하여, 두 VPC에 있는 리소스들이 Private IP 주소를 통해 서로 통신할 수 있도록 해주는 기능
+- 서로 독립적으로 존재하던 두 개의 VPC 사이에 사설 네트워크 연결 통로를 만드는 것
+- ex. 상황 가정
+- VPC A: 10.0.0.0/16
+- VPC B: 172.16.0.0/16
+- 두 VPC에 각각 EC2 인스턴스가 존재
+- VPC Peering을 설정하면 VPC A의 EC2 인스턴스가 VPC B의 인스턴스에 Private IP를 사용해 직접 통신할 수 있음
+- 이때 인터넷이나 Internet Gateway를 거칠 필요가 없음
+1. VPC Peering을 설정하는 방법
+   - 1. Peering Connection 요청 생성
+        - VPC A의 소유자가 VPC B를 대상으로 Peering Connection을 요청
+   - 2. 요청 수락
+        - VPC B의 소유자가 요청을 수락해야 연결이 활성화됨
+        - 다른 AWS 계정의 VPC와 연결하는 경우에도 상대방의 수락이 필요함
+   - 3. 양쪽 Route Table 수정
+        - 각 VPC의 Route Table에 상대방 VPC의 CIDR을 목적지로 하는 경로를 추가함
+   - 4. 보안 규칙 확인
+        - Security Group과 NACL이 해당 통신을 허용하도록 설정
+2. 가장 중요한 설정: Route Table
+   - 
