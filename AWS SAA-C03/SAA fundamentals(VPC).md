@@ -662,4 +662,54 @@
    - 4. 보안 규칙 확인
         - Security Group과 NACL이 해당 통신을 허용하도록 설정
 2. 가장 중요한 설정: Route Table
-   - 
+   - 서로 연결되는 양쪽 VPC의 Route Table에 Peering Connection을 설정해야 함
+   - 요청 경로와 응답 경로 모두 필요하기 때문에 양쪽 Route Table을 설정해야 함
+   - ex. EC2-A가 EC2-B에 요청을 보내면 VPC A의 Route Table이 목적지를 확인하고 Peering Connection으로 전달함
+   - EC2-B가 응답을 보내면 VPC B의 Route Table이 목적지를 확인하고 Peering Connection으로 전달
+3. VPC Peering의 주요 특징과 제한 사항
+   - 1. 서로 다른 AWS 계정 및 Region 연결 가능
+        - 동일 계정 + 동일 리전
+        - 동일 게정 + 서로 다른 리전
+        - 서로 다른 계정 + 동일 리전
+        - 서로 다른 계정 + 서로 다른 리전
+        - 위의 연결을 모두 지원함
+        - ex. 계정 A 소유인 서울 리전의 VPC와 계정 B 서유인 버지니아 리전의 VPC도 연결할 수 있음(서로 다른 계정 + 서로 다른 리전)
+   - 2. CIDR Block이 겹치면 연결 불가
+        - ex.
+        - VPC A - CIDR: 10.0.0.0/16 (10.0.0.0 ~ 10.0.255.255)
+        - VPC B - CIDR: 10.0.1.0/24 (10.0.1.0 ~ 10.0.1.255)
+        - 위처럼 CIDR이 구성되면 VPC A의 CIDR이 VPC B의 CIDR을 포함하므로(겹치는 부분이 생김) 연결할 수 없음
+   - 3. **Transitive Peering을 지원하지 않음**
+        - VPC Peering은 직접 연결된 VPC 사이에서만 통신할 수 있음
+        - ex.
+        - VPC A <-> VPC B / VPC A <-> VPC C
+        - VPC B와 VPC C가 모두 VPC A에 연결되어 있지만, VPC B와 VPC C가 통신할 수 있는 것은 아님
+        - VPC B와 VPC C가 통신하려면 별도의 Peering Connection을 만들어야 함
+        - Non-transitive Peering이라고도 부름
+   - 4. 별도의 보안 설정 필요
+        - VPC Peering은 두 VPC 간의 네트워크 경로를 제공할 뿐, 모든 통신을 무조건 허용하는 기능은 아님
+   - 앞서 배웠던 Security Group(SG)와 Network ACL(NACL)이 여전히 적용됨
+   - 따라서 Peering Connection과 Route Table을 올바르게 설정해도 SG에서 통신을 차단하면 연결이 불가능함
+4. VPC Peering vs Transit Gateway
+   - VPC Peering의 가장 큰 한계는 여러 VPC를 연결할 때 연결의 수가 급격히 증가한다는 것
+   - ex. VPC가 3개인 경우 3개의 연결, 4개라면 총 6개, 5개라면 총 10개의 연결이 필요함 -> VPC의 개수가 늘어나면 연결의 수가 급격히 많아짐
+   - 이를 해결한 대표적 AWS 서비스가 바로 AWS Transit Gateway임
+   - Transit Gateway
+     - 연결 방식: 중앙 허브를 통한 연결
+     - 구조: Hub-and-Spoke
+     - Transitive Routing: 지원
+     - 다수 VPC 연결: 연결 수 부담 없이 관리하기 용이
+     - 주요 용도: 다수 VPC의 중앙 집중식 연결
+     - 따라서 여러 VPC가 서로 통신해야 하는 대규모 환경이라면 Transit Gateway가 더 적합함
+5. 비용 및 핵심 정리
+   - 비용
+     - VPC Peering Connection을 생성하는 것 자체에는 별도 요금이 없음
+     - Peering Connection을 통해 전송되는 데이터에는 데이터 전송 요금이 발생할 수 있음
+     - Internet Gateway는 필요하지 않음
+     - 서로 다른 Region간 Peering도 지원함
+   - SAA 시험 핵심 5가지
+     - VPC Peering은 두 VPC 간 Private IP 기반 직접 통신을 지원함
+     - 서로 다른 계정과 리전의 VPC도 연결할 수 있음
+     - 연결할 VPC들의 CIDR Block은 겹치면 안됨
+     - 양쪽 VPC의 Route Table에 상대방 VPC로 향하는 경로를 추가해야 함
+     - Transitive Peering을 지원하지 않음
