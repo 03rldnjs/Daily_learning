@@ -546,7 +546,7 @@
 
 3. Network ACL(NACL)
    - Subnet에 적용하는 Stateless 네트워크 방화벽
-   - Security Group이 **개별 리소스를 보호**한다면, NACL은 S**ubnet의 경계에서 들어오고 나가는 트래픽을 제어**함
+   - Security Group이 **개별 리소스를 보호**한다면, NACL은 **Subnet의 경계에서 들어오고 나가는 트래픽을 제어**함
    1. 주요 특징
       - 적용 범위: Subnet 수준
       - 방식: Stateless
@@ -612,3 +612,32 @@
   1. Security Group =  Stateful + Allow only + 리소스 수준
   2. NACL = Stateless + Allow & Deny + Subnet 수준
   3. NACL은 낮은 Rule Number부터 평가, SG는 종합 평가
+
+6. 왜 SG는 Stateful이고, NACL은 Stateless일까?
+  1. Security Group이 Stateful인 이유
+     - 일반적인 웹 서버는 수많은 사용자와 양방향으로 통신함. 매번 요청과 응답에 대한 규칙을 별도로 관리해야 한다면 설정이 복잡해질 것
+     - 따라서 SG은 연결 상태를 추적하고, 이미 허용된 연결에 대한 응답을 자동으로 허용하는 Stateful방식을 사용함
+     - SG의 Stateful 특성은 개별 서버의 통신을 세밀하게 제어하면서도 관리 편의성을 높이는데 유리함
+  2. Network ACL이 Stateless인 이유
+     - NACL은 개별 EC2가 아니라 Subnet 전체의 트래픽을 제어함
+     - NACL은 특정 연결의 상태를 기억하기보다는, 해당 Subnet으로 들어오거나 나가는 패킷을 독리비적으로 통제하는 역할에 집중함
+     - 해당 구조의 장점
+       - 특정 IP 대역을 명시적으로 차단할 수 있음
+       - Inbound와 Outbound에 서로 다른 보안 정책을 적용할 수 있음
+       - Subnet 전체에 공통적인 접근 제어 정책을 적용할 수 있음
+       - 연결 상태를 유지하지 않고 규칙에 따라 패킷을 독립적으로 평가함
+     - 특히 NACL은 Allow뿐 아니라 Deny도 지원함
+     - 따라서 특정 IP 대역을 차단하고 나머지 IP는 허용하는 정책을 만들 수 있음
+     - 이처럼 NACL은 Subnet 경계에서 독립적인 접근 제어 정책을 적용하는데 적합하게 설계됨
+ - NACL이 Stateless이고 SG가 Stateful이라고 반드시 보안 수준의 차이가 나는 것은 아님. 두 장치는 서로 다른 위치와 목적에서 보안 정책을 적용할 뿐
+ - NACL과 SG 상태 암기 팁
+   - 대기업 건물의 출입에 비유할 수 있음
+     - NACL: 건물 입구 검문소(Stateless)
+       - 출입할 때마다 정해진 규칙에 따라 검사
+       - 특정 사람이나 집단을 명시적으로 차단
+       - 건물 전체의 출입 정책 관리
+       - 들어올 때 출입증이 있었다고 나갈 때 출입증 없이 나갈 수 없음
+     - SG: 사무실 출입문(Stateful)
+       - 허가받은 사람이 들어오면 해당 방문의 퇴실도 자연스럽게 가능
+       - 개별 사무실에 대한 보호
+       - 허용된 출입 중심
