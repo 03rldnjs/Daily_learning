@@ -373,19 +373,23 @@
 
 # NAT(Network Address Translation) Gateway
 - Network Address Translation이 정확히 무슨 뜻인가?
-  - Private IP를 사용하는 인스턴스의 트래픽을 NAT Gateway가 Public IP(or Elastic IP(= 고정 Public IP)를 사용해 인터넷으로 나갈 수 있도록 주소를 변환함
+  - Private IP를 사용하는 인스턴스의 트래픽을 NAT Gateway가 Elastic IP(= 고정 Public IP)를 사용해 인터넷으로 나갈 수 있도록 주소를 변환함
   - 그래서 인터넷에서는 NAT Gateway의 Public IP에서 온 요청처럼 보임
   - 인터넷에서 응답이 돌아오면 NAT Gateway가 다시 Private IP로 변환하여 EC2로 전달함
   - 이 과정이 바로 Network Address Translation
 
 - NAT Gateway가 왜 필요한가?
   - Private Subnet의 EC2가 인터넷에서 직접 접근받을 수 없게 만들면서도, EC2가 인터넷 환경에 나가서 패키지를 다운로드하거나 외부 API를 호출하는 것은 허용하고 싶은 상황
-  - NAT가 Private Subnet -> Internet 방향의 outbound통신을 가능하게 해줌
+  - NAT가 Private Subnet -> Internet 방향의 outbound 통신을 가능하게 해줌
   - 또한 Internet -> Private EC2의 연결을 인터넷에서 선제적으로 진행하는 것은 허용하지 않음
 
 - 고가용성 확보와 AZ 장애에 대비한 NAT Gateway 아키텍처
   - 하나의 NAT Gateway를 여러 AZ에서 공유하다가 NAT Gateway가 있는 AZ에 장애가 발생하면 다른 AZ의 리소스들도 인터넷 액세스를 잃을 수 있음
-  - 따라서 고가용성과 장애 대비를 원한다면 각각의 AZ에 하나씩 NAT Gateway를 배치하여 하나의 AZ에 장애가 발생했을 때 다른 AZ의 인터넷 액세스에 영향이 없도록 하는 것이 고가용성을 확보하는 아키텍처임(단, 비용적인 측면에서는 더 비쌀수 밖에 없음. 따라서 위의 상황이 아니고, 비용을 최소한으로 사용하기를 원하는 경우에는 하나의 AZ에 NAT Gateway를 배치한 후 공유하는 것이 정답에 가까울수도 있음)
+  - 따라서 고가용성과 장애 대비를 원한다면 각각의 AZ에 하나씩 NAT Gateway를 배치하여 하나의 AZ에 장애가 발생했을 때 다른 AZ의 인터넷 액세스에 영향이 없도록 하는 것이 고가용성을 확보하는 아키텍처임(단, 비용적인 측면에서는 더 비쌀 수밖에 없음. 따라서 위의 상황이 아니고, 비용을 최소한으로 사용하기를 원하는 경우에는 하나의 AZ에 NAT Gateway를 배치한 후 공유하는 것이 정답에 가까울 수도 있음)
+  - 참고: 2025년 11월 20일부터 NAT Gateway에 리전 가용성 모드(Regional NAT Gateway)가 추가됨
+    - 하나의 NAT Gateway가 워크로드가 있는 여러 AZ로 자동 확장되어, AZ마다 NAT Gateway를 따로 만들 필요가 줄어듦(기존의 AZ 단위 방식은 Zonal NAT Gateway라고 부름)
+    - Regional NAT Gateway는 VPC 수준의 리소스라서 별도의 Public Subnet이 필요하지 않음
+    - 단, Private NAT Gateway는 Regional NAT Gateway에서 지원되지 않고 Zonal 모드로만 가능함
 
 - NAT Gateway vs NAT instance
   - NAT Gateway(AWS 관리형 서비스)
@@ -395,20 +399,20 @@
     - EC2를 NAT 장비로 사용
     - 내가 EC2를 하나 만들어 NAT의 역할을 부여함
   - AWS 공식 문서에서도 NAT Gateway는 AWS가 제공하는 관리형 NAT 장치, NAT instance는 EC2에서 직접 생성하는 NAT 장치로 설명함. AWS는 일반적으로 NAT Gateway 사용을 권장함
-   - 비교
-   -  |                 | NAT Gateway     | NAT Instance        |
-      | --------------- | --------------- | ------------------- |
-      | 형태             | AWS 관리형 서비스 | EC2 Instance        |
-      | 관리             | **AWS가 관리**   | **사용자가 관리**         |
-      | 확장성           | 높음             | EC2 Instance 크기에 의존 |
-      | 가용성           |여러 AZ에 배치 가능 | 직접 구성 필요            |
-      | Security Group  | ❌ 연결 불가     | ✅ 사용 가능             |
-      | Port Forwarding | ❌              | ✅ 가능                |
-      | Bastion Host    | ❌              | ✅ 가능                |
-      | 유지보수          | 거의 없음        | OS 패치 등 직접 관리       |
-      | 일반적인 권장     | **NAT Gateway** | 특수한 경우              |
+  - 비교
+    | 항목             | NAT Gateway                          | NAT Instance          |
+    | --------------- | ------------------------------------ | --------------------- |
+    | 형태             | AWS 관리형 서비스                       | EC2 Instance          |
+    | 관리             | **AWS가 관리**                        | **사용자가 관리**        |
+    | 확장성           | 높음                                  | EC2 Instance 크기에 의존 |
+    | 가용성           | AZ 안에서는 자동 이중화, AZ 장애 대비는 AZ마다 배치 | 직접 구성 필요          |
+    | Security Group  | ❌ 연결 불가                           | ✅ 사용 가능            |
+    | Port Forwarding | ❌                                   | ✅ 가능                |
+    | Bastion Host    | ❌                                   | ✅ 가능                |
+    | 유지보수          | 거의 없음                              | OS 패치 등 직접 관리     |
+    | 일반적인 권장     | **NAT Gateway**                      | 특수한 경우             |
 
- 
+
 - NAT instance의 작동 방식
   - Public Subnet에 EC2를 하나 배치
   - Private EC2의 Route Table: 0.0.0.0/0 -> NAT instance
@@ -418,11 +422,15 @@
 - 왜 NAT instance를 사용하는가?
   - EC2의 특성상 여러 관리 책임을 사용자가 가지게 됨.
   - 이는 운영 부담을 늘리지만, **그만큼 사용자가 제어할 수 있는 영역도 많아지게 됨**.
-  - 따라서 특정 네트워크 트래픽을 세밀하게 제어하길 원하거나 사용자 지정 구성, Bastion Host역할 동시 수행 등 을 원하는 경우 NAT instance를 사용하는 것이 더 유리할 수 있음(단, EC2에 NAT와 Bastion Host를 같이 사용하는 것이 일반적인 구조인 것은 아님)
+  - 따라서 특정 네트워크 트래픽을 세밀하게 제어하길 원하거나 사용자 지정 구성, Bastion Host 역할 동시 수행 등을 원하는 경우 NAT instance를 사용하는 것이 더 유리할 수 있음(단, EC2에 NAT와 Bastion Host를 같이 사용하는 것이 일반적인 구조인 것은 아님)
+
+- NAT instance와 Bastion Host의 차이점
+  - 두 서비스 모두 EC2 인스턴스를 활용하며, 사용자가 대부분의 관리 책임을 가진다는 공통점이 있음
+  - NAT instance는 Private Subnet에 있는 EC2로부터 인터넷으로 향하는 Outbound 통신을 가능하게 하는 역할이고, Bastion Host는 외부의 관리자가 Private EC2에 관리 목적으로 접근(Inbound)할 수 있는 진입점 역할을 함.
 
 - NAT Gateway와 NAT instance의 중요 포인트
   - NAT Gateway와 instance가 인터넷으로 바로 연결해주는 것이 아니라, NAT Gateway -> Internet Gateway -> Internet의 구조 (결국 **Internet으로 연결하는 직접적인 요소는 Internet Gateway**이고, NAT Gateway는 Private IP를 사용하는 리소스가 Internet으로 나갈 수 있도록 NAT를 수행하는 장치)
-  - NAT Gateway와 NAT instance모두 기본적으로 Public Subnet에 배치(단순히 이름이 Public인 것이 아니라, Route Table에 Internet Gateway로 향하는 경로가 존재하는 Subnet)
+  - NAT Gateway와 NAT instance 모두 기본적으로 Public Subnet에 배치(단순히 이름이 Public인 것이 아니라, Route Table에 Internet Gateway로 향하는 경로가 존재하는 Subnet)
 
 - NAT Gateway vs VPC Endpoint
   - 한 줄로 요약하자면, **프라이빗 서브넷을 인터넷에 연결하려면 NAT Gateway**, **다른 AWS 서비스 및 PrivateLink 기반 서비스에 연결하려면 VPC Endpoint(without internet)**
@@ -433,18 +441,19 @@
 
 - 왜 VPC Endpoint를 사용하는가?
   - 가장 중요한 이유는 **인터넷을 거칠 필요가 없기 때문**
-  - 만약 Private EC2가 S3에 접근한다고 할 때, NAT Gateway를 사용하면 NAT Gateway 비용과 데이터 처리 비용 등이 발생할 수 있음(단, 항상 VPC Endpoint가 더 저렴한 것은 아님, 상황에 따라 비용은 역전될 수 있음) 
+  - 만약 Private EC2가 S3에 접근한다고 할 때, NAT Gateway를 사용하면 NAT Gateway 비용과 데이터 처리 비용 등이 발생할 수 있음(단, 항상 VPC Endpoint가 더 저렴한 것은 아님, 상황에 따라 비용은 역전될 수 있음)
   - 반면에 VPC Endpoint를 활용하면 AWS 서비스로 VPC 내부에서 직접 연결할 수 있음
 
-+ VPC Endpoint와 NAT Gateway는 역할이 다른만큼 양립가능한 두 서비스임. 즉, 인터넷 접근과 동시에 S3등의 AWS 서비스에 접근해야하는 경우 두 방식을 모두 사용할 수 있음. 
++ VPC Endpoint와 NAT Gateway는 역할이 다른만큼 양립가능한 두 서비스임. 즉, 인터넷 접근과 동시에 S3 등의 AWS 서비스에 접근해야하는 경우 두 방식을 모두 사용할 수 있음.
 
 - VPC Endpoint의 종류
   1. Gateway Endpoint
      - **S3, DynamoDB**로의 접근을 원한다면 Gateway Endpoint
-     - Route Table에 S3/DyanmoDB로의 경로를 추가
+     - Route Table에 S3/DynamoDB로의 경로를 추가
   2. Interface Endpoint
      - AWS PrivateLink를 기반으로 함. 대부분의 AWS 서비스/PrivateLink 지원 서비스로의 접근을 원한다면 Interface Endpoint
      - **ENI를 생성**함(시험에서 Endpoint가 ENI를 생성한다는 표현이 나오면 Interface Endpoint 떠올리기)
+
     
 - SAA-C03 유형 정리
   상황 1. Private subnet의 EC2 인스턴스가 인터넷에서 소프트웨어 업데이트를 다운로드해야한다.
@@ -457,7 +466,7 @@
   - 정답: VPC Endpoint 중 Gateway Endpoint -> S3와 DynamoDB에 대한 명시적 언급 + 인터넷 접근 불필요
 
 - NAT instance와 Bastion Host의 차이점
-  - 두 서비스 모두 EC2 인스턴스를 활용하며, 사용자가 대부분의 관리 책임을 가진다는 공통점이 있
+  - 두 서비스 모두 EC2 인스턴스를 활용하며, 사용자가 대부분의 관리 책임을 가진다는 공통점이 있음
   - NAT instance는 Private Subnet에 있는 EC2로부터 인터넷으로 향하는 Outbound 통신을 가능하게 하는 역할이고, Bastion Host는 외부의 관리자가 Private EC2에 관리 목적으로 접근(Inbound)할 수 있는 진입점 역할을 함.
 
 - 최종 핵심 암기
@@ -493,12 +502,14 @@
       Internet Gateway
              ↓
          Internet
+- Route Table에 경로를 추가하는 방식은 Gateway Endpoint(S3/DynamoDB)임. Interface Endpoint는 Route Table에 경로를 추가하지 않고, 서브넷에 만들어진 ENI의 사설 IP로 연결됨
+- NAT Gateway는 Public Subnet에 있으며, 그 Public Subnet의 Route Table이 Internet Gateway로 향함
 
 + Private NAT Gateway
   - NAT Gateway는 default로 Public Subnet에 위치하지만, Private Subnet에 배치되는 경우도 있음
-  - Private NAT Gateway가 가지는 차이점
-    1. private Subnet에 배치
-    2. 인터넷으로 직접 나가는데 사용하디 않음
+- Private NAT Gateway가 가지는 차이점
+    1. Private Subnet에 배치
+    2. 인터넷으로 직접 나가는 데 사용하지 않음
     3. 다른 VPC나 온프레미스 네트워크 등으로 나가는 트래픽의 IP를 변환하는 데 사용
     4. 주로 Transit Gateway 또는 Virtual Private Gateway를 통한 연결과 함께 사용
     - 즉, 인터넷 연결용이 아닌, 사설 네트워크 간 통신에서 주소를 변환하는 용도
@@ -645,7 +656,7 @@
       - 어떤 서버가 요청을 처리하더라도 동일한 처리가 가능하도록 설계
       - 서버 추가/제거가 상대적으로 쉬움
     - Stateful = 상태 유지: 서버가 이전 요청에서 생성된 상태 정보를 보관하고, 이후 요청에서 이를 활용
-      - 서버 메모리에 로그인 세션이나 진행 상태를 저장할 수 없음
+      - 서버 메모리에 로그인 세션이나 진행 상태가 저장됨
       - 다음 요청이 다른 서버로 전달되면 상태 정보가 없을 수 있음
       - 상태 공유/동기화 또는 세션 고정 같은 추가 설계가 필요할 수 있음
   - Scale Up: 수직적 향상 / 성능 향상
@@ -657,7 +668,7 @@
     - ELB를 통해 트래픽 분산 가능
     - Auto Scaling으로 인스턴스 수 자동 조절 가능
     - 인스턴스들을 여러 AZ에 분산시켜 가용성 향상 가능
-   
+
   - Stateless + Scale Out
     - Stateful 중심 설계: 특정 서버에 상태가 종속됨 -> 만약 요청이 A 서버에 의존하고 있다면, 해당 요청을 B가 처리하기 위해 세션 공유, 세션 고정 등의 추가 조치가 필요함. 또한 A 서버가 종료되면 메모리에만 있던 상태가 사라질 가능성 존재
     - Stateless 중심 설계: 상태가 서버 외부에서 관리됨
@@ -676,6 +687,7 @@
         2. 트래픽이 특정 인스턴스에 몰릴 수 있음
         3. Auto Scaling으로 인스턴스가 추가되어도 부하가 항상 균등하게 분배되지는 않음
       -> Sticky Session이 항상 나쁜 것은 아니지만, 가능하다면 세션을 외부에서 공유해 서버 간 의존성을 줄이는 설계가 확장성과 장애 대응 측면에서 유리한 경우가 많음
+    - 자세한 내용은 아래 "Session State & Session Stickiness" 참고
 
 - Amazon EC2 Auto Scaling
 - 기본 구조
@@ -684,37 +696,37 @@
     2. Scaling Policies: 언제, 얼마나 확장/축소할지 결정 -> 인스턴스가 더 필요한가?
     3. Health Checks: 인스턴스가 정상인지 판단하고 교체할지 결정 -> 현재 인스턴스가 정상인가?
     4. Health Check Grace Period: 새 인스턴스가 정상화될 시간 보장 -> 새 인스턴스가 정상 상태에 도달할 때 까지 기다릴 필요가 있는가?
-   
+
 - Health Checks: 어떤 상태를 확인하는가?
   - EC2 Status Checks: EC2 인스턴스와 이를 실행하는 기반 시스템에 문제가 있는가?
     1. System Status Check
        - AWS가 관리하는 기반 인프라에 문제가 있는지 확인 ex. 물리적 호스트, 네트워크 또는 전원과 같은 AWS 측 기반 시스템 문제가 원인이 될 수 있음
     2. Instance Status Check
-       - EC2 인스턴스 자체의 운영 상태 확인 ex. 운영체제 부팅 문제, 네트우크 설정 문제 또는 메모리/파일 시스템 관련 문제 등이 원인이 될 수 있음
-      
+       - EC2 인스턴스 자체의 운영 상태 확인 ex. 운영체제 부팅 문제, 네트워크 설정 문제 또는 메모리/파일 시스템 관련 문제 등이 원인이 될 수 있음
+
   - ELB Health Checks: 로드밸런서가 등록된 대상에 요청을 보내도 되는지 판단하기 위한 검사
     - ELB가 인스턴스를 비정상으로 판단했다고 해서 Auto Scaling이 반드시 그 인스턴스를 교체하는 것은 아님
       - ELB는 비정상 대상을 일반적인 트래픽 분산에서 제외할 수 있음
       - ASG는 기본적으로 ELB 상태 검사 결과를 무시함
       - ASG에서 ELB Health Checks를 활성화했다면, ELB가 비정상적으로 판단한 인스턴스를 ASG도 비정상으로 판정하고 교체할 수 있음
       - 즉, ELB의 트래픽 분산과 ASG의 인스턴스 교체 판단은 구분해야 함
-     
-    3. Health Check Grace Period
-       - 새 인스턴스가 InService 상태에 들어간 뒤, 상태 검사 실패만으로 너무 일찍 교체되지 않도록 ASG가 기다리는 최소 시간
-       - ex. Grace Period - 120 sec
-         1. EC2 시작 - 인스턴스가 실행되고 어플리케이션이 초기화되기 시작함
-         2. 초기화 중 - 아직 어플리케이션이 준비되지 않았다면 /health요청에 정상 응답하지 못할 수 있음. 따라서 ELB는 대상이 비정상이라고 판단할 수 있음
-         3. Grace Period 중 조기 교체 방지 - ASG는 유예 기간을 적용해 새 인스턴스를 성급하게 Unhealthy로 표시하고 교체하지 않도록 함
-         4. 120초 경과 - 여전히 상태 검사에 실패하면 ASG가 인스턴스를 비정상이라고 판단하고 교체할 수 있음
-         + 유예기간이 EC2의 실제 실행 중단까지 무시하는 것은 아님. 유예 기간 중 더 이상 EC2가 running 상태가 아니라는 것이 감지되면 ASG는 즉시 해당 인스턴스를 비정상으로 표시하고 교체할 수 있음
-         + Grace Period는 길수록 좋은가? -> X
-            - 너무 짧으면: 어플리케이션 초기화가 끝나기 전에 인스턴스가 반복적으로 교체될 수 있음
-            - 너무 길면: 실제로 고장 난 인스턴스의 교체가 늦어질 수 있음
-            - 따라서 인스턴스 부팅, 어플리케이션 초기화 및 ELB 헬스 체크 통과에 필요한 시간을 고려해 시간을 설정해야 함(AWS 문서 기준 콘솔 생성 시 Default 300sec/ CLF or SDK 생성 시 Default 0sec)
-      + Grace Period vs Instance Warmup
-        - Instance Warmup: 새 인스턴스가 충분히 준비되기 전의 지표가 확장 정책의 판단을 왜곡하지 않도록 함
-        - Grace Period: 새 인스턴스가 초기화 중일 때 너무 빨리 비정상 판정을 받고 교체되는 것을 방지
-       
+
+  - Health Check Grace Period(유예 기간)
+    - 새 인스턴스가 InService 상태에 들어간 뒤, 상태 검사 실패만으로 너무 일찍 교체되지 않도록 ASG가 기다리는 최소 시간
+    - ex. Grace Period - 120 sec
+      1. EC2 시작 - 인스턴스가 실행되고 애플리케이션이 초기화되기 시작함
+      2. 초기화 중 - 아직 애플리케이션이 준비되지 않았다면 /health 요청에 정상 응답하지 못할 수 있음. 따라서 ELB는 대상이 비정상이라고 판단할 수 있음
+      3. Grace Period 중 조기 교체 방지 - ASG는 유예 기간을 적용해 새 인스턴스를 성급하게 Unhealthy로 표시하고 교체하지 않도록 함
+      4. 120초 경과 - 여전히 상태 검사에 실패하면 ASG가 인스턴스를 비정상이라고 판단하고 교체할 수 있음
+      + 유예기간이 EC2의 실제 실행 중단까지 무시하는 것은 아님. 유예 기간 중 더 이상 EC2가 running 상태가 아니라는 것이 감지되면 ASG는 즉시 해당 인스턴스를 비정상으로 표시하고 교체할 수 있음
+      + Grace Period는 길수록 좋은가? -> X
+        - 너무 짧으면: 애플리케이션 초기화가 끝나기 전에 인스턴스가 반복적으로 교체될 수 있음
+        - 너무 길면: 실제로 고장 난 인스턴스의 교체가 늦어질 수 있음
+        - 따라서 인스턴스 부팅, 애플리케이션 초기화 및 ELB 헬스 체크 통과에 필요한 시간을 고려해 시간을 설정해야 함(AWS 문서 기준 콘솔 생성 시 Default 300sec / CLI or SDK 생성 시 Default 0sec)
+    + Grace Period vs Instance Warmup
+      - Instance Warmup: 새 인스턴스가 충분히 준비되기 전의 지표가 확장 정책의 판단을 왜곡하지 않도록 함
+      - Grace Period: 새 인스턴스가 초기화 중일 때 너무 빨리 비정상 판정을 받고 교체되는 것을 방지
+
   - Auto Scaling Types
     1. Dynamic Scaling(동적 확장)
        - 현재의 트래픽이나 CloudWatch 지표에 따라 용량 조절
@@ -730,7 +742,7 @@
     4. Manual Scaling(수동 조절)
        - 관리자가 ASG의 Desired Capacity를 직접 변경
        - 자동 확장 정책이 아닌 관리자의 직접적인 용량 변경이 필요한 상황에 사용
-      
+
   - 함께 알아둘 개념/용어
     1. Minimum, Desired, Maximum Capacity
        - Min = 2, Desired = 3, Max = 8이라면 일반적으로 인스턴스 3대를 목표로 운영하며, 자동 확장 시 최대 8대까지 늘어날 수 있음
@@ -741,51 +753,51 @@
        - Cooldown = 단순 확장 정책에서 조정 직후 추가 조정을 제한하는 시간
        - Instance Warmup = 새 인스턴스가 준비되는 동안 지표 집계 및 확장 판단에 미치는 영향 조절
        - Grace Period = 초기화 중인 인스턴스가 헬스 체크 실패로 조기에 교체되지 않도록 하는 시간
-    3.  Lifecycle Hooks
+    3. Lifecycle Hooks
        - 인스턴스가 시작되거나 종료되는 과정에서 사용자 정의 작업을 수행할 시간 제공
        - ex. 인스턴스 시작 시 애플리케이션 설치와 초기화를 완료한 뒤 서비스에 투입하거나, 종료 전에 로그를 저장하고 작업을 정리하도록 할 수 있음.
     4. Instance Refresh
        - Launch Template나 AMI를 업데이트한 뒤 ASG의 기존 인스턴스를 순차적으로 교체할 때 사용하는 기능.
-       - 어플리케이션 버전이나 운영체제 이미지를 업데이트하면서 한꺼번에 모든 인스턴스를 교체하는 위험을 줄리는 데 유용
+       - 애플리케이션 버전이나 운영체제 이미지를 업데이트하면서 한꺼번에 모든 인스턴스를 교체하는 위험을 줄이는 데 유용
 
   - High Availability(고가용성), Fault Tolerance(내결함성), Durability(내구성)
     - High Availability: 장애가 발생하더라도 서비스를 계속 이용할 수 있도록 설계하는 것
     - Fault Tolerance: 구성 요소에 장애가 발생해도 서비스 중단이나 기능 저하를 최소화하며 계속 동작하도록 설계하는 것. 엄밀한 의미에서는 장애가 발생해도 서비스가 중단되지 않는 수준을 의미함
     - Availability: 서비스나 데이터에 필요할 때 접근하고 사용할 수 있는 정도
     - Durability: 저장한 데이터가 손실되지 않고 보존될 가능성 또는 데이터 보존의 신뢰성
-   
+
     - High Availability와 Fault Tolerance의 차이
       - High Availability: 장애를 견디고 빠르게 복구
         - 장애 가능성을 완전히 제거하기보다는, 장애가 발생해도 서비스를 이용할 수 있는 상태를 유지하거나 빠르게 복구하도록 설계하는 데 초점
         - Multi-AZ를 통해 고가용성을 높일 수 있음. 단, 장애 감지, 트래픽 전환, 인스턴스 교체 등의 과정에서 일시적인 중단이나 지연이 발생할 수 있음
-       
+
       - Fault Tolerance: 장애가 발생해도 계속 동작
         - 구성 요소가 고장나더라도 서비스가 중단되지 않도록 하는데 초점
         - 요청을 처리하는 구성 요소 하나가 실패해도 다른 구성 요소가 즉시 처리를 이어받고, 사용자 입장에서 서비스 중단이 발생하지 않도록 설계
         - Multi-AZ를 구성했다고 Fault Tolerance가 보장되는 것은 아님. 장애 전환이 얼마나 빠른지, 데이터가 일관되게 유지되는지, 의존 서비스도 정상인지에 따라 결과가 달라짐
-       
+
       - 판단 기준
         - High Availability: 장애 발생 후 자동 복구, 서비스 중단 최소화, 다른 AZ로 전환 강조
         - Fault Tolerance: 구성 요소 하나가 고장 나더라도 서비스가 중단되지 않아야 함 강조
-       
+
       - RTO / RPO
         - RTO(Recovery Time Objective): 장애 발생 후 서비스를 복구하기까지 허용되는 목표 시간
         - RPO(Recovery Point Objective): 장애 발생 시 허용할 수 있는 데이터 손실의 시간 범위
-       
-      - Avaliability와 Durability의 차이
+
+      - Availability와 Durability의 차이
         - Availability: 데이터에 접근할 수 있는가?
           - 필요한 시점에 데이터나 서비스를 사용할 수 있는 정도
           - 만약 중요한 파일이 S3에 저장되어 있는데, S3에 장애가 발생해 해당 파일을 일시적으로 읽을 수 없다면, 파일 자체가 삭제되지 않았더라도 그 시점의 가용성은 낮아진 것
         - Durability: 데이터가 손실되지 않고 보존되는가?
           - 저장된 데이터가 손실되지 않고 보존되는 정도
           - 파일을 저장한 뒤 서비스에 일시적인 접근 장애가 발생했더라도 파일이 그대로 보존되어 있다면 내구성은 유지된 것
-         
+
 
 - AWS ELB(Elastic Load Balancer)
   - 들어오는 트래픽을 여러 대상에 분산하여 애플리케이션의 가용성, 확장성, 안정성을 높이는 AWS 서비스
   - 많은 수의 트래픽이 몰려올 때, ELB가 없다면 특정 서버에 요청이 집중될 수 있음
   - ELB를 통해 여러 서버로 요청을 분산할 수 있고 특정 서버가 비정상 상태인 경우 ELB는 해당 서버를 정상 대상으로 취급하지 않고 트래픽을 다른 정상 대상으로 보낼 수 있음
- 
+
   - ELB와 함께 알아야 할 개념
     - Target Group: 트래픽을 전달할 대상과 상태 확인 설정을 관리
     - Health Check: 대상이 정상적으로 요청을 처리할 수 있는지 확인
@@ -798,12 +810,12 @@
       - HTTP 요청의 경로, 도메인, 헤더 등 애플리케이션 내용을 분석해 라우팅
     - NLB(Network Load Balancer / Layer 4 / 전송 계층)
       - TCP, UDP, TLS 등의 연결과 네트워크 정보를 바탕으로 트래픽 전달
-    - GWLB(Gateway Load Balancer / Layer 3&4 / IP 패킷)
+    - GWLB(Gateway Load Balancer / Layer 3 / IP 패킷)
       - 네트워크 트래픽을 방화벽이나 침입 탐지/방지 장비 같은 가상 네트워크 어플라이언스로 전달하고 분산
-    - 즉, ALB와 NLB는 주로 애플리케이션 트래픽을 대상 서버에 분배하고, GWLB는 네트워크 트래픽을 보안/네트워크 장비에 투명하게 전달하는데 집중
-   
+    - 즉, ALB와 NLB는 주로 애플리케이션 트래픽을 대상 서버에 분배하고, GWLB는 네트워크 트래픽을 보안/네트워크 장비에 투명하게 전달하는 데 집중
+
   - Application Load Balancer(ALB)
-    - 핵심 기능: 컨텐츠 기반 라우팅
+    - 핵심 기능: 콘텐츠 기반 라우팅
     - ex. 사용자 -> ALB, 하나의 도메인으로 접속
     - 요청 내용에 따른 라우팅 규칙:
       1. 이미지 서비스 - Target Group A
@@ -822,7 +834,7 @@
         - Target Group: 요청을 전달할 대상과 상태 확인 설정 관리
       - 요청 흐름 요약
         - Client -> Listener -> Listener Rule -> Target Group -> 대상 서버
-       
+
       - ALB 용례
         - 일반적인 웹사이트나 웹 API
         - HTTP 요청을 URL 경로에 따라 **서로 다른 서비스로 전달**
@@ -835,7 +847,7 @@
     - HTTP 요청의 URL 내용을 분석하는 대신 네트워크 연결과 프로토콜 정보를 바탕으로 트래픽을 분산
     - 핵심 특징
       1. 높은 처리량과 낮은 지연 시간: 대량의 연결과 높은 성능이 필요한 워크로드에 적합 ex. 게임 서버, 실시간 통신, TCP 기반 서비스
-      2. 가용 영역별 고정 IP 주소: NLB는 가용 영역별로 고정 IP를 제공할 수 있으며, 필요하면 각 가용역영에 Elastic IP를 연결할수도 있음
+      2. 가용 영역별 고정 IP 주소: NLB는 가용 영역별로 고정 IP를 제공할 수 있으며, 필요하면 각 가용 영역에 Elastic IP를 연결할 수도 있음
       3. 클라이언트 원본 IP 보존: 구성에 따라 클라이언트의 원본 IP를 백엔드 대상에서 확인할 수 있도록 지원
       4. TCP, UDP, TLS 처리
          - TCP 기반의 자체 프로토콜 서버
@@ -844,7 +856,7 @@
          - TCP Listener를 통해 TLS 트래픽을 암호화 상태로 전달하는 구성
       - NLB Key Words
         - Static IP, TCP/UDP, Low latency
-  - GateWay Load Balancer(GWLB)
+  - Gateway Load Balancer(GWLB)
     - 단순히 웹 서버나 애플리케이션 서버에 요청을 분산하는 것이 아니라, 방화벽이나 침입 탐지/방지 시스템 같은 가상 장비를 트래픽 경로에 배치하고 확장하는 데 사용
     - GWLB가 필요한 이유
       - 일반적인 구조에서 방화벽을 여러 대 운영해야 대량의 트래픽 처리가 원활함. 그러나 방화벽을 여러 대 운영할 경우 어떤 트래픽을 어느 장비로 보낼지, 동일한 통신 흐름이 같은 장비를 거치도록 어떻게 관리할지 등의 문제가 생김 -> 이런 문제를 해결해주는게 바로 GWLB
@@ -859,7 +871,7 @@
       - ALB처럼 URL 경로나 HTTP 헤더를 해석해 라우팅하지는 않음
       - 주요 특징
         - 매우 높은 처리량과 낮은 지연시간이 필요한 서비스에 적합
-        - 고정 IP(Elastic IP)가 필요한 아키텍처에 적합, 필요에 따라 각 가용역역에 Elastic IP 연결 가능
+        - 고정 IP(Elastic IP)가 필요한 아키텍처에 적합, 필요에 따라 각 가용 영역에 Elastic IP 연결 가능
         - HTTP가 아닌 TCP/UDP 기반 애플리케이션에도 사용 가능
         - 클라이언트의 원본 IP 주소를 백엔드에 보존할 수 있는 구성이 있음
     - ALB는 HTTP 요청을 이해하고, NLB는 네트워크 연결을 전달함
@@ -877,11 +889,11 @@
       - NLB는 지원되는 대상 유형 및 설정에 대해 네트워크 연결의 원본 IP를 직접 보존함
       - NLB와 Proxy Protocol v2를 함께 사용하는 경우 특정 구성에서 원본 IP 등 연결 정보를 별도의 프로토콜 헤더로 전달함
       - 즉, NLB는 L4에서 동작하므로 적절한 구성에서는 IP 패킷의 원본 주소 자체를 보존할 수 있지만, 특정 구성에서는 원본 IP가 그대로 보존되지 않을 수 있음. 이때 Proxy Protocol v2를 사용하면 원본 연결 정보를 전달할 수 있음
-     
+
       - 함께 알아두면 좋은 X-Forwarded 헤더
         1. X-Forwarded-Proto: 클라이언트가 ALB에 연결할 때 사용한 프로토콜 ex. https
         2. X-Forwarded-Port: 클라이언트가 ALB에 연결할 때 사용한 포트 ex. 443
-    
+
 - Scaling Policy
   - Dynamic Scaling
     1. **Target Tracking Scaling** - 대상 추적 조정
@@ -903,9 +915,9 @@
        - 과거의 부하 패턴을 분석해 앞으로 필요할 용량을 예측하고 미리 준비
        - ex. 평일 오전마다 트래픽이 급증하는 서비스에서 수요가 늘기 전에 인스턴스를 준비
        - 실제 부하가 높아진 뒤 반응하는 것만이 아니라, 예상되는 부하에 선제적으로 대응
-   
-  - Auto Scaling Types와 Scaling Policies는 서로 완전히 독립적인 개념이 아니라, Auto Scaling을 서로 다른 관점에서 분류한 것. 그래서 서로 이름이 겹치는 부분이 존재하며 이는 동일한 이름의 다른 요소가 아니라 서로 같은 것임
- 
+
+  - Auto Scaling Types와 Scaling Policies는 서로 완전히 독립적인 개념이 아니라, Auto Scaling을 서로 다른 관점에서 분류한 것. 그래서 이름이 겹치는 항목은 이름만 같은 별개의 요소가 아니라 서로 같은 요소임
+
   - Cross-Zone Load Balancing(교차 영역 로드 밸런싱)
     - 로드 밸런서가 특정 AZ에 들어온 트래픽을 다른 AZ에 있는 대상 인스턴스에도 분산할 수 있도록 하는 기능
     - AZ별로 인스턴스 수가 다르더라도 전체 인스턴스에 트래픽을 고르게 분산할 수 있는 특징을 지님
@@ -913,15 +925,15 @@
     1. Cross-Zone Load Balancing이 없는 경우
        - AZ - A와 AZ - B 존재, AZ - A에는 2개의 인스턴스, AZ - B에는 1개의 인스턴스 존재
        - AZ - A와 AZ - B로 트래픽이 절반씩 들어온다고 가정 시 AZ - A에 존재하는 인스턴스는 각각 25%의 트래픽을 받지만, AZ - B에 존재하는 1개의 인스턴스는 50%의 트래픽을 받음 -> 결과적으로 AZ - B에 있는 인스턴스가 다른 인스턴스보다 상대적으로 많은 부하를 받게 됨
-    2. Cross-Zone Load Balacing이 활성화된 경우
+    2. Cross-Zone Load Balancing이 활성화된 경우
        - 각 AZ의 로드 밸런서 노드가 다른 AZ에 있는 대상 인스턴스에도 트래픽을 전달할 수 있음
        - 즉, 아까와 같은 상황에서 AZ - B에 몰렸던 트래픽을 AZ - A에 존재하는 인스턴스로 전달하여 특정 AZ의 인스턴스에 부하가 집중되는 현상을 줄일 수 있음
   - Cross-Zone Load Balancing의 활성화 여부
     - ALB: Default 활성화 -> 기본으로 AZ 간 트래픽 분산 수행
-    - NLB: Default 비활성화 -> 수동으로 활성화하면 AZ간 트래픽 분산이 가능하지만, **교차 AZ 데이터 전송 비용이 발생할 수 있음**
-  - 예상 시험 지문: 한 기업은 두 개의 AZ에 EC2 인스턴스를 배포했습니다. AZ-A에는 4대, AZ-B에는 2대의 인스턴스가 존재합니다. 기업은 특정 AZ에 트래픽이 집중되는 현상을 방지하고 모든 AZ의 인스턴스를 활용하고자 합니다. 어떤 기능을 사용해야 할까요? -> Cross-Zone Load Balancing
+    - NLB: Default 비활성화 -> 수동으로 활성화하면 AZ 간 트래픽 분산이 가능하지만, **교차 AZ 데이터 전송 비용이 발생할 수 있음**
     - GWLB: Default 비활성화 -> 필요에 따라 활성화 가능
-    
+  - 예상 시험 지문: 한 기업은 두 개의 AZ에 EC2 인스턴스를 배포했습니다. AZ-A에는 4대, AZ-B에는 2대의 인스턴스가 존재합니다. 기업은 특정 AZ에 트래픽이 집중되는 현상을 방지하고 모든 AZ의 인스턴스를 활용하고자 합니다. 어떤 기능을 사용해야 할까요? -> Cross-Zone Load Balancing
+
 - Session State(세션 상태) & Session Stickiness(세션 고정)
   - Session State: 사용자가 웹 서비스와 상호작용하는 동안 유지해야 하는 사용자별 정보 -> 기억해야 할 정보
   - Session Stickiness: 동일한 사용자의 요청을 **동일한 서버로 계속 전달**하는 기능 -> 같은 서버에 계속 연결하는 방법
@@ -949,10 +961,10 @@
         1. 최초 요청 - 브라우저가 ALB에 HTTP 요청을 보냄. 이때는 쿠키가 없는 상태
         2. ALB가 인스턴스 선택 - ALB가 EC2 1을 선택하여 요청 전달
         3. ALB가 쿠키 발급 - EC2 1의 응답을 브라우저에 전달하면서 ALB가 생성한 쿠키를 응답에 포함
-        4. 브라우저가 쿠키 저장 - 부라우저는 응답에 포함된 쿠키를 저장
+        4. 브라우저가 쿠키 저장 - 브라우저는 응답에 포함된 쿠키를 저장
         5. 이후 요청에 쿠키 포함 - 브라우저가 다음 요청을 보낼 때 저장된 쿠키를 함께 전송
         6. ALB가 기존 인스턴스로 전달 - ALB는 쿠키를 확인하여 이전에 선택했던 EC2 1로 요청 전달
-      - 즉, ALB가 사용자를 식별하는 데 쿠키를 활용하여 동일한 서버로 요청을 전달하는 것 
+      - 즉, ALB가 사용자를 식별하는 데 쿠키를 활용하여 동일한 서버로 요청을 전달하는 것
 
   - ALB의 Sticky Session 유형
     - Duration-based: ALB가 생성한 쿠키의 유효기간을 설정
@@ -969,12 +981,13 @@
     - 세션 정보를 개별 EC2 인스턴스 내부에 저장하는 대신, 여러 인스턴스가 접근할 수 있는 별도의 저장소에 보관하는 방법(AWS의 경우 Amazon ElastiCache를 활용하여 구현 가능)
     - ex.
       1. 사용자 A의 요청이 EC2 1에 전달
-      2. EC2 1은 로그인 정보와 장바구니 정보를 Elasticache에 저장
-      3. 다음 요청이 EC2 2에 전달되더라도 Elasticache에서 동일한 세션 정보를 조회
+      2. EC2 1은 로그인 정보와 장바구니 정보를 ElastiCache에 저장
+      3. 다음 요청이 EC2 2에 전달되더라도 ElastiCache에서 동일한 세션 정보를 조회
       4. 따라서 사용자는 서버가 바뀌어도 로그인 상태와 장바구니 정보 유지 가능
     - 단, External Session Storage를 활용한다고 해서 모든 장애 문제가 해결되는 것은 아님
-    - External Session Stroage를 구현하기 위해 ElastiCache를 사용하여, ElastiCache가 중요한 구성 요소가 되므로, ElastiCache 자체의 가용성도 확보해야 함
-      1. Primaty와 Replica 구성(Automatic Failover - 자동 장애 조치)
+    - External Session Storage를 구현하기 위해 ElastiCache를 사용하여, ElastiCache가 중요한 구성 요소가 되므로, ElastiCache 자체의 가용성도 확보해야 함
+      1. Primary와 Replica 구성(Automatic Failover - 자동 장애 조치)
+         - 복제와 자동 장애 조치는 Valkey/Redis OSS 엔진 기준이며, Memcached는 복제와 자동 장애 조치를 지원하지 않음
          - 작동 과정
            1. AZ-A의 Primary가 세션 데이터 저장
            2. 해당 데이터가 AZ-B의 Replica로 복제
@@ -982,7 +995,7 @@
            4. AWS가 Replica를 새로운 Primary로 승격
            5. 애플리케이션은 새로운 Primary를 통해 세션 데이터를 조회하고 저장
           - 단, 복제는 일반적으로 비동기 복제(Async)이므로 장애 직전의 일부 데이터가 복제되지 못할 가능성이 있음. 또한 장애 조치 중에는 일시적인 연결 중단이 발생할 수 있음
-        
+
 - ALB, Auto Scaling, External Session Storage(by ElastiCache) 전체 아키텍처
   - 전체 요청 흐름
     1. 사용자가 ALB에 요청
@@ -991,13 +1004,13 @@
     4. 세션 정보가 존재하면 로그인 상태와 사용자 정보 확인
     5. 사용자의 요청을 처리하고 필요한 세션 정보를 갱신
     6. ElastiCache의 Primary 데이터는 다른 AZ의 Replica에도 복제
-   
-- SSL/TLS Termination(SLL/TLS 종료)
+
+- SSL/TLS Termination(SSL/TLS 종료)
   - HTTPS 통신
     - HTTP 통신에 TLS 암호화를 적용한 것
     - 일반적으로 클라이언트와 서버 사이에서 TLS 연결을 설정하고 데이터를 암호화하여 주고 받음
   - AWS에서 ALB를 사용하는 경우, EC2(서버)가 직접 TLS 암호화를 처리하지 않고 ALB가 대신 처리하도록 구성할 수 있는데 SSL/TLS Termination이 그것임
- 
+
   - SSL/TLS Termination 작동 과정
     - SSL/TLS Termination 구조
       - 브라우저 -> ALB -> 서버(EC2 인스턴스)
@@ -1027,7 +1040,7 @@
 - SSL/TLS Termination과 End-to-End Encryption 비교
   1. SSL/TLS Termination
      - 클라이언트 -> ALB만 암호화(HTTPS 연결)
-     - ALB와 EC2간의 연결은 암호화되어있지 않음(HTTP 연결)
+     - ALB와 EC2 간의 연결은 암호화되어있지 않음(HTTP 연결)
      - ALB에서 복호화한 후 EC2에 HTTP로 전달하는 구조
   2. End-to-End Encryption
      - ELB에서만 사용되는 특정 기능의 명칭이 아니라 통신의 양 끝단 사이에서 암호화가 유지되는 구조를 설명하는 개념
@@ -1036,8 +1049,8 @@
        - 클라이언트에서 ALB로 넘어올 때, TLS 복호화 후 다시 암호화하여 EC2에 전달
        - 이 경우 ALB의 Target Group 프로토콜을 HTTPS로 설정하고, EC2에서도 HTTPS 통신을 처리하도록 구성해야 함
        - ALB에서 TLS 연결이 한 번 종료되고, EC2와 새로운 TLS 연결을 맺는 구조
-       - 클라이이언트와 EC2 사이에 하나의 TLS 연결이 그대로 유지되는 것은 아님
-     - ELB Case(TLS Pass-through)
+       - 클라이언트와 EC2 사이에 하나의 TLS 연결이 그대로 유지되는 것은 아님
+     - NLB Case(TLS Pass-through)
        - 클라이언트 -> NLB(TCP Listener) -> EC2 모두 암호화
        - 클라이언트로부터 받은 TLS 연결을 복호화/종료하지 않고 동일한 TLS 연결의 암호화 데이터를 EC2에 전달
        - EC2는 전달받은 TLS 연결을 TLS 복호화 및 처리
@@ -1060,4 +1073,3 @@
   - NLB 특이 사항
     - TLS Listener(TLS Termination): NLB가 TLS를 종료하고 복호화
     - TCP Listener(443)(TLS Pass-through): TLS를 복호화하지 않고 암호화된 트래픽을 EC2로 전달(클라이언트와 EC2가 직접 TLS 연결을 맺음) -> End-to-End Encryption의 대표적 형태로 볼 수 있음
-
