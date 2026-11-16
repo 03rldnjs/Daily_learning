@@ -958,3 +958,106 @@
      - 당신은 누구인가요? -> 인증서, 계정, SAML 등을 이용해 신원 확인
   2. Authorization = What can you access?
      - 무엇에 접근할 수 있나요? -> Authorization Rule과 SG를 통해 접근 제어
+
+# AWS Site-to-Site VPN
+- 회사의 사내 네트워크와 AWS VPC를 안전하게 연결하는 관리형 VPN 서비스
+- Client VPN과 비교하면 가장 중요한 차이는 바로 연결 대상
+  - Client VPN: 개인 사용자의 컴퓨터 <-> AWS VPC
+  - Site-to-Site VPN: 회사의 전체 네트워크 <-> AWS VPC
+- ex. 회사가 자체 데이터센터의 서버를 운영하면서 AWS로 일부 서비스를 이전했다고 가정
+  - 회사 직원들은 여전히 사내 데이터센터의 서버를 사용하고 있고, AWS에는 새로운 애플리케이션 서버가 배포되어 있음
+  - 이때 사내 네트워크와 AWS VPC를 Site-to-Site VPN으로 연결하면 두 네트워크 리소스가 서로 통신할 수 있음
+  - 해당 연결은 IPsec VPN Tunnel을 이용함(IPsec = Internet Protocol Security)
+    + IPsec: 네트워크 계층(Layer 3)에서 데이터 패킷을 암호화하고 인증하여 안전한 통신을 제공하는 프로토콜 모음. 인터넷처럼 신뢰할 수 없는 공중망을 통해 두 지점 간에 안전한 터널(VPN)을 만들 때 핵심적으로 사용됨
+1. Site-to-Site VPN의 기본 구조
+   1. Customer Gateway Device(고객 측 VPN 장비)
+      - 회사의 데이터센터나 사내 네트워크에 설치된 VPN 장비
+      - ex.
+        - Cisco 라우터
+        - Fortinet 방화벽
+        - Palo Alto 방화벽
+        - VPN 기능을 지원하는 소프트웨어 장비
+      - 이 장비가 AWS 측 VPN Endpoint와 IPsec Tunnel을 형성함
+   2. Customer Gateway(CGW)
+      - AWS에서 생성하는 리소스로, 고객 측 VPN 장비의 정보를 AWS에 등록하는 역할
+      - Customer Gateway Device: 실제 회사 측 VPN 장비
+      - Customer Gateway: 해당 장비의 정보를 AWS에 등록한 논리적 리소스
+      - 두 리소스는 이름이 비슷하지만 서로 다른 리소스임(실제 장비 vs 논리적 리소스)
+   3. Virtual Private Gateway(VGW)
+      - AWS 측에서 VPN 연결을 종료하는 가상 게이트웨이
+      - VGW는 특정 VPC에 연결할 수 있으며, 해당 VPC와 회사의 사내 네트워크 사이의 VPN 통신을 처리
+      - 간단히 말하면, AWS VPC측의 VPN 관문
+   4. Transit Gateway(TGW)
+      - Transit Gateway 역시 AWS 측에서 VPN 연결을 종료할 수 있는 네트워크 게이트웨이
+      - 다만, VGW와 달리 여러 VPC와 온프레미스 네트워크를 중앙에서 연결하는 허브 역할 수행
+   + Virtual Private Gateway(VGW) vs Transit Gateway
+     - VGW
+       - 주요 역할: 특정 VPC의 VPN 연결(1 on 1)
+       - 연결 구조: VPC 중심
+       - 적합한 환경: 단일 VPC 또는 단순 연결
+     - Transit Gateway
+       - 주요 역할: 여러 VPC와 네트워크의 중앙 연결(1 on N)
+       - 연결 구조: Hub-and-Spoke
+       - 적합한 환경: 다수 VPC 및 복잡한 네트워크
+2. Site-to-Site VPN의 작동 과정
+   - ex. 사내 서버가 AWS의 EC2에 접근한다고 가정
+     1. 사내 서버가 목적지 10.0.1.10으로 패킷 전송
+     2. 사내 네트워크의 라우터가 해당 목적지가 AWS VPC의 네트워크임을 확인
+     3. Customer Gateway Device가 패킷을 IPsec Tunnel에 넣어 암호화
+     4. 암호화된 패킷이 인터넷을 통해 AWS VPN Endpoint로 전달
+     5. AWS 측에서 패킷을 복호화하고 VPC로 전달
+     6. EC2가 요청을 처리하고 응답 전송
+     7. 응답은 반대 방향의 VPN Tunnel을 통해 사내 네트워크로 전달
+   - Site-to-Site VPN은 인터넷을 통과하지 않는 서비스가 아님. 인터넷을 통과하지만, 실제 데이터는 IPsec Tunnel을 통해 암호화된 상태로 전송됨. 즉, 인터넷을 전송 경로로 활용하면서 데이터의 기밀성과 무결성을 유지함
+3. Site-to-Site VPN의 주요 특징
+   1. IPsec을 이용한 암호화 통신
+      - ex. 사내 서버가 AWS EC2에 데이터를 전송한다면, 데이터가 인터넷을 통과하더라도 VPN Tunnel 내부에서는 암호화된 상태로 전달됨(through IPsec Tunnel)
+      - 주요 보안 관련 특징
+        - 데이터 암호화: 외부에서 데이터를 쉽게 읽을 수 없도록 보호
+        - 무결성 검증: 전송 중 데이터가 변조되었는지 확인
+        - 상대방 인증: VPN 연결 상대가 신로히할 수 있는 장비인지 확인
+        - IKEv2 지원: VPN Tunnel을 구성하고 보안 연결을 협상하는 프로토콜 지원
+      - 따라서 회사 내부 네트워크와 AWS 사이에 안전한 연결을 구성할 수 있음
+   **2. VPN Connection 하나당 두개의 Tunnel 제공**
+      - AWS Site-to-Site VPN의 대표적인 특징
+      - 하나의 VPN Connection에서는 기본적으로 두 개의 IPsec Tunnel이 제공됨
+      - 왜 두 개를 제공할까?
+        - 첫 번째 Tunnel에 장애가 발생하더라도 두 번째 Tunnel을 통해 통신을 지속할 수 있도록 하기 위해서임 -> 가용성 향상
+        - ex. Tunnel 1: 정상적인 통신에 사용, Tunnel 2: 장애 발생 시 대체 경로로 사용
+      - 설정에 따라 양쪽 Tunnel을 활용하는 방식으로 운영도 가능
+      - 주의할 점: 두 개의 Tunnel이 있다고 해서 자동으로 대역폭이 두 배가 되는 것은 아님
+     3. Static Routing과 Dynamic Routing 지원
+        - Site-to-Site VPN은 두 가지 라우팅 방식을 지원함
+          1. Static Routing(정적 라우팅)
+             - 관리자가 목적지 네트워크 경로를 직접 입력하는 방식
+             - ex. 회사 네트워크가 192.168.0.0/16이고, AWS PC가 10.0.0.0/16이라면, 양쪽에 상대방 네트워크로 향하는 경로를 직접 입력하여 설정함
+               - 특징
+                 - 구성과 이해가 간단함
+                 - 네트워크 변경 시 관리자가 직접 경로를 수정해야 함
+                 - 소규모 네트워크에 적합
+          2. Dynamic Routing (BGP / 동적 라우팅)
+             - BGP(Border Gateway Protocol)을 이용해 네트워크 경로를 동적으로 교환하는 방식
+             - ex. 회사 측 라우터가 192.168.0.0/16을 광고하면 AWS 측 게이트웨이가 해당 네트워크에 도달할 수 있는 경로를 학습함
+             - 반대로 AWS 측에서도 VPC 네트워크 경로를 광고할 수 있음
+             - 특징
+               - 네트워크 경로를 자동으로 교환
+               - 네트워크 변경에 유연하게 대응
+               - 여러 경로를 활용하는 고급 라우팅 구성에 적합
+             - 특히 Transit Gateway에 연결된 VPN에 동적 라우팅을 사용하면 ECMP(Equal-Cost Multi-Path)를 통해 여러 VPN 경로에 트래픽을 분산할 수 있음
+4. 다양한 VPN 장치와 호환 가능
+   - IKEv1이나 IKEv2를 사용하는 서드파티 VPN 라우터와의 호환을 지원함
+5. AWS Transit Gateway와 연결 가능
+   - Site-to-Site VPN은 VGW뿐만 아니라 Transit Gateway에도 연결할 수 있음
+   - ex. 회사의 데이터센터 하나가 AWS의 VPC 여러 개와 통신해야 한다고 가정
+     - VPC A: 개발 환경
+     - VPC B: 운영 환경
+     - VPC C: 데이터베이스 환경
+   - 각 VPC에 개별 VPN 연결을 만들기보다는 Transit Gateway를 중앙 허브로 두고 Site-to-Site VPN을 연결할 수 있음
+   - 이렇게 구성하면 Transit Gateway의 허브 역할을 통해 On-premise 네트워크와 여러 VPC 사이의 연결을 중앙에서 관리할 수 있음
+6. Accelerated Site-to-Site VPN
+   - 일반적인 Site-to-Site VPN은 인터넷을 통해 AWS VPN Endpoint 사이의 인터넷 경로가 길거나 불안정할 수 있음
+   - 이를 개선하기 위해 AWS는 Accelerated Site-to-Site VPN을 제공함
+     - AWS Global Accelerator를 활용
+     - 가까운 AWS 네트워크 Edge Location으로 트래픽 전달
+     - AWS 글로벌 네트워크를 활용하여 성능과 안정성 개선
+   - 
