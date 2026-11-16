@@ -495,7 +495,7 @@
                          │
              ┌───────────┼───────────┐
              ↓           ↓           ↓
-        Internet      S3/DynamoDB   AWS Service
+        Private Subnet     S3/DynamoDB   AWS Service
              ↓           ↓           ↓
         NAT Gateway   Gateway EP   Interface EP
              ↓
