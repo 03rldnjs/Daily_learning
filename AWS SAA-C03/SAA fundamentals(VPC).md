@@ -1044,20 +1044,38 @@
                - 네트워크 변경에 유연하게 대응
                - 여러 경로를 활용하는 고급 라우팅 구성에 적합
              - 특히 Transit Gateway에 연결된 VPN에 동적 라우팅을 사용하면 ECMP(Equal-Cost Multi-Path)를 통해 여러 VPN 경로에 트래픽을 분산할 수 있음
-4. 다양한 VPN 장치와 호환 가능
-   - IKEv1이나 IKEv2를 사용하는 서드파티 VPN 라우터와의 호환을 지원함
-5. AWS Transit Gateway와 연결 가능
-   - Site-to-Site VPN은 VGW뿐만 아니라 Transit Gateway에도 연결할 수 있음
-   - ex. 회사의 데이터센터 하나가 AWS의 VPC 여러 개와 통신해야 한다고 가정
-     - VPC A: 개발 환경
-     - VPC B: 운영 환경
-     - VPC C: 데이터베이스 환경
-   - 각 VPC에 개별 VPN 연결을 만들기보다는 Transit Gateway를 중앙 허브로 두고 Site-to-Site VPN을 연결할 수 있음
-   - 이렇게 구성하면 Transit Gateway의 허브 역할을 통해 On-premise 네트워크와 여러 VPC 사이의 연결을 중앙에서 관리할 수 있음
-6. Accelerated Site-to-Site VPN
-   - 일반적인 Site-to-Site VPN은 인터넷을 통해 AWS VPN Endpoint 사이의 인터넷 경로가 길거나 불안정할 수 있음
-   - 이를 개선하기 위해 AWS는 Accelerated Site-to-Site VPN을 제공함
-     - AWS Global Accelerator를 활용
-     - 가까운 AWS 네트워크 Edge Location으로 트래픽 전달
-     - AWS 글로벌 네트워크를 활용하여 성능과 안정성 개선
-   - 
+      4. 다양한 VPN 장치와 호환 가능
+         - IKEv1이나 IKEv2를 사용하는 서드파티 VPN 라우터와의 호환을 지원함
+      5. AWS Transit Gateway와 연결 가능
+         - Site-to-Site VPN은 VGW뿐만 아니라 Transit Gateway에도 연결할 수 있음
+         - ex. 회사의 데이터센터 하나가 AWS의 VPC 여러 개와 통신해야 한다고 가정
+           - VPC A: 개발 환경
+           - VPC B: 운영 환경
+           - VPC C: 데이터베이스 환경
+         - 각 VPC에 개별 VPN 연결을 만들기보다는 Transit Gateway를 중앙 허브로 두고 Site-to-Site VPN을 연결할 수 있음
+         - 이렇게 구성하면 Transit Gateway의 허브 역할을 통해 On-premise 네트워크와 여러 VPC 사이의 연결을 중앙에서 관리할 수 있음
+      6. Accelerated Site-to-Site VPN
+         - 일반적인 Site-to-Site VPN은 인터넷을 통해 AWS VPN Endpoint 사이의 인터넷 경로가 길거나 불안정할 수 있음
+         - 이를 개선하기 위해 AWS는 Accelerated Site-to-Site VPN을 제공함
+           - AWS Global Accelerator를 활용
+           - 가까운 AWS 네트워크 Edge Location으로 트래픽 전달
+           - AWS 글로벌 네트워크를 활용하여 성능과 안정성 개선
+4. Site-to-Site VPN의 제한 사항
+   1. 인터넷 환경에 영향을 받음
+      - Site-to-Site VPN은 일반적으로 인터넷을 통해 Tunnel을 구성함
+      - 따라서 다음과 같은 문제가 발생할 수 있음
+        - 인터넷 회선의 품질 저하
+        - 네트워크 지연시간 증가
+        - 패킷 손실
+        - 인터넷 구간의 혼잡
+      - 회사에서 대량의 데이터를 AWS로 전송해야 하는데 인터넷 회선이 불안정하다면 전송 성능이 떨어질 수 있음
+      - 또한 두 개의 Tunnel을 제공하더라도 회사 측 인터넷 회선 자체에 문제가 생기면 두 Tunnel 모두 통신 불가 상태가 될 수 있음
+   2. 대역폭에 제한이 있음
+      - 일반적인 Site-to-Site VPN의 표준 Tunnel 하나는 최대 1.25Gbps의 대역폭을 지원함
+      - Large Bandwidth Tunnel을 활용하여 최대 5Gbps까지 대역폭을 늘릴 수 있지만, 한계가 정해져 있음
+      - 따라서 대규모 데이터 전송이나 매우 높은 네트워크 처리량이 필요한 환경에서는 한계가 분명히 존재함
+   3. 암호화 및 캠슐화에 따른 오버헤드
+      - VPN은 데이터를 암호화하고 IPsec 패킷으로 캡슐화함
+      - 이 과정에서 추가적인 헤더가 붙으므로 실제 애플리케이션 데이터에 사용할 수 있는 패킷 공간이 줄어듦
+      - ex. 일반적인 Ethernet 네트워크에서 사용하는 MTU는 1500Byte인 경우가 많지만, Site-to-Site VPN의 MTU 제한은 1446Byte임
+   
