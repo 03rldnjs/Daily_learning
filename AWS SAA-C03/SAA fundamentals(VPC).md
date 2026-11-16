@@ -812,4 +812,149 @@
 1. Client VPN Deployment
    - 관리자가 AWS에 Client VPN 환경을 구축하는 과정
    - 사용자가 접속한 VPN Endpoint를 만들고, 해당 Endpoint가 접근할 네트워크를 연결하고, 통신 경로와 접근 권한을 설정해야 함
-   - 
+   - Deployment의 주요 단계
+     1. Client VPN Endpoint 생성
+        - AWS VPC Console에서 Client VPN Endpoint를 생성함
+        - 이때 다음 사항을 설정함
+          - Client CIDR Block
+          - 인증 방식
+          - Server Certificate
+          - VPN 프로토콜 및 포트 등
+     2. Target Network 연결
+        - Client VPN Endpoint에 접근 대상 VPC의 Subent 연결(해당 과정을 Target Network Association이라고 함)
+        - 하나 이상의 Subnet을 연결할 수 있으며, 여러 AZ에 연결하면 가용성을 높일 수 있음
+     3. Route 설정
+        - VPN 사용자가 접근할 목적지 네트워크로 향하는 경로를 설정
+        - ex. VPC CIDR 이 10.0.0.0/16이라면 해당 네트워크로 향하는 경로 설정 필요
+     4. Authorization Rule 설정
+        - 어떤 사용자가 어떤 네트워크에 접근할 수 있는지 지정
+     5. Security Group 확인
+        - VPN  Endpoint의 Target Network Association에 적용된 Security Group과 실제 EC2의 Security Group이 통신을 허용하도록 설정
+   - Client CIDR
+     - VPN에 접속한 사용자에게 할당할 IP 주소의 범위
+     - ex.
+     - VPC CIDR: 10.0.0.0/16
+     - Client CIDR: 172.20.0.0/22 (172.20.0.0 ~ 172.20.3.255)
+     - VPN 사용자가 접속하면 Client CIDR에서 IP 주소를 할당 받음
+       - 사용자 A: 172.20.0.10
+       - 사용자 B: 172.20.0.11
+       - 사용자 C: 172.20.0.12
+     - 이 주소를 통해 AWS는 VPN에 연결된 사용자들의 네트워크 트래픽을 구분할 수 있음
+     - 주의할 점: Client CIDR은 VPC CIDR이나 연결할 다른 네트워크의 CIDR과 겹치면 안됨
+     - 또한 IPv4 Client CIDR은 /12에서 /22 사이의 범위여야 하며, /22가 AWS 권장 크기임
+2. Client Configuration(클라이언트 설정)
+   - 실제 사용자의 컴퓨터에서 VPN에 접속할 수 있도록 설정하는 과정
+   - 관리자가 VPN 서버를 구축한 뒤, **직원들이 자신의 컴퓨터에서 그 VPN에 접속할 수 있도록 준비**하는 것
+   - Client Configuration 과정
+     1. 관리자가 AWS Client VPN Endpoint의 Configuration File 다운로드
+     2. 사용자에게 해당 파일 전달
+     3. 사용자는 AWS 제공 Client VPN 소프트웨어 또는 호환되는 OpenVPN 기반 클라이언트 설치
+     4. Configuration File을 클라이언트 프로그램에 가져옴
+     5. 사용자가 VPN Endpoint에 접속하고 인증을 수행함
+     6. 인증이 성공하면 VPN 세션이 수립됨
+   - Configuration File의 역할
+     - 일반적으로 .ovpn 확장자를 사용하는 파일
+     - 다음과 같은 연결 정보가 포함됨
+       - VPN Endpoint의 DNS 주소
+       - 연결에 사용할 포트 및 프로토콜
+       - 서버 인증서 관련 정보
+       - 인증 방식에 필요한 설정
+     - 사용자의 컴퓨터에 VPN 서버 주소와 연결 방법을 **일일이 입력하지 않아도 되도록** 제공하는 설정 파일
+     - 즉, Deployment는 AWS 관리자가 VPN 인프라를 구축하기 위해 하는 설정이고, Client Configuration은 VPN 사용자가 사용자의 컴퓨터의 접속을 준비하기 위해 하는 설정인 것
+3. Authentication(인증)
+   - VPN에 접속하려는 사용자가 실제로 허가된 사용자인지 확인하는 과정(단어 뜻 그대로)
+   - ex. 회사 직원이 집에서 회사의 AWS 네트워크에 접속하려고 하는 경우 -> AWS는 먼저 해당 사용자가 회사 직원인지 확인해야 함(Authentication)
+   - AWS Client VPN의 3가지 인증 방식
+     1. Mutual Authentication(상호 인증, 인증서 기반)
+        - 인증서를 통해 클라이언트와 VPN Endpoint가 서로의 신원을 확인하는 방식
+        - 일반적으로 다음 두가지 인증서가 사용됨
+          - Server Certificate: 클라이언트가 접속하려는 VPN 서버가 신뢰할 수 있는 서버인지 확인
+          - Client Certificate: VPN에 접속하려는 클라이언트가 유효한 인증서를 가지고 있는지 확인
+          - 동작 과정
+            1. 클라이언트가 VPN Endpoint에 접속 요청
+            2. VPN Endpoint가 자신의 Server Certificate 제시
+            3. 클라이언트가 서버 인증서의 유효성 확인
+            4. VPN Endpoint가 클라이언트 인증서 요청
+            5. 클라이언트가 Client Certificate 제출
+            6. VPN Endpoint가 인증서의 유효성 확인
+            7. 인증에 성공하면 VPN 연결이 수립됨
+     2. Active Directory Authentication(사용자 기반 인증)
+        - 회사의 Active Directory를 이용해 사용자 계정과 비밀번호를 확인하는 방식
+        - ex. 회사 직원에게 다음과 같은 계정이 있다고 가정
+          - ID: employee01
+          - Password: 개인 비밀번호
+        - 직원이 VPN에 접속하면 Active Directory를 통해 계정의 유효성을 확인함
+        - 회사에서 이미 직원 계정을 관리하고 있다면 기존 계정 체계를 활용할 수 있다는 장점이 있음
+     3. Federated Authentication(연합 인증, SAML 기반)
+        - 외부 Identity Provider(IdP)를 이용하여 사용자를 인증하는 방식
+        - ex. 회사가 다음과 같은 서비스를 사용한다고 가정
+          - Microsoft Entra ID
+          - Okta
+          - 기타 SAML 2.0을 지원하는 **Identity Provider**(= 외부 IdP)
+        - 사용자가 VPN 접속을 시도하면 외부 IdP의 로그인 화면으로 이동하여 인증을 수행하고, 인증 결과를 AWS Client VPN에 전달
+        - 회사가 이미 사용하는 통합 로그인(SSO) 체계를 VPN에도 활용할 수 있다는 장점이 있음
+        - ex. 회사 직원이 사내 계정으로 여러 업무 시스템에 로그인하고 있다면 VPN 인증에도 동일한 IdP를 사용할 수 있음
+     + 인증 방식 비교
+       - Mutual Authenticiation(인증서 기반 상호 인증)
+         - 인증 수단: Client Certificate
+         - 주요 특징: 인증서로 클라이언트 확인
+       - Active Directory(사용자 기반 인증)
+         - 인증 수단: ID / Password
+         - 주요 특징: 회사 계정 체계 활용
+       - Federated Authentication(연합 인증)
+         - 인증 수단: SAML 2.0
+         - 주요 특징: 외부 IdP 및 SSO 활용
+     + 추가 사항
+       - Client VPN Endpoint를 생성할 때는 인증 방식과 관계없이 Server Certificate를 AWS Certificate Manager(ACM)에 준비해야 함
+       - Mutual Authentication은 사용자 기반 인증(AD 또는 SAML)과 함께 사용할 수도 있음
+       - 인증에 두 방식을 함께 사용할 경우 두 가지 인증을 모두 통과해야 함
+4. Authorization(인가)
+   - Authentication이 사용자의 신원을 확인하는 과정이었다면, Authorization은 인증된 사용자가 어떤 네트워크와 리소스에 접근할 수 있는지 결정하는 과정
+   - ex. 회사에 다음과 같은 직원들이 있다고 가정
+     - 직원 A
+       - 부서: 개발팀
+       - 접근해야 하는 리소스: 개발 서버
+     - 직원 B
+       - 부서: 인사팀
+       - 접근해야 하는 리소스: 인사 관리 서버
+     - 직원 C
+       - 부서: 관리자
+       - 접근해야 하는 리소스: 개발 서버 + 인사 서버
+   - 세 직원 모두 회사 직원이므로 Authentication은 통과할 수 있음
+   - 하지만 세 사람에게 동일한 네트워크 접근 권한을 부여해서는 안됨 -> Authorization을 통해 접근 범위 제한 및 구분
+   - Authorization Rule
+     - 사용자가 접근할 수 있는 목적지 네트워크를 Rule을 통해 지정
+     - ex. 목적지 네트워크
+       - 10.0.1.0/24 : 개발 서버 -> 접근 허용 그룹: 개발팀
+       - 10.0.2.0/24 : 인사 서버 -> 접근 허용 그룹: 인사팀
+       - 10.0.3.0/24 : 전체 VPN -> 접근 허용 그룹: 관리팀
+     - 위의 예시처럼 Rule을 설정하면 각 부서에 필요에 필요한 접근 권한만 부여할 수 있음
+     - 단, 그룹 기반 접근 제어를 활용하려면 Active Directory 또는 SAML 기반 인증이 필요함
+     - Mutual Authentication만 사용하는 경우에는 Authorization Rule에서 특정 사용자 그룹을 지정할 수 없고, 해당 규칙은 모든 인증된 클라이언트에 적용됨
+5. 실제 통신 과정
+   - ex. 회사의 개발자가 집에서 개발 서버에 접속하려고 함
+   - VPN 사용자: 개발자 A
+   - VPN Endpoint: AWS Client VPN
+   - 개발 서버: EC2
+   - 개발 서버 Private IP: 10.0.1.10
+   1. Client Configuration
+      - 개발자는 컴퓨터에 AWS VPN Client를 설치하고 관리자가 제공한 .ovpn 파일을 가져옴
+   2. Authentication
+      - 개발자가 VPN에 접속
+      - AWS는 인증서 또는 회사 계정 등을 이용해 개발자의 신원을 확인함
+   3. VPN 연결 수립
+      - 인증에 성공하면 VPN Endpoint와 개발자의 컴퓨터 사이에 암호화된 VPN 세션이 만들어짐
+      - 이때 CIDR에서 IP 주소가 할당됨
+   4. Authorization
+      - 개발자가 개발팀 그룹에 속해 있는지 확인하고, 개발 서버 네트워크에 대한 접근이 허용되는지확인함
+   5. Routing 및 Security Group 확인
+      - 목적지 10.0.1.10으로 향하는 경로가 존재하는지 확인하고, 개발 서버의 Security Group이 Client VPN에서 오는 트래픽을 허용하는지 확인
+   6. 개발 서버 접근
+      - 모든 조건이 충족되면 개발자는 자신의 컴퓨터에서 개발 서버에 SSH로 접속할 수 있음
+
++ Authentication과 Authorization의 구분
+  - 영어 스펠링도 비슷하여 혼동할 수 있음
+  1. Authentication = Who are you?
+     - 당신은 누구인가요? -> 인증서, 계정, SAML 등을 이용해 신원 확인
+  2. Authorization = What can you access?
+     - 무엇에 접근할 수 있나요? -> Authorization Rule과 SG를 통해 접근 제어
