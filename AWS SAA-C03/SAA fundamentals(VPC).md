@@ -1078,4 +1078,60 @@
       - VPN은 데이터를 암호화하고 IPsec 패킷으로 캡슐화함
       - 이 과정에서 추가적인 헤더가 붙으므로 실제 애플리케이션 데이터에 사용할 수 있는 패킷 공간이 줄어듦
       - ex. 일반적인 Ethernet 네트워크에서 사용하는 MTU는 1500Byte인 경우가 많지만, Site-to-Site VPN의 MTU 제한은 1446Byte임
-   
+   4. 단일 TCP 세션 한계
+      - Site-to-Site VPN은 기본적으로 VPN 연결 하나에 두 개의 IPsec 터널을 제공함. 일반적인 표준 터널의 최대 대역폭은 각각 1.25Gbps임
+      - 2개의 터널이지만, 두 터널을 동시에 사용한다고 데이터 전송도 최대 2.5Gbps를 사용할 수 있는 것은 아님(일반적으로는 하나의 TCP 세션은 두 터널의 대역폭을 합산에서 사용할 수 없음)
+
+# AWS VPN CloudHub
+- 여러 On-premise 지사를 AWS의 하나의 VGW(Virtual Private Gateway)에 Site-to-Site VPN으로 연결하는 구조(Transit Gate와 역할을 다르지만, 구조는 똑같이 Hub-and-Spoke 구조임)
+- 지사 간 통신을 AWS 네트워크를 경유해 수행할 수 있음
+- 별도의 전용 네트워크 장비나 복잡한 지사 간 VPN 연결을 구축하지 않아도 됨
+- 일반적으로 각 지사는 서로 다른 BGP ASN을 사용하고 동적 라우팅을 활용함
+- 시험 단서: 여러 지사 네트워크를 AWS를 경유해 서로 연결하려는 경우 -> VPN CloudHub
+
+# AWS Direct Connect
+- On-premise 데이터센터와 AWS를 전용 네트워크로 연결하는 서비스
+- **공용 인터넷을 경유하지 않으므로** 일반적인 VPN보다 **일관성 있는 네트워크 성능**을 기대할 수 있음
+- 대역폭 보장과 짧은 지연 시간이 중요한 워크로드에 적합
+- **기본적으로 데이터가 암호화되지 않음**. 암호화가 필요한 경우 VPN을 함께 구성할 수 있음
+- 연결 자체의 구축에는 시간이 걸릴 수 있음(물리 광통신을 통해 On-premise와 AWS VPC를 연결하는 것이기 때문)
+- 시험 단서: 높은 대역폭, 일관된 성능, 전용 연결 -> Direct Connect
+
+# Direct Connect Gateway(DX Gateway)
+- 하나의 Direct Connect 연결을 여러 리전의 VPC와 연결할 수 있도록 해주는 글로벌 네트워크 구성 요소
+- VGW(Virtual Private Gateway) 또는 TGW(Transit Gateway)와 연결해 온프레미스 네트워크에서 여러 VPC에 접근하도록 구성할 수 있음
+- 시험 단서: 하나의 DX(Direct Connect) 연결을 여러 리전의 VPC에 연결 -> Direct Connect Gateway
+
+# AWS Transit Gateway
+- 앞서 VPC Peering과 비교하여 설명한 적이 있음
+- 여러 VPC, Site-to-Site VPN, DX Gateway 등을 중앙에서 연결하는 네트워크 허브
+- VPC 간 통신 및 온프레미스와 여러 VPC 간 통신을 중앙에서 관리할 수 있음
+- VPC Peering의 복잡한하고 비효율적인 연결 방식을 대체할 수 있음
+- 시험 단서: 수많은 VPC와 온프레미스 네트워크를 중앙에서 연결 -> Transit Gateway
+
+# 한 눈에 비교하기
+- VPN CloudHUb
+  - 핵심 역할: 여러 온프레미스 지사 연결
+  - 대표적 사용 사례: 지사 간 통신
+- Direct Connect(DX)
+  - 핵심 역할: AWS 전용 네트워크 연결
+  - 대표적 사용 사례: 고성능, 일관된 연결이 필요한 경우
+- Direct Connect Gateway
+  - 핵심 역할: DX와 여러 AWS 네트워크 연결
+  - 대표적 사용 사례: 여러 리전의 VPC 접근
+- Transit Gateway
+  - 핵심 역할: 네트워크 중앙 허브
+  - 대표적 사용 사례: 다수의 VPC,VPN 연결
+- 시험에서 주의할 점
+  - VPN CloudHub와 Transit Gateway의 차이
+    - VPN CloudHub: 여러 온프레미스 지사 간 연결
+    - Transit Gateway: 여러 VPC와 온프레미스 네트워크 중앙 연결(허브식)
+  - Direct Connect는 암호화가 기본값이 아님
+    - 암호화가 필요하다면 DX 위에 Site-to-Site VPN(IPsec Tunnel)을 구성하는 방식으로 설계 필요(빈출)
+  - Direct Connect Gateway와 Transit Gateway는 대체 관계가 아님
+    - DX Gateway는 Direct Connect를 여러 VPC 네트워크에 연결하도록 도움
+    - TGW는 여러 네트워크 사이의 라우팅을 중앙에서 관리함
+    - DX를 TGW에 연결하는 일반적인 구조는 Direct Connect -> DX Gateway -> Transit Gateway임
+  - DX Gateway는 VPC 간 통신을 중계하는 허브가 아님
+    - VPC 간 통신을 중앙에서 관리하려면 Transit Gateway를 사용해야 함
+  
